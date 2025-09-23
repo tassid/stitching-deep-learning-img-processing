@@ -1,8 +1,8 @@
 # 1_stitcher_basico.py
 # uso (arquivos locais):
-#   python 1_stitcher_basico.py --imgs a.jpg b.jpg c.jpg --modo panorama
-# uso (dataset HuggingFace):
-#   python 1_stitcher_basico.py --hf LivingOptics/hyperspectral-orchard --split train --count 5 --out pano.jpg
+# python -m modules.classic.1_stitcher_basico --imgs a.jpg b.jpg c.jpg --modo panorama --out pano.jpg
+# uso (dataset HF):
+# python -m modules.classic.1_stitcher_basico --hf miroslavjaros/Video-To-Dataset-Orchard-Apple --split train --count 24 --offset 300 --modo scans --out pano.jpg
 
 # falhou com status 1: não há sobreposição suficiente entre as imagens
 

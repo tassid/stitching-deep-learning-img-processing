@@ -30,9 +30,9 @@ def status_to_msg(status: int) -> str:
         ST_ERR_HOMOGRAPHY_EST_FAIL: "Falha ao estimar homografia (poucas features ou não correspondem).",
         ST_ERR_CAMERA_PARAMS_ADJUST_FAIL: "Falha ao ajustar parâmetros da câmera.",
     }
-    tip = " Dicas: mantenha ordem/seq, 30-50% de overlap, iluminação semelhante; use modo SCANS para varreduras."
+    tip = "Dicas: mantenha ordem/seq, 30-50% de overlap, iluminação semelhante; use modo SCANS para varreduras."
     return mapping.get(status, "Falhou com status " + str(status) + ".") + tip
-    return mapping.get(status, "Falhou com status " + str(status) + ".") + tip
+
 
 def make_stitcher(modo: str, try_gpu: bool):
     mode = cv2.Stitcher_PANORAMA if modo == "panorama" else cv2.Stitcher_SCANS
@@ -64,12 +64,86 @@ def read_images(files: List[Path]):
 # ===== Registry de métodos =====
 METHODS = {}
 
-
 def register_method(key, label):
     def deco(fn):
         METHODS[key] = {"label": label, "fn": fn}
         return fn
     return deco
+
+# Descobre automaticamente scripts em modules/classic e modules/deep.
+# Preferência: se o módulo tiver função Python stitch(imgs)->np.ndarray, usa import; senão, usa subprocess com --dir/--out.
+
+def discover_algorithms():
+    import importlib, pkgutil, sys, tempfile, shutil, subprocess
+    from pathlib import Path
+    import cv2 as _cv
+
+    def add_bridge(mod_name: str, key: str, label: str):
+        # Tenta import
+        try:
+            mod = importlib.import_module(mod_name)
+            fn = getattr(mod, "stitch", None)
+            if callable(fn):
+                def _call(imgs, **kwargs):
+                    return fn(imgs)
+                METHODS[key] = {"label": label, "fn": _call}
+                return
+        except Exception:
+            pass
+        # Fallback subprocess
+        def _bridge(imgs, **kwargs):
+            tmp = tempfile.mkdtemp(prefix=key.replace("/", "_") + "_")
+            try:
+                in_dir = Path(tmp) / "imgs"
+                in_dir.mkdir(parents=True, exist_ok=True)
+                for i, im in enumerate(imgs):
+                    _cv.imwrite(str(in_dir / ("im_%03d.jpg" % i)), im)
+                out_file = Path(tmp) / "out.jpg"
+                cmd = [sys.executable, "-m", mod_name, "--dir", str(in_dir), "--out", str(out_file)]
+                ret = subprocess.run(cmd, capture_output=True, text=True)
+                if ret.returncode != 0:
+                    raise RuntimeError(label + " falhou (retcode %d)\nSTDOUT:\n%s\nSTDERR:\n%s" % (ret.returncode, ret.stdout, ret.stderr))
+                pano = _cv.imread(str(out_file))
+                if pano is None:
+                    raise RuntimeError(label + " não gerou imagem em: " + str(out_file))
+                return pano
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+        METHODS[key] = {"label": label, "fn": _bridge}
+
+    # Clássicos (arquivos .py em modules/classic, exceto __init__ e nomes que começam com número — já temos um nativo)
+    try:
+        import modules.classic as classic_pkg
+        pkg_path = classic_pkg.__path__
+        for info in pkgutil.iter_modules(pkg_path):
+            name = info.name
+            if name.startswith("__") or name[0].isdigit():
+                continue
+            mod_name = "modules.classic." + name
+            key = "classic/" + name
+            label = "Clássico • " + name.replace("_", " ").title()
+            add_bridge(mod_name, key, label)
+    except Exception:
+        pass
+
+    # Deep
+    try:
+        import modules.deep as deep_pkg
+        pkg_path = deep_pkg.__path__
+        for info in pkgutil.iter_modules(pkg_path):
+            name = info.name
+            if name.startswith("__"):
+                continue
+            mod_name = "modules.deep." + name
+            key = "deep/" + name
+            label = "Deep • " + name.replace("_", " ").title()
+            add_bridge(mod_name, key, label)
+    except Exception:
+        pass
+
+    # Insere nossos dois métodos de referência no topo (garantir presença)
+    METHODS.setdefault("classic/opencv_stitcher", {"label": "Clássico • OpenCV Stitcher (panorama/scans)", "fn": method_opencv_stitcher})
+    METHODS.setdefault("classic/orb_homography", {"label": "Clássico • ORB + Homography (sequencial)", "fn": method_orb_homography})
 
 
 @register_method("classic/opencv_stitcher", "Clássico • OpenCV Stitcher (panorama/scans)")
@@ -159,7 +233,7 @@ def method_loftr_bridge(imgs, **kwargs):
         cmd = [sys.executable, "-m", "modules.deep.loftr", "--dir", str(in_dir), "--out", str(out_file)]
         ret = subprocess.run(cmd, capture_output=True, text=True)
         if ret.returncode != 0:
-            raise RuntimeError("LoFTR falhou (retcode " + str(ret.returncode) + ") STDOUT: " + ret.stdout + " STDERR: " + ret.stderr)
+            raise RuntimeError(f"LoFTR falhou (retcode {ret.returncode})\nSTDOUT:\n{ret.stdout}\nSTDERR:\n{ret.stderr}")
         pano = _cv.imread(str(out_file))
         if pano is None:
             raise RuntimeError("LoFTR concluiu mas não gerou imagem em: " + str(out_file))
@@ -183,15 +257,20 @@ class StitcherGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Stitcher — Clássico & Deep")
-        self.geometry("980x600")
-        self.minsize(900, 560)
+        self.geometry("1020x640")
+        self.minsize(940, 600)
         self.configure(padx=10, pady=10)
+
+        # Descoberta de métodos
+        discover_algorithms()
 
         self.files: List[Path] = []
         self.output_dir = Path.cwd() / "results"
         self.modo = tk.StringVar(value="panorama")
         self.try_gpu = tk.BooleanVar(value=False)
         self.method_key = tk.StringVar(value=list(METHODS.keys())[0])
+        self.do_metrics = tk.BooleanVar(value=False)
+        self.ref_path = tk.StringVar(value="")
 
         self._build_left()
         self._build_right()
@@ -229,12 +308,12 @@ class StitcherGUI(tk.Tk):
         box = ttk.LabelFrame(right, text="Parâmetros")
         box.pack(fill=tk.X)
 
-        # Método
+        # Método (agrupado por prefixo)
         meth_row = ttk.Frame(box)
         meth_row.pack(fill=tk.X, pady=(6, 0))
         ttk.Label(meth_row, text="Método:").pack(side=tk.LEFT)
         values = list(METHODS.keys())
-        self.method_cb = ttk.Combobox(meth_row, textvariable=self.method_key, state="readonly", width=50, values=values)
+        self.method_cb = ttk.Combobox(meth_row, textvariable=self.method_key, state="readonly", width=60, values=values)
         self.method_cb.pack(side=tk.LEFT, padx=8)
 
         # Modo
@@ -248,6 +327,17 @@ class StitcherGUI(tk.Tk):
         gpu_row.pack(fill=tk.X, pady=6)
         ttk.Checkbutton(gpu_row, text="Tentar GPU (futuro)", variable=self.try_gpu).pack(side=tk.LEFT)
 
+        # Métricas
+        met_box = ttk.LabelFrame(right, text="Métricas (opcional)")
+        met_box.pack(fill=tk.X, pady=(10, 0))
+        ttk.Checkbutton(met_box, text="Calcular métricas vs referência (PSNR/SSIM)", variable=self.do_metrics).pack(anchor=tk.W)
+        ref_row = ttk.Frame(met_box)
+        ref_row.pack(fill=tk.X, pady=(6, 0))
+        ttk.Label(ref_row, text="Referência:").pack(side=tk.LEFT)
+        ttk.Entry(ref_row, textvariable=self.ref_path, width=44).pack(side=tk.LEFT, padx=6)
+        ttk.Button(ref_row, text="Escolher...", command=self.choose_ref).pack(side=tk.LEFT)
+
+        # Saída
         out_box = ttk.LabelFrame(right, text="Saída")
         out_box.pack(fill=tk.X, pady=(10, 0))
         self.out_dir_var = tk.StringVar()
@@ -339,6 +429,12 @@ class StitcherGUI(tk.Tk):
             self.output_dir.mkdir(parents=True, exist_ok=True)
             self.out_dir_var.set(str(self.output_dir))
 
+    def choose_ref(self):
+        f = filedialog.askopenfilename(title="Escolha imagem de referência",
+                                       filetypes=[("Imagens", "*.jpg *.jpeg *.png *.bmp *.tif *.tiff"), ("Todos", "*.*")])
+        if f:
+            self.ref_path.set(f)
+
     def run_stitch(self):
         if len(self.files) < 2:
             messagebox.showwarning("Aviso", "Selecione pelo menos 2 imagens.")
@@ -362,6 +458,14 @@ class StitcherGUI(tk.Tk):
             ok = cv2.imwrite(str(out_path), pano)
             if not ok:
                 raise RuntimeError("Falha ao salvar a imagem de saída.")
+            # Métricas
+            if self.do_metrics.get() and self.ref_path.get():
+                try:
+                    m = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
+                    save_metrics_json(self.output_dir / ("metrics_" + safe_key + "_" + ts + ".json"), m)
+                    self._log("Métricas: PSNR=%.3f dB | SSIM=%.4f" % (m.get("psnr", float('nan')), m.get("ssim", float('nan'))))
+                except Exception as met_err:
+                    self._log("Falha nas métricas: " + str(met_err))
             self._log("Concluído: " + str(out_path))
             self._notify_done(out_path)
         except Exception as exc:
@@ -388,9 +492,24 @@ class StitcherGUI(tk.Tk):
         self.log.see(tk.END)
 
     def _notify_done(self, out_path: Path):
-        self.after(0, lambda: messagebox.showinfo("Concluído", "Panorama salvo em: " + str(out_path)))
+        self.after(0, lambda: messagebox.showinfo("Concluído", "Panorama salvo em:" + str(out_path)))
 
 
+# ---------- Métricas ----------
+
+def compute_metrics(ref_path: str, test_img):
+    import numpy as np, cv2
+    ref = cv2.imread(ref_path)
+    if ref is None: raise RuntimeError("Não consegui ler a referência: " + ref_path)
+    if ref.shape[:2] != test_img.shape[:2]:
+        ref = cv2.resize(ref, (test_img.shape[1], test_img.shape[0]))
+    psnr = float(cv2.PSNR(ref, test_img))
+    def _ssim(a,b):
+        a,b=a.astype('float64'),b.astype('float64'); C1=(0.01*255)**2; C2=(0.03*255)**2
+        mu_a,mu_b=a.mean(),b.mean(); va, vb = a.var(), b.var(); cab=((a-mu_a)*(b-mu_b)).mean()
+        return ((2*mu_a*mu_b + C1)*(2*cab + C2))/((mu_a**2 + mu_b**2 + C1)*(va + vb + C2))
+    ssim = float((_ssim(test_img[:,:,0],ref[:,:,0])+_ssim(test_img[:,:,1],ref[:,:,1])+_ssim(test_img[:,:,2],ref[:,:,2]))/3.0)
+    return {"psnr": psnr, "ssim": ssim}
 if __name__ == "__main__":
     app = StitcherGUI()
     app.mainloop()

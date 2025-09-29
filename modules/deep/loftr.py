@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # modules/deep/loftr.py
 """
 LoFTR-based stitching (deep feature matching, detector-free)
@@ -5,23 +6,26 @@ LoFTR-based stitching (deep feature matching, detector-free)
   and stitches incrementally with feather blending.
 - Supports local files (--imgs) or Hugging Face datasets (--hf).
 
-Usage (local):
+Uso (local):
   python -m modules.deep.loftr --imgs a.jpg b.jpg c.jpg --weights outdoor --min_side 960 --out pano_loftr.jpg
 
-Usage (HF):
+Uso (HF):
   python -m modules.deep.loftr --hf miroslavjaros/Video-To-Dataset-Orchard-Apple --split train \
       --count 24 --offset 300 --min_side 960 --out pano_loftr.jpg
 
 Reqs:
-  pip install opencv-contrib-python torch kornia datasets pillow huggingface_hub[hf_xet]
+  pip install opencv-contrib-python torch kornia datasets pillow
 """
 
 from __future__ import annotations
-import argparse, sys, math
+import argparse, sys
 from typing import List, Tuple, Optional
 import numpy as np
 import cv2
 
+__all__ = ["stitch", "stitch_loftr"]
+
+# ----------------- Utils -----------------
 def pil_to_bgr(pil_img):
     import numpy as np
     return cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
@@ -55,7 +59,7 @@ def loftr_match(im0: np.ndarray, im1: np.ndarray, device: str = "cpu", weights: 
     import kornia as K
     from kornia.feature import LoFTR
 
-    if weights not in {"outdoor","indoor"}:
+    if weights not in {"outdoor", "indoor"}:
         weights = "outdoor"
     matcher = LoFTR(pretrained=weights).to(device).eval()
 
@@ -83,41 +87,32 @@ def loftr_match(im0: np.ndarray, im1: np.ndarray, device: str = "cpu", weights: 
 def estimate_homography(k0: np.ndarray, k1: np.ndarray, ransac_thresh: float = 3.0) -> Optional[np.ndarray]:
     if k0.shape[0] < 4 or k1.shape[0] < 4:
         return None
-    H, mask = cv2.findHomography(k0, k1, cv2.USAC_MAGSAC, ransac_thresh, maxIters=10000, confidence=0.999)
+    # Fallback se USAC_MAGSAC não existir na sua build do OpenCV
+    method = getattr(cv2, "USAC_MAGSAC", cv2.RANSAC)
+    H, _ = cv2.findHomography(k0, k1, method, ransac_thresh, maxIters=10000, confidence=0.999)
     return H
 
 # ----------------- Stitching helpers -----------------
 def resize_min_side(img: np.ndarray, min_side: int):
-    if min_side <= 0: return img
-    h,w = img.shape[:2]; s = min(h,w)
-    if s <= min_side: return img
+    if min_side <= 0:
+        return img
+    h, w = img.shape[:2]; s = min(h, w)
+    if s <= min_side:
+        return img
     scale = min_side / float(s)
-    return cv2.resize(img, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
+    return cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
 
-def compute_global_transforms(imgs: List[np.ndarray], device: str, weights: str, conf_thresh: float,
-                              ransac_thresh: float) -> List[np.ndarray]:
-    Hs = [np.eye(3, dtype=np.float32)]  # H_0 = I (base)
-    for i in range(1, len(imgs)):
-        k0, k1, cf = loftr_match(imgs[i], imgs[i-1], device=device, weights=weights, conf_thresh=conf_thresh)
-        H = estimate_homography(k0, k1, ransac_thresh=ransac_thresh)
-        if H is None:
-            raise SystemExit(f"homografia insuficiente no par {i-1}->{i} (matches={k0.shape[0]})")
-        # H maps img[i] -> img[i-1]; compose to base (0)
-        H_global = Hs[-1] @ H
-        Hs.append(H_global.astype(np.float32))
-    return Hs
-
-def warp_all_to_canvas(imgs: List[np.ndarray], Hs: List[np.ndarray]) -> Tuple[List[np.ndarray], List[np.ndarray], Tuple[int,int], np.ndarray]:
+def warp_all_to_canvas(imgs: List[np.ndarray], Hs: List[np.ndarray]):
     # Calcula bounding box global e faz uma translação para manter tudo positivo
     corners_all = []
     for im, H in zip(imgs, Hs):
-        h,w = im.shape[:2]
+        h, w = im.shape[:2]
         corners = np.float32([[0,0],[w,0],[w,h],[0,h]]).reshape(-1,1,2)
         wc = cv2.perspectiveTransform(corners, H)
         corners_all.append(wc)
     cc = np.vstack(corners_all)
-    xmin,ymin = np.floor(cc.min(axis=0).ravel()).astype(np.int32)
-    xmax,ymax = np.ceil (cc.max(axis=0).ravel()).astype(np.int32)
+    xmin, ymin = np.floor(cc.min(axis=0).ravel()).astype(np.int32)
+    xmax, ymax = np.ceil (cc.max(axis=0).ravel()).astype(np.int32)
     Tx, Ty = -xmin, -ymin
     T = np.array([[1,0,Tx],[0,1,Ty],[0,0,1]], dtype=np.float32)
     size = (int(xmax - xmin), int(ymax - ymin))
@@ -125,16 +120,16 @@ def warp_all_to_canvas(imgs: List[np.ndarray], Hs: List[np.ndarray]) -> Tuple[Li
     for im, H in zip(imgs, Hs):
         W = T @ H
         wim = cv2.warpPerspective(im, W, size)
-        mask = (cv2.cvtColor(wim, cv2.COLOR_BGR2GRAY) > 0).astype(np.uint8)*255
+        mask = (cv2.cvtColor(wim, cv2.COLOR_BGR2GRAY) > 0).astype(np.uint8) * 255
         warps.append(wim); masks.append(mask)
     return warps, masks, size, T
 
 def feather_blend_pair(base: np.ndarray, warp: np.ndarray, mask_base: np.ndarray, mask_warp: np.ndarray) -> np.ndarray:
     k = np.ones((3,3), np.uint8)
     mask_base = cv2.morphologyEx(mask_base, cv2.MORPH_DILATE, k)
-    mask_warp = cv2.morphologyEx(mask_warp, cv2.MORPH_DILATE, k)
+    mask_warp  = cv2.morphologyEx(mask_warp,  cv2.MORPH_DILATE, k)
     dt_b = cv2.distanceTransform((mask_base>0).astype(np.uint8), cv2.DIST_L2, 5)
-    dt_w = cv2.distanceTransform((mask_warp>0).astype(np.uint8), cv2.DIST_L2, 5)
+    dt_w = cv2.distanceTransform((mask_warp >0).astype(np.uint8), cv2.DIST_L2, 5)
     s = dt_b + dt_w + 1e-6
     wb = (dt_b/s)[...,None]; ww = (dt_w/s)[...,None]
     out = base.astype(np.float32)*wb + warp.astype(np.float32)*ww
@@ -145,30 +140,8 @@ def blend_sequence(warps: List[np.ndarray], masks: List[np.ndarray]) -> np.ndarr
     m_base = masks[0].copy()
     for i in range(1, len(warps)):
         canvas = feather_blend_pair(canvas, warps[i], m_base, masks[i])
-        m_base = ((cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)>0).astype(np.uint8))*255
+        m_base = ((cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)>0).astype(np.uint8)) * 255
     return canvas
-
-# ----------------- Visualization -----------------
-def save_match_vis(im_a, im_b, k0, k1, save_path: str, max_lines: int = 2000):
-    # side-by-side with lines
-    ha, wa = im_a.shape[:2]; hb, wb = im_b.shape[:2]
-    H = max(ha, hb); W = wa + wb
-    vis = np.zeros((H, W, 3), dtype=np.uint8)
-    vis[:ha,:wa] = im_a
-    vis[:hb,wa:wa+wb] = im_b
-    # random subset if too many
-    n = k0.shape[0]
-    idx = np.arange(n)
-    if n > max_lines:
-        idx = np.random.choice(n, size=max_lines, replace=False)
-    for i in idx:
-        x0,y0 = k0[i]
-        x1,y1 = k1[i]
-        color = tuple(np.random.randint(0,255, size=3).tolist())
-        cv2.circle(vis, (int(x0), int(y0)), 2, color, -1)
-        cv2.circle(vis, (int(x1)+wa, int(y1)), 2, color, -1)
-        cv2.line(vis, (int(x0), int(y0)), (int(x1)+wa, int(y1)), color, 1)
-    cv2.imwrite(save_path, vis)
 
 # ----------------- Pipeline -----------------
 def stitch_loftr(imgs: List[np.ndarray], device: str = "cpu", weights: str = "outdoor",
@@ -192,6 +165,13 @@ def stitch_loftr(imgs: List[np.ndarray], device: str = "cpu", weights: str = "ou
     # feather blend sequence
     pano = blend_sequence(warps, masks)
     return pano
+
+# --- API direta para a GUI ---
+def stitch(imgs: List[np.ndarray], device: str = "cpu", weights: str = "outdoor",
+           min_side: int = 960, conf_thresh: float = 0.2, ransac_thresh: float = 3.0) -> np.ndarray:
+    """Entrada/saída em memória para a GUI."""
+    return stitch_loftr(imgs, device=device, weights=weights, min_side=min_side,
+                        conf_thresh=conf_thresh, ransac_thresh=ransac_thresh)
 
 # ----------------- CLI -----------------
 def cli_main():

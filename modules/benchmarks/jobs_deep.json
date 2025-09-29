@@ -1,0 +1,117 @@
+[
+  {
+    "name": "loftr",
+    "cmd": [
+      "python",
+      "-m",
+      "modules.deep.loftr",
+      "--hf",
+      "miroslavjaros/Video-To-Dataset-Orchard-Apple",
+      "--split",
+      "train",
+      "--count",
+      "24",
+      "--offset",
+      "300",
+      "--min_side",
+      "960",
+      "--out",
+      "{out}"
+    ],
+    "outfile": "deep_loftr.jpg"
+  },
+  {
+    "name": "sp_superglue",
+    "cmd": [
+      "python",
+      "-m",
+      "modules.deep.sp_superglue",
+      "--hf",
+      "miroslavjaros/Video-To-Dataset-Orchard-Apple",
+      "--split",
+      "train",
+      "--count",
+      "24",
+      "--offset",
+      "300",
+      "--min_side",
+      "960",
+      "--sp-weights",
+      "synthetic",
+      "--sg-weights",
+      "outdoor",
+      "--out",
+      "{out}"
+    ],
+    "outfile": "deep_sp_sg.jpg"
+  },
+  {
+    "name": "deep_homography",
+    "cmd": [
+      "python",
+      "-m",
+      "modules.deep.deep_homography",
+      "--hf",
+      "miroslavjaros/Video-To-Dataset-Orchard-Apple",
+      "--split",
+      "train",
+      "--count",
+      "24",
+      "--offset",
+      "300",
+      "--min_side",
+      "960",
+      "--fallback",
+      "sift",
+      "--out",
+      "{out}"
+    ],
+    "outfile": "deep_h4pt.jpg"
+  },
+  {
+    "name": "flow_raft",
+    "cmd": [
+      "python",
+      "-m",
+      "modules.deep.flow_stitch",
+      "--hf",
+      "miroslavjaros/Video-To-Dataset-Orchard-Apple",
+      "--split",
+      "train",
+      "--count",
+      "24",
+      "--offset",
+      "300",
+      "--model",
+      "raft",
+      "--min_side",
+      "960",
+      "--out",
+      "{out}"
+    ],
+    "outfile": "deep_flow.jpg"
+  },
+  {
+    "name": "udis_unsup",
+    "cmd": [
+      "python",
+      "-m",
+      "modules.deep.udis",
+      "--hf",
+      "miroslavjaros/Video-To-Dataset-Orchard-Apple",
+      "--split",
+      "train",
+      "--count",
+      "12",
+      "--offset",
+      "300",
+      "--steps",
+      "200",
+      "--min_side",
+      "960",
+      "--out",
+      "{out}"
+    ],
+    "outfile": "deep_udis.jpg"
+  }
+]

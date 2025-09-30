@@ -1,0 +1,1 @@
+20250930_003742 [classic-opencv_stitcher] PSNR=nan SSIM=nan out=pano_classic-opencv_stitcher_20250930_003742.jpg

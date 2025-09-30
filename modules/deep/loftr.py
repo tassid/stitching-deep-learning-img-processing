@@ -1,24 +1,12 @@
 # -*- coding: utf-8 -*-
 # modules/deep/loftr.py
 """
-LoFTR-based stitching (deep feature matching, detector-free)
-- Matches dense correspondences with LoFTR (Kornia), estimates homographies via RANSAC,
-  and stitches incrementally with feather blending.
-- Supports local files (--imgs) or Hugging Face datasets (--hf).
-
-Uso (local):
-  python -m modules.deep.loftr --imgs a.jpg b.jpg c.jpg --weights outdoor --min_side 960 --out pano_loftr.jpg
-
-Uso (HF):
-  python -m modules.deep.loftr --hf miroslavjaros/Video-To-Dataset-Orchard-Apple --split train \
-      --count 24 --offset 300 --min_side 960 --out pano_loftr.jpg
-
-Reqs:
-  pip install opencv-contrib-python torch kornia datasets pillow
+LoFTR-based stitching (deep feature matching, detector-free).
+Requisitos: pip install opencv-contrib-python torch kornia datasets pillow
 """
 
 from __future__ import annotations
-import argparse, sys
+import argparse, sys, os
 from typing import List, Tuple, Optional
 import numpy as np
 import cv2
@@ -45,31 +33,77 @@ def load_from_hf(name: str, split: str, count: int, offset: int, shuffle: bool) 
             imgs.append(pil_to_bgr(img))
         except Exception:
             if isinstance(img, str):
-                im = cv2.imread(img)
+                im = cv2.imread(img, cv2.IMREAD_UNCHANGED)
                 if im is not None:
                     imgs.append(im)
     if len(imgs) < 2:
         sys.exit("Não consegui ler imagens RGB desse dataset/split.")
     return imgs
 
+def ensure_gray_8u(img: np.ndarray) -> np.ndarray:
+    """Converte qualquer entrada (BGR/BGRA/GRAY/GRAY+ALPHA, 8/16 bits) para GRAY 8-bit (H,W)."""
+    if img is None:
+        raise ValueError("Imagem None.")
+    if img.dtype == np.uint16:
+        img = (img / 257).astype(np.uint8)
+    if img.ndim == 2:
+        gray = img
+    elif img.ndim == 3:
+        c = img.shape[2]
+        if c == 1:   gray = img[..., 0]
+        elif c == 2: gray = img[..., 0]  # descarta alpha/canal extra
+        elif c == 3: gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        elif c == 4: gray = cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
+        else:        gray = cv2.cvtColor(img[..., :3], cv2.COLOR_BGR2GRAY)
+    else:
+        raise ValueError(f"Dimensão inesperada: {img.shape}")
+    if gray.dtype != np.uint8:
+        gray = cv2.normalize(gray, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    return gray
+
+# ----------------- Visualização (opcional) -----------------
+def save_match_vis(img0: np.ndarray, img1: np.ndarray, k0: np.ndarray, k1: np.ndarray, path: str, max_draw: int = 500):
+    vis0 = img0.copy(); vis1 = img1.copy()
+    h = max(vis0.shape[0], vis1.shape[0]); w = vis0.shape[1] + vis1.shape[1]
+    canvas = np.zeros((h, w, 3), dtype=np.uint8)
+    canvas[:vis0.shape[0], :vis0.shape[1]] = vis0
+    canvas[:vis1.shape[0], vis0.shape[1]:] = vis1
+    step = max(1, int(len(k0) / max_draw))
+    for i in range(0, len(k0), step):
+        p0 = tuple(np.round(k0[i]).astype(int))
+        p1 = tuple(np.round(k1[i]).astype(int))
+        p1_shift = (p1[0] + vis0.shape[1], p1[1])
+        cv2.line(canvas, p0, p1_shift, (0, 255, 0), 1, cv2.LINE_AA)
+        cv2.circle(canvas, p0, 2, (0, 0, 255), -1)
+        cv2.circle(canvas, p1_shift, 2, (255, 0, 0), -1)
+    os.makedirs(os.path.dirname(path), exist_ok=True) if os.path.dirname(path) else None
+    cv2.imwrite(path, canvas)
+
 # ----------------- LoFTR Matching -----------------
 def loftr_match(im0: np.ndarray, im1: np.ndarray, device: str = "cpu", weights: str = "outdoor",
                 conf_thresh: float = 0.2) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     import torch
-    import kornia as K
     from kornia.feature import LoFTR
 
     if weights not in {"outdoor", "indoor"}:
         weights = "outdoor"
     matcher = LoFTR(pretrained=weights).to(device).eval()
 
-    def to_tensor_gray(img_bgr: np.ndarray) -> "torch.Tensor":
-        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-        t = K.image_to_tensor(gray, keepdim=True).float() / 255.0   # (1,1,H,W)
+    def to_tensor_gray(img_any: np.ndarray) -> "torch.Tensor":
+        # Versão independente do Kornia: garante (1,1,H,W)
+        gray = ensure_gray_8u(img_any)               # (H,W), uint8
+        t = torch.from_numpy(gray).contiguous().float() / 255.0  # (H,W)
+        t = t.unsqueeze(0).unsqueeze(0)              # (1,1,H,W)
         return t
 
     t0 = to_tensor_gray(im0)
     t1 = to_tensor_gray(im1)
+
+    # Sanidade: B=1, C=1
+    if not (t0.ndim == 4 and t0.shape[1] == 1):
+        raise RuntimeError(f"Esperado (B,1,H,W), recebi {tuple(t0.shape)}")
+    if not (t1.ndim == 4 and t1.shape[1] == 1):
+        raise RuntimeError(f"Esperado (B,1,H,W), recebi {tuple(t1.shape)}")
 
     with torch.no_grad():
         data = {"image0": t0.to(device), "image1": t1.to(device)}
@@ -81,13 +115,11 @@ def loftr_match(im0: np.ndarray, im1: np.ndarray, device: str = "cpu", weights: 
     if conf_thresh is not None and conf_thresh > 0:
         m = conf >= conf_thresh
         k0, k1, conf = k0[m], k1[m], conf[m]
-
     return k0, k1, conf
 
 def estimate_homography(k0: np.ndarray, k1: np.ndarray, ransac_thresh: float = 3.0) -> Optional[np.ndarray]:
     if k0.shape[0] < 4 or k1.shape[0] < 4:
         return None
-    # Fallback se USAC_MAGSAC não existir na sua build do OpenCV
     method = getattr(cv2, "USAC_MAGSAC", cv2.RANSAC)
     H, _ = cv2.findHomography(k0, k1, method, ransac_thresh, maxIters=10000, confidence=0.999)
     return H
@@ -103,7 +135,6 @@ def resize_min_side(img: np.ndarray, min_side: int):
     return cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
 
 def warp_all_to_canvas(imgs: List[np.ndarray], Hs: List[np.ndarray]):
-    # Calcula bounding box global e faz uma translação para manter tudo positivo
     corners_all = []
     for im, H in zip(imgs, Hs):
         h, w = im.shape[:2]
@@ -147,9 +178,7 @@ def blend_sequence(warps: List[np.ndarray], masks: List[np.ndarray]) -> np.ndarr
 def stitch_loftr(imgs: List[np.ndarray], device: str = "cpu", weights: str = "outdoor",
                  min_side: int = 960, conf_thresh: float = 0.2, ransac_thresh: float = 3.0,
                  save_matches_dir: Optional[str] = None) -> np.ndarray:
-    # pre-resize
     imgs_r = [resize_min_side(im, min_side) for im in imgs]
-    # compute global transforms
     Hs = [np.eye(3, dtype=np.float32)]
     for i in range(1, len(imgs_r)):
         k0, k1, cf = loftr_match(imgs_r[i], imgs_r[i-1], device=device, weights=weights, conf_thresh=conf_thresh)
@@ -160,16 +189,13 @@ def stitch_loftr(imgs: List[np.ndarray], device: str = "cpu", weights: str = "ou
         if H is None:
             raise SystemExit(f"homografia insuficiente no par {i-1}->{i} (matches={k0.shape[0]})")
         Hs.append((Hs[-1] @ H).astype(np.float32))
-    # warp to global canvas
     warps, masks, size, T = warp_all_to_canvas(imgs_r, Hs)
-    # feather blend sequence
     pano = blend_sequence(warps, masks)
     return pano
 
-# --- API direta para a GUI ---
+# --- API para GUI ---
 def stitch(imgs: List[np.ndarray], device: str = "cpu", weights: str = "outdoor",
            min_side: int = 960, conf_thresh: float = 0.2, ransac_thresh: float = 3.0) -> np.ndarray:
-    """Entrada/saída em memória para a GUI."""
     return stitch_loftr(imgs, device=device, weights=weights, min_side=min_side,
                         conf_thresh=conf_thresh, ransac_thresh=ransac_thresh)
 
@@ -184,7 +210,7 @@ def cli_main():
     p.add_argument("--offset", type=int, default=0)
     p.add_argument("--shuffle", action="store_true")
 
-    p.add_argument("--device", choices=["cpu","cuda"], default="cpu")
+    p.add_argument("--device", choices=["cpu","cuda","mps"], default="cpu")
     p.add_argument("--weights", choices=["outdoor","indoor"], default="outdoor")
     p.add_argument("--min_side", type=int, default=960)
     p.add_argument("--conf_thresh", type=float, default=0.2)
@@ -194,7 +220,7 @@ def cli_main():
     a = p.parse_args()
 
     if a.imgs:
-        imgs = [cv2.imread(x) for x in a.imgs]
+        imgs = [cv2.imread(x, cv2.IMREAD_UNCHANGED) for x in a.imgs]
     else:
         imgs = load_from_hf(a.hf, a.split, a.count, a.offset, a.shuffle)
 
@@ -202,7 +228,6 @@ def cli_main():
         sys.exit("Falha ao ler alguma imagem.")
 
     if a.save_matches_dir:
-        import os
         os.makedirs(a.save_matches_dir, exist_ok=True)
 
     pano = stitch_loftr(imgs, device=a.device, weights=a.weights, min_side=a.min_side,

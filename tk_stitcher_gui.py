@@ -5,14 +5,14 @@ from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
 from datetime import datetime
 from typing import List
+import json
 
 # ===== Dependências =====
 try:
     import cv2
 except Exception as err:
-    # Evita erro de janela antes de criar root
     root = tk.Tk(); root.withdraw()
-    messagebox.showerror("Erro", "OpenCV não encontrado. Instale com: pip install opencv-python Detalhes: " + str(err))
+    messagebox.showerror("Erro", "OpenCV não encontrado. Instale com: pip install opencv-python\nDetalhes: " + str(err))
     raise
 
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
@@ -23,16 +23,14 @@ ST_ERR_NEED_MORE_IMGS = getattr(cv2, "STITCHER_ERR_NEED_MORE_IMGS", 1)
 ST_ERR_HOMOGRAPHY_EST_FAIL = getattr(cv2, "STITCHER_ERR_HOMOGRAPHY_EST_FAIL", 2)
 ST_ERR_CAMERA_PARAMS_ADJUST_FAIL = getattr(cv2, "STITCHER_ERR_CAMERA_PARAMS_ADJUST_FAIL", 3)
 
-
 def status_to_msg(status: int) -> str:
     mapping = {
         ST_ERR_NEED_MORE_IMGS: "Não há imagens suficientes (>=2) ou sobreposição insuficiente.",
         ST_ERR_HOMOGRAPHY_EST_FAIL: "Falha ao estimar homografia (poucas features ou não correspondem).",
         ST_ERR_CAMERA_PARAMS_ADJUST_FAIL: "Falha ao ajustar parâmetros da câmera.",
     }
-    tip = "Dicas: mantenha ordem/seq, 30-50% de overlap, iluminação semelhante; use modo SCANS para varreduras."
+    tip = " Dicas: mantenha ordem/seq, 30-50% de overlap, iluminação semelhante; use modo SCANS para varreduras."
     return mapping.get(status, "Falhou com status " + str(status) + ".") + tip
-
 
 def make_stitcher(modo: str, try_gpu: bool):
     mode = cv2.Stitcher_PANORAMA if modo == "panorama" else cv2.Stitcher_SCANS
@@ -45,9 +43,8 @@ def make_stitcher(modo: str, try_gpu: bool):
             st.setWarper(Warper("spherical", 1.0))
     except Exception:
         pass
-    _ = try_gpu  # placeholder
+    _ = try_gpu  # Stitcher de pip não usa CUDA
     return st
-
 
 def read_images(files: List[Path]):
     imgs = []
@@ -60,91 +57,123 @@ def read_images(files: List[Path]):
         raise RuntimeError("Selecione pelo menos 2 imagens.")
     return imgs
 
+# ===== Utils de MÉTRICAS =====
+def save_metrics_json(path: Path, metrics: dict):
+    Path(path).write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def save_metrics_txt(path: Path, method_key: str, ts: str, metrics: dict, out_name: str, ref_path: str):
+    lines = [
+        f"timestamp: {ts}",
+        f"method: {method_key}",
+        f"output: {out_name}",
+        f"reference: {ref_path}",
+        f"psnr_db: {metrics.get('psnr', float('nan')):.3f}",
+        f"ssim: {metrics.get('ssim', float('nan')):.4f}",
+    ]
+    Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+def append_metrics_log(output_dir: Path, key: str, ts: str, metrics: dict, extra: dict | None = None):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    line = f"{ts} [{key}] PSNR={metrics.get('psnr', float('nan')):.3f} SSIM={metrics.get('ssim', float('nan')):.4f}"
+    if extra:
+        line += " " + " ".join(f"{k}={v}" for k, v in extra.items())
+    line += "\n"
+    (output_dir / "metrics_log.txt").open("a", encoding="utf-8").write(line)
 
 # ===== Registry de métodos =====
 METHODS = {}
 
 def register_method(key, label):
     def deco(fn):
-        METHODS[key] = {"label": label, "fn": fn}
+        METHODS[key] = {"label": label, "fn": fn, "accepts_try_gpu": True}
         return fn
     return deco
 
-# Descobre automaticamente scripts em modules/classic e modules/deep.
-# Preferência: se o módulo tiver função Python stitch(imgs)->np.ndarray, usa import; senão, usa subprocess com --dir/--out.
-
+# Descoberta automática de algorithms em modules/classic e modules/deep
 def discover_algorithms():
-    import importlib, pkgutil, sys, tempfile, shutil, subprocess
+    import importlib, pkgutil, sys, tempfile, shutil, subprocess, inspect
     from pathlib import Path
     import cv2 as _cv
 
     def add_bridge(mod_name: str, key: str, label: str):
-        # Tenta import
+        # Caminho 1: import direto com stitch(imgs[, try_gpu|device])
         try:
             mod = importlib.import_module(mod_name)
             fn = getattr(mod, "stitch", None)
             if callable(fn):
+                sig = inspect.signature(fn)
+                accepted = set(sig.parameters.keys())
                 def _call(imgs, **kwargs):
-                    return fn(imgs)
-                METHODS[key] = {"label": label, "fn": _call}
+                    kw = {}
+                    if "try_gpu" in accepted and "try_gpu" in kwargs:
+                        kw["try_gpu"] = kwargs["try_gpu"]
+                    if "device" in accepted and "device" in kwargs:
+                        kw["device"] = kwargs["device"]
+                    return fn(imgs, **kw) if kw else fn(imgs)
+                METHODS[key] = {
+                    "label": label,
+                    "fn": _call,
+                    "accepts_try_gpu": ("try_gpu" in accepted or "device" in accepted),
+                }
                 return
         except Exception:
             pass
-        # Fallback subprocess
+        # Caminho 2: subprocesso com --dir/--out e opcional --device
         def _bridge(imgs, **kwargs):
             tmp = tempfile.mkdtemp(prefix=key.replace("/", "_") + "_")
             try:
                 in_dir = Path(tmp) / "imgs"
                 in_dir.mkdir(parents=True, exist_ok=True)
                 for i, im in enumerate(imgs):
-                    _cv.imwrite(str(in_dir / ("im_%03d.jpg" % i)), im)
+                    _cv.imwrite(str(in_dir / f"im_{i:03d}.jpg"), im)
                 out_file = Path(tmp) / "out.jpg"
                 cmd = [sys.executable, "-m", mod_name, "--dir", str(in_dir), "--out", str(out_file)]
+                if kwargs.get("try_gpu", False):
+                    try:
+                        import torch  # type: ignore
+                        if torch.cuda.is_available():
+                            cmd += ["--device", "cuda"]
+                        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                            cmd += ["--device", "mps"]
+                    except Exception:
+                        pass
                 ret = subprocess.run(cmd, capture_output=True, text=True)
                 if ret.returncode != 0:
-                    raise RuntimeError(label + " falhou (retcode %d)\nSTDOUT:\n%s\nSTDERR:\n%s" % (ret.returncode, ret.stdout, ret.stderr))
+                    raise RuntimeError(f"{label} falhou (retcode {ret.returncode})\nSTDOUT:\n{ret.stdout}\nSTDERR:\n{ret.stderr}")
                 pano = _cv.imread(str(out_file))
                 if pano is None:
                     raise RuntimeError(label + " não gerou imagem em: " + str(out_file))
                 return pano
             finally:
                 shutil.rmtree(tmp, ignore_errors=True)
-        METHODS[key] = {"label": label, "fn": _bridge}
+        METHODS[key] = {"label": label, "fn": _bridge, "accepts_try_gpu": True}
 
-    # Clássicos (arquivos .py em modules/classic, exceto __init__ e nomes que começam com número — já temos um nativo)
+    # Clássicos
     try:
         import modules.classic as classic_pkg
-        pkg_path = classic_pkg.__path__
-        for info in pkgutil.iter_modules(pkg_path):
+        for info in pkgutil.iter_modules(classic_pkg.__path__):
             name = info.name
             if name.startswith("__") or name[0].isdigit():
                 continue
-            mod_name = "modules.classic." + name
-            key = "classic/" + name
-            label = "Clássico • " + name.replace("_", " ").title()
-            add_bridge(mod_name, key, label)
+            add_bridge(f"modules.classic.{name}", f"classic/{name}", "Clássico • " + name.replace("_", " ").title())
     except Exception:
         pass
 
     # Deep
     try:
         import modules.deep as deep_pkg
-        pkg_path = deep_pkg.__path__
-        for info in pkgutil.iter_modules(pkg_path):
+        for info in pkgutil.iter_modules(deep_pkg.__path__):
             name = info.name
             if name.startswith("__"):
                 continue
-            mod_name = "modules.deep." + name
-            key = "deep/" + name
-            label = "Deep • " + name.replace("_", " ").title()
-            add_bridge(mod_name, key, label)
+            add_bridge(f"modules.deep.{name}", f"deep/{name}", "Deep • " + name.replace("_", " ").title())
     except Exception:
         pass
 
-    # Insere nossos dois métodos de referência no topo (garantir presença)
-    METHODS.setdefault("classic/opencv_stitcher", {"label": "Clássico • OpenCV Stitcher (panorama/scans)", "fn": method_opencv_stitcher})
-    METHODS.setdefault("classic/orb_homography", {"label": "Clássico • ORB + Homography (sequencial)", "fn": method_orb_homography})
-
+    # Garantir presença dos dois métodos nativos
+    METHODS.setdefault("classic/opencv_stitcher", {"label": "Clássico • OpenCV Stitcher (panorama/scans)", "fn": method_opencv_stitcher, "accepts_try_gpu": False})
+    METHODS.setdefault("classic/orb_homography", {"label": "Clássico • ORB + Homography (sequencial)", "fn": method_orb_homography, "accepts_try_gpu": False})
 
 @register_method("classic/opencv_stitcher", "Clássico • OpenCV Stitcher (panorama/scans)")
 def method_opencv_stitcher(imgs, modo="panorama", try_gpu=False):
@@ -154,9 +183,8 @@ def method_opencv_stitcher(imgs, modo="panorama", try_gpu=False):
         raise RuntimeError(status_to_msg(status))
     return pano
 
-
 @register_method("classic/orb_homography", "Clássico • ORB + Homography (sequencial)")
-def method_orb_homography(imgs, ratio=0.75, ransac_reproj=4.0):
+def method_orb_homography(imgs, ratio=0.75, ransac_reproj=4.0, try_gpu: bool=False):
     import numpy as np
     orb = cv2.ORB_create(nfeatures=4000)
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
@@ -213,13 +241,9 @@ def method_orb_homography(imgs, ratio=0.75, ransac_reproj=4.0):
         pano = warp_merge(pano, imgs[i], H)
     return pano
 
-
 @register_method("deep/loftr", "Deep • LoFTR (via subprocess)")
 def method_loftr_bridge(imgs, **kwargs):
-    """Chama seu modules/deep/loftr.py como módulo Python em subprocesso.
-    Expectativa: o script aceita --dir <pasta> e --out <arquivo> e salva o panorama.
-    Ajuste se sua CLI for diferente.
-    """
+    """Bridge para modules/deep/loftr.py: aceita --dir/--out e opcional --device (cuda/mps)."""
     import tempfile, shutil, subprocess, sys
     from pathlib import Path
     import cv2 as _cv
@@ -231,6 +255,15 @@ def method_loftr_bridge(imgs, **kwargs):
             _cv.imwrite(str(in_dir / f"im_{i:03d}.jpg"), im)
         out_file = Path(tmp) / "out.jpg"
         cmd = [sys.executable, "-m", "modules.deep.loftr", "--dir", str(in_dir), "--out", str(out_file)]
+        if kwargs.get("try_gpu", False):
+            try:
+                import torch  # type: ignore
+                if torch.cuda.is_available():
+                    cmd += ["--device", "cuda"]
+                elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                    cmd += ["--device", "mps"]
+            except Exception:
+                pass
         ret = subprocess.run(cmd, capture_output=True, text=True)
         if ret.returncode != 0:
             raise RuntimeError(f"LoFTR falhou (retcode {ret.returncode})\nSTDOUT:\n{ret.stdout}\nSTDERR:\n{ret.stderr}")
@@ -241,17 +274,13 @@ def method_loftr_bridge(imgs, **kwargs):
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
-
-
 @register_method("deep/superglue", "Deep • SuperGlue (placeholder)")
 def method_superglue_placeholder(imgs, **kwargs):
     raise RuntimeError("SuperGlue não está configurado. Integre modules/deep/sp.superglue.py e exponha stitch(imgs).")
 
-
 @register_method("deep/flow_stitch", "Deep • Optical Flow Stitch (placeholder)")
 def method_flow_placeholder(imgs, **kwargs):
     raise RuntimeError("Flow Stitch não está configurado. Integre modules/deep/flow_stitch.py e exponha stitch(imgs).")
-
 
 class StitcherGUI(tk.Tk):
     def __init__(self):
@@ -261,22 +290,23 @@ class StitcherGUI(tk.Tk):
         self.minsize(940, 600)
         self.configure(padx=10, pady=10)
 
-        # Descoberta de métodos
         discover_algorithms()
 
         self.files: List[Path] = []
-        self.output_dir = Path.cwd() / "results"
+        # >>> resultados sempre na pasta do arquivo
+        self.output_dir = Path(__file__).resolve().parent / "results"
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
         self.modo = tk.StringVar(value="panorama")
         self.try_gpu = tk.BooleanVar(value=False)
         self.method_key = tk.StringVar(value=list(METHODS.keys())[0])
         self.do_metrics = tk.BooleanVar(value=False)
         self.ref_path = tk.StringVar(value="")
+        # >>> crie a StringVar ANTES de construir a UI da direita
+        self.out_dir_var = tk.StringVar(value=str(self.output_dir))
 
         self._build_left()
         self._build_right()
-
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.out_dir_var.set(str(self.output_dir))
 
     # ---------- UI ----------
     def _build_left(self):
@@ -308,7 +338,6 @@ class StitcherGUI(tk.Tk):
         box = ttk.LabelFrame(right, text="Parâmetros")
         box.pack(fill=tk.X)
 
-        # Método (agrupado por prefixo)
         meth_row = ttk.Frame(box)
         meth_row.pack(fill=tk.X, pady=(6, 0))
         ttk.Label(meth_row, text="Método:").pack(side=tk.LEFT)
@@ -316,7 +345,6 @@ class StitcherGUI(tk.Tk):
         self.method_cb = ttk.Combobox(meth_row, textvariable=self.method_key, state="readonly", width=60, values=values)
         self.method_cb.pack(side=tk.LEFT, padx=8)
 
-        # Modo
         mode_row = ttk.Frame(box)
         mode_row.pack(fill=tk.X, pady=(6, 0))
         ttk.Label(mode_row, text="Modo:").pack(side=tk.LEFT)
@@ -325,9 +353,8 @@ class StitcherGUI(tk.Tk):
 
         gpu_row = ttk.Frame(box)
         gpu_row.pack(fill=tk.X, pady=6)
-        ttk.Checkbutton(gpu_row, text="Tentar GPU (futuro)", variable=self.try_gpu).pack(side=tk.LEFT)
+        ttk.Checkbutton(gpu_row, text="Tentar GPU (Deep/LoFTR)", variable=self.try_gpu).pack(side=tk.LEFT)
 
-        # Métricas
         met_box = ttk.LabelFrame(right, text="Métricas (opcional)")
         met_box.pack(fill=tk.X, pady=(10, 0))
         ttk.Checkbutton(met_box, text="Calcular métricas vs referência (PSNR/SSIM)", variable=self.do_metrics).pack(anchor=tk.W)
@@ -337,10 +364,8 @@ class StitcherGUI(tk.Tk):
         ttk.Entry(ref_row, textvariable=self.ref_path, width=44).pack(side=tk.LEFT, padx=6)
         ttk.Button(ref_row, text="Escolher...", command=self.choose_ref).pack(side=tk.LEFT)
 
-        # Saída
         out_box = ttk.LabelFrame(right, text="Saída")
         out_box.pack(fill=tk.X, pady=(10, 0))
-        self.out_dir_var = tk.StringVar()
         out_row = ttk.Frame(out_box)
         out_row.pack(fill=tk.X, pady=6)
         ttk.Label(out_row, text="Pasta:").pack(side=tk.LEFT)
@@ -388,7 +413,7 @@ class StitcherGUI(tk.Tk):
                 self.files.append(p)
                 self.listbox.insert(tk.END, str(p))
                 add += 1
-        self._log("Adicionados " + str(add) + " arquivo(s). Total: " + str(len(self.files)))
+        self._log(f"Adicionados {add} arquivo(s). Total: {len(self.files)}")
 
     def clear_files(self):
         self.files.clear()
@@ -402,7 +427,7 @@ class StitcherGUI(tk.Tk):
         for idx in reversed(sel):
             self.listbox.delete(idx)
             del self.files[idx]
-        self._log("Removidos " + str(len(sel)) + " item(ns).")
+        self._log(f"Removidos {len(sel)} item(ns).")
 
     def move_selection(self, delta: int):
         sel = list(self.listbox.curselection())
@@ -412,12 +437,9 @@ class StitcherGUI(tk.Tk):
             j = i + delta
             if 0 <= j < self.listbox.size():
                 self.files[i], self.files[j] = self.files[j], self.files[i]
-                txt_i = self.listbox.get(i)
-                txt_j = self.listbox.get(j)
-                self.listbox.delete(i)
-                self.listbox.insert(i, txt_j)
-                self.listbox.delete(j)
-                self.listbox.insert(j, txt_i)
+                txt_i, txt_j = self.listbox.get(i), self.listbox.get(j)
+                self.listbox.delete(i); self.listbox.insert(i, txt_j)
+                self.listbox.delete(j); self.listbox.insert(j, txt_i)
         self.listbox.selection_clear(0, tk.END)
         for i in [k + delta for k in sel if 0 <= k + delta < self.listbox.size()]:
             self.listbox.selection_set(i)
@@ -448,26 +470,67 @@ class StitcherGUI(tk.Tk):
             imgs = read_images(self.files)
             key = self.method_key.get()
             fn = METHODS[key]["fn"]
+
+            # Passa try_gpu apenas se o método realmente aceitar
+            kwargs = {}
+            if METHODS.get(key, {}).get("accepts_try_gpu", False):
+                kwargs["try_gpu"] = self.try_gpu.get()
+
             if key == "classic/opencv_stitcher":
                 pano = fn(imgs, modo=self.modo.get(), try_gpu=self.try_gpu.get())
             else:
-                pano = fn(imgs)
+                pano = fn(imgs, **kwargs) if kwargs else fn(imgs)
+
             ts = datetime.now().strftime("%Y%m%d_%H%M%S")
             safe_key = key.replace("/", "-")
-            out_path = self.output_dir / ("pano_" + safe_key + "_" + ts + ".jpg")
+            out_path = self.output_dir / f"pano_{safe_key}_{ts}.jpg"
             ok = cv2.imwrite(str(out_path), pano)
             if not ok:
                 raise RuntimeError("Falha ao salvar a imagem de saída.")
-            # Métricas
+
+            # --- Sempre salvar métricas TXT com mesmo basename ---
+            metrics_txt = out_path.with_suffix(".txt")
+            metrics_data = {"psnr": float("nan"), "ssim": float("nan")}
+            calc_done = False
+
+            # Calcula métricas apenas se a usuária quiser (checkbox) e houver referência;
+            # ainda assim o TXT é sempre criado (com NaN se não calcular).
             if self.do_metrics.get() and self.ref_path.get():
                 try:
-                    m = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
-                    save_metrics_json(self.output_dir / ("metrics_" + safe_key + "_" + ts + ".json"), m)
-                    self._log("Métricas: PSNR=%.3f dB | SSIM=%.4f" % (m.get("psnr", float('nan')), m.get("ssim", float('nan'))))
+                    metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
+                    calc_done = True
                 except Exception as met_err:
                     self._log("Falha nas métricas: " + str(met_err))
+
+            save_metrics_txt(
+                metrics_txt,
+                key,
+                ts,
+                metrics_data,
+                out_path.name,
+                self.ref_path.get() or "(sem referência)"
+            )
+            append_metrics_log(self.output_dir, safe_key, ts, metrics_data, extra={"out": out_path.name})
+
+            if calc_done:
+                self._log(f"Métricas: PSNR={metrics_data.get('psnr', float('nan')):.3f} dB | SSIM={metrics_data.get('ssim', float('nan')):.4f}")
+
             self._log("Concluído: " + str(out_path))
             self._notify_done(out_path)
+
+            # Abrir a pasta de saída automaticamente
+            try:
+                import os, subprocess, platform
+                folder = str(self.output_dir)
+                if platform.system() == "Windows":
+                    os.startfile(folder)  # type: ignore[attr-defined]
+                elif platform.system() == "Darwin":
+                    subprocess.Popen(["open", folder])
+                else:
+                    subprocess.Popen(["xdg-open", folder])
+            except Exception:
+                pass
+
         except Exception as exc:
             msg = str(exc)
             self._log("Erro: " + msg)
@@ -492,24 +555,26 @@ class StitcherGUI(tk.Tk):
         self.log.see(tk.END)
 
     def _notify_done(self, out_path: Path):
-        self.after(0, lambda: messagebox.showinfo("Concluído", "Panorama salvo em:" + str(out_path)))
-
+        self.after(0, lambda: messagebox.showinfo("Concluído", "Panorama salvo em: " + str(out_path)))
 
 # ---------- Métricas ----------
-
 def compute_metrics(ref_path: str, test_img):
     import numpy as np, cv2
     ref = cv2.imread(ref_path)
-    if ref is None: raise RuntimeError("Não consegui ler a referência: " + ref_path)
+    if ref is None:
+        raise RuntimeError("Não consegui ler a referência: " + ref_path)
     if ref.shape[:2] != test_img.shape[:2]:
         ref = cv2.resize(ref, (test_img.shape[1], test_img.shape[0]))
     psnr = float(cv2.PSNR(ref, test_img))
     def _ssim(a,b):
-        a,b=a.astype('float64'),b.astype('float64'); C1=(0.01*255)**2; C2=(0.03*255)**2
-        mu_a,mu_b=a.mean(),b.mean(); va, vb = a.var(), b.var(); cab=((a-mu_a)*(b-mu_b)).mean()
+        a,b = a.astype('float64'), b.astype('float64')
+        C1=(0.01*255)**2; C2=(0.03*255)**2
+        mu_a,mu_b=a.mean(),b.mean(); va, vb = a.var(), b.var()
+        cab=((a-mu_a)*(b-mu_b)).mean()
         return ((2*mu_a*mu_b + C1)*(2*cab + C2))/((mu_a**2 + mu_b**2 + C1)*(va + vb + C2))
-    ssim = float((_ssim(test_img[:,:,0],ref[:,:,0])+_ssim(test_img[:,:,1],ref[:,:,1])+_ssim(test_img[:,:,2],ref[:,:,2]))/3.0)
+    ssim = float((_ssim(test_img[:,:,0],ref[:,:,0]) + _ssim(test_img[:,:,1],ref[:,:,1]) + _ssim(test_img[:,:,2],ref[:,:,2]))/3.0)
     return {"psnr": psnr, "ssim": ssim}
+
 if __name__ == "__main__":
     app = StitcherGUI()
     app.mainloop()

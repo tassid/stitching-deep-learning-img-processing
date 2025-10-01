@@ -1,1 +1,5 @@
 20250930_003742 [classic-opencv_stitcher] PSNR=nan SSIM=nan out=pano_classic-opencv_stitcher_20250930_003742.jpg
+20250930_091757 [classic-opencv_stitcher] PSNR=11.069 SSIM=0.4711 out=pano_classic-opencv_stitcher_20250930_091757.jpg
+20250930_093122 [classic-opencv_stitcher] PSNR=10.906 SSIM=0.3559 out=pano_classic-opencv_stitcher_20250930_093122.jpg
+20250930_093157 [classic-orb_homography] PSNR=12.280 SSIM=0.5105 out=pano_classic-orb_homography_20250930_093157.jpg
+20250930_095015 [deep-loftr] PSNR=12.188 SSIM=0.5389 out=pano_deep-loftr_20250930_095015.jpg

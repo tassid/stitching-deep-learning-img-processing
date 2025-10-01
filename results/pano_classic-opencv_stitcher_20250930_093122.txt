@@ -1,0 +1,6 @@
+timestamp: 20250930_093122
+method: classic/opencv_stitcher
+output: pano_classic-opencv_stitcher_20250930_093122.jpg
+reference: C:/datasets/Dataset for Stitching with Multiple Registrations (2018)/robust_image_stitching_with_multiple_registrations_results/robust_image_stitching_with_multiple_registrations_results/theory_left/ours.png
+psnr_db: 10.906
+ssim: 0.3559

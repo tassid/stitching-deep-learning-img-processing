@@ -55,30 +55,40 @@ def load_from_hf(name: str, split: str, count: int, offset: int, shuffle: bool) 
         sys.exit("Não consegui ler imagens RGB desse dataset/split.")
     return imgs
 
-p = argparse.ArgumentParser()
-p.add_argument("--imgs", nargs="+", help="arquivos locais")
-p.add_argument("--hf", help="ex: LivingOptics/hyperspectral-orchard")
-p.add_argument("--split", default="train")
-p.add_argument("--count", type=int, default=5)
-p.add_argument("--offset", type=int, default=0)
-p.add_argument("--shuffle", action="store_true")
-p.add_argument("--modo", choices=["panorama", "scans"], default="panorama")
-p.add_argument("--try_gpu", action="store_true")
-p.add_argument("--out", default="pano_stitcher.jpg")
-a = p.parse_args()
+# --- API para GUI ---
+def stitch(imgs, try_gpu=False, modo="panorama", **kwargs):
+    """Interface simplificada para a GUI."""
+    st = make_stitcher(modo, try_gpu)
+    status, pano = st.stitch(imgs)
+    if status != cv2.STITCHER_OK:
+        raise RuntimeError(f"Stitching falhou com status {status}")
+    return pano
 
-if not a.imgs and not a.hf:
-    sys.exit("Use --imgs ... ou --hf <dataset>.")
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--imgs", nargs="+", help="arquivos locais")
+    p.add_argument("--hf", help="ex: LivingOptics/hyperspectral-orchard")
+    p.add_argument("--split", default="train")
+    p.add_argument("--count", type=int, default=5)
+    p.add_argument("--offset", type=int, default=0)
+    p.add_argument("--shuffle", action="store_true")
+    p.add_argument("--modo", choices=["panorama", "scans"], default="panorama")
+    p.add_argument("--try_gpu", action="store_true")
+    p.add_argument("--out", default="pano_stitcher.jpg")
+    a = p.parse_args()
 
-imgs = [cv2.imread(x) for x in a.imgs] if a.imgs else load_from_hf(a.hf, a.split, a.count, a.offset, a.shuffle)
-if any(im is None for im in imgs):
-    sys.exit("Falha ao ler alguma imagem.")
+    if not a.imgs and not a.hf:
+        sys.exit("Use --imgs ... ou --hf <dataset>.")
 
-st = make_stitcher(a.modo, a.try_gpu)
-status, pano = st.stitch(imgs)
+    imgs = [cv2.imread(x) for x in a.imgs] if a.imgs else load_from_hf(a.hf, a.split, a.count, a.offset, a.shuffle)
+    if any(im is None for im in imgs):
+        sys.exit("Falha ao ler alguma imagem.")
 
-if status != cv2.STITCHER_OK:
-    sys.exit(f"falhou com status {status}")
+    st = make_stitcher(a.modo, a.try_gpu)
+    status, pano = st.stitch(imgs)
 
-cv2.imwrite(a.out, pano)
-print(f"ok: {a.out}")
+    if status != cv2.STITCHER_OK:
+        sys.exit(f"falhou com status {status}")
+
+    cv2.imwrite(a.out, pano)
+    print(f"ok: {a.out}")

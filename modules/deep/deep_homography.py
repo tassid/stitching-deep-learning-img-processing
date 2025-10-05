@@ -210,6 +210,21 @@ def stitch_deep_homography(imgs: List[np.ndarray], weights: Optional[str], devic
     pano = blend_sequence(warps, masks)
     return pano
 
+# --- API para GUI ---
+def stitch(imgs: List[np.ndarray], device: str = "cpu", try_gpu: bool = False) -> np.ndarray:
+    """Interface simplificada para a GUI (usa fallback SIFT, sem pesos treinados)."""
+    if try_gpu and device == "cpu":
+        try:
+            import torch
+            if torch.cuda.is_available():
+                device = "cuda"
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                device = "mps"
+        except Exception:
+            pass
+    # Usa fallback SIFT já que não temos pesos treinados por padrão
+    return stitch_deep_homography(imgs, weights=None, device=device, fallback="sift")
+
 # ----------------- CLI -----------------
 def cli_main():
     p = argparse.ArgumentParser(prog="deep.deep_homography")

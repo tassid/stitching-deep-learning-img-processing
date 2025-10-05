@@ -90,7 +90,7 @@ def detect_harris(img_bgr: np.ndarray, thresh_alpha: float = 0.04, ksize: int = 
         if len(selected) >= max_kp:
             break
 
-    kps = [cv2.KeyPoint(float(x), float(y), _size=7, response=float(s)) for x, y, s in selected]
+    kps = [cv2.KeyPoint(float(x), float(y), 7.0, response=float(s)) for x, y, s in selected]
     return kps
 
 # ---------------- FAST ----------------
@@ -108,6 +108,114 @@ def detect_fast(img_bgr: np.ndarray, threshold: int = 10, nonmax: bool = True, m
 def draw_keypoints(img_bgr: np.ndarray, kps: List[cv2.KeyPoint], color=(0,255,0)) -> np.ndarray:
     out = img_bgr.copy()
     return cv2.drawKeypoints(out, kps, None, color=color, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+# ---------------- Stitching com Harris/FAST ----------------
+
+def stitch_with_detector(imgs: List[np.ndarray], detector: str = "harris",
+                         ratio: float = 0.75, ransac_thresh: float = 3.0,
+                         min_side: int = 900, max_kp: int = 1000,
+                         alpha: float = 0.04, threshold: int = 10,
+                         nonmax: bool = True) -> np.ndarray:
+    """
+    Stitching usando Harris ou FAST como detector de features.
+    Usa SIFT para descritores e matching.
+    """
+    imgs_r = [resize_min_side(im, min_side) for im in imgs]
+
+    # Inicializar SIFT para descritores
+    sift = cv2.SIFT_create()
+    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
+
+    def match_pair(im_a, im_b):
+        # Detectar keypoints com Harris ou FAST
+        if detector == "harris":
+            kps_a = detect_harris(im_a, thresh_alpha=alpha, max_kp=max_kp)
+            kps_b = detect_harris(im_b, thresh_alpha=alpha, max_kp=max_kp)
+        else:  # FAST
+            kps_a = detect_fast(im_a, threshold=threshold, nonmax=nonmax, max_kp=max_kp)
+            kps_b = detect_fast(im_b, threshold=threshold, nonmax=nonmax, max_kp=max_kp)
+
+        if len(kps_a) < 4 or len(kps_b) < 4:
+            raise RuntimeError(f"Keypoints insuficientes: A={len(kps_a)}, B={len(kps_b)}")
+
+        # Computar descritores SIFT nas posições detectadas
+        gray_a = cv2.cvtColor(im_a, cv2.COLOR_BGR2GRAY)
+        gray_b = cv2.cvtColor(im_b, cv2.COLOR_BGR2GRAY)
+        kps_a, desc_a = sift.compute(gray_a, kps_a)
+        kps_b, desc_b = sift.compute(gray_b, kps_b)
+
+        if desc_a is None or desc_b is None or len(desc_a) < 4 or len(desc_b) < 4:
+            raise RuntimeError("Descritores insuficientes após SIFT.compute()")
+
+        # Matching com ratio test
+        knn = bf.knnMatch(desc_b, desc_a, k=2)
+        good = []
+        for pair in knn:
+            if len(pair) < 2:
+                continue
+            m, n = pair
+            if m.distance < ratio * n.distance:
+                good.append(m)
+
+        if len(good) < 8:
+            raise RuntimeError(f"Correspondências insuficientes: {len(good)}")
+
+        # Estimar homografia
+        pts_b = np.float32([kps_b[m.queryIdx].pt for m in good])
+        pts_a = np.float32([kps_a[m.trainIdx].pt for m in good])
+        H, _ = cv2.findHomography(pts_b, pts_a, cv2.RANSAC, ransac_thresh)
+
+        if H is None:
+            raise RuntimeError("Falha ao estimar homografia (RANSAC)")
+
+        return H
+
+    def warp_merge(base, img, H):
+        h1, w1 = base.shape[:2]
+        h2, w2 = img.shape[:2]
+        corners_img = np.float32([[0,0],[w2,0],[w2,h2],[0,h2]]).reshape(-1,1,2)
+        corners_img_w = cv2.perspectiveTransform(corners_img, H)
+        corners_base = np.float32([[0,0],[w1,0],[w1,h1],[0,h1]]).reshape(-1,1,2)
+        all_pts = np.vstack((corners_img_w, corners_base))
+        xmin, ymin = np.floor(all_pts.min(axis=0).ravel()).astype(int)
+        xmax, ymax = np.ceil(all_pts.max(axis=0).ravel()).astype(int)
+        tx, ty = -xmin, -ymin
+        T = np.array([[1,0,tx],[0,1,ty],[0,0,1]], dtype=float)
+        size = (xmax - xmin, ymax - ymin)
+        base_w = cv2.warpPerspective(base, T, size)
+        img_w = cv2.warpPerspective(img, T @ H, size)
+        mask_b = (base_w.sum(axis=2) > 0).astype("uint8") * 255
+        mask_i = (img_w.sum(axis=2) > 0).astype("uint8") * 255
+        overlap = cv2.bitwise_and(mask_b, mask_i)
+        out = base_w.copy()
+        out[mask_i > 0] = img_w[mask_i > 0]
+        if overlap.any():
+            mix = (base_w.astype(float) + img_w.astype(float)) / 2.0
+            out[overlap > 0] = mix[overlap > 0].astype("uint8")
+        return out
+
+    # Stitching incremental
+    pano = imgs_r[0]
+    for i in range(1, len(imgs_r)):
+        H = match_pair(pano, imgs_r[i])
+        pano = warp_merge(pano, imgs_r[i], H)
+
+    return pano
+
+# ---------------- API para GUI ----------------
+
+def stitch(imgs, try_gpu=False, detector="harris", ratio=0.75, ransac=3.0,
+           min_side=900, max_kp=1000, alpha=0.04, threshold=10,
+           nonmax=True, **kwargs):
+    """
+    Interface simplificada para a GUI.
+    Usa Harris ou FAST como detector + SIFT descritores.
+    """
+    return stitch_with_detector(
+        imgs, detector=detector, ratio=ratio, ransac_thresh=ransac,
+        min_side=min_side, max_kp=max_kp, alpha=alpha,
+        threshold=threshold, nonmax=nonmax
+    )
 
 # ---------------- CLI ----------------
 

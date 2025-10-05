@@ -252,12 +252,21 @@ def stitch_hybrid(imgs: List[np.ndarray], detector_name: str, matcher_name: str,
         warp_mask = (cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)>0).astype(np.uint8)*255
         base_mask = (cv2.cvtColor(base, cv2.COLOR_BGR2GRAY)>0).astype(np.uint8)*255
 
-        canvas = stitch_hybrid_step = hybrid_blend_overlap(
+        canvas = hybrid_blend_overlap(
             base, warp, base_mask, warp_mask,
             w_contrast=w_contrast, w_saturation=w_saturation, w_exposure=w_exposure,
             w_focus=w_focus, focus=focus, levels=levels, ksize=ksize
         )
     return canvas
+
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000, levels=5,
+           w_contrast=1.0, w_saturation=1.0, w_exposure=1.0,
+           w_focus=0.0, focus="lapvar", ksize=3, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_hybrid(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
+                        levels, w_contrast, w_saturation, w_exposure, w_focus, focus, ksize)
 
 # ---------- CLI ----------
 def cli_main():

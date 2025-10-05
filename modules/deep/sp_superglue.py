@@ -1,15 +1,17 @@
 # modules/deep/sp_superglue.py
 """
-SuperPoint + SuperGlue stitching
-- Detecta keypoints e descritores com SuperPoint (Kornia)
-- Faz matching robusto com SuperGlue (Kornia)
+DISK + LightGlue stitching (Kornia 0.8.1+)
+- Detecta keypoints e descritores com DISK (Deep Image Structure Keypoints)
+- Faz matching robusto com LightGlue
 - Estima homografia (USAC_MAGSAC) e faz warping incremental + feather blending
 
+Nota: Substituído SuperPoint+SuperGlue por DISK+LightGlue para compatibilidade com Kornia 0.8.1+
+
 Uso (arquivos locais):
-  python -m modules.deep.sp_superglue --imgs a.jpg b.jpg c.jpg --sp-weights synthetic --sg-weights outdoor --min_side 960 --out pano_sp_sg.jpg
+  python -m modules.deep.sp_superglue --imgs a.jpg b.jpg c.jpg --min_side 960 --out pano_disk_lg.jpg
 
 Uso (Hugging Face):
-  python -m modules.deep.sp_superglue --hf miroslavjaros/Video-To-Dataset-Orchard-Apple --split train --count 24 --offset 300 --min_side 960 --out pano_sp_sg.jpg
+  python -m modules.deep.sp_superglue --hf miroslavjaros/Video-To-Dataset-Orchard-Apple --split train --count 24 --offset 300 --min_side 960 --out pano_disk_lg.jpg
 
 Requisitos:
   pip install opencv-contrib-python torch kornia datasets pillow "huggingface_hub[hf_xet]"
@@ -47,57 +49,100 @@ def load_from_hf(name: str, split: str, count: int, offset: int, shuffle: bool) 
         sys.exit("Não consegui ler imagens RGB desse dataset/split.")
     return imgs
 
-# --------------- SuperPoint + SuperGlue ---------------
+# --------------- DISK + LightGlue ---------------
 def sp_sg_match(im0: np.ndarray, im1: np.ndarray, device: str = "cpu",
                 sp_weights: str = "synthetic", sg_weights: str = "outdoor",
                 keypoint_thresh: float = 0.005, max_kp: int = 4096,
                 match_conf_thresh: float = 0.2) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Usa DISK + LightGlue (disponível no Kornia 0.8.1+)
+    Nota: sp_weights e sg_weights são ignorados (mantidos por compatibilidade)
+    """
     import torch
     import kornia as K
-    from kornia.feature import SuperPoint, SuperGlue, KeypointDetector
+    from kornia.feature import DISK, LightGlueMatcher
+    from kornia.feature.laf import laf_from_center_scale_ori
 
-    # SuperPoint
-    sp = SuperPoint(max_num_keypoints=max_kp, detection_threshold=keypoint_thresh, pretrained=sp_weights).to(device).eval()
-    # SuperGlue
-    sg = SuperGlue(pretrained=sg_weights).to(device).eval()
+    # DISK feature extractor
+    disk = DISK.from_pretrained("depth").to(device).eval()
+    # LightGlue matcher
+    matcher = LightGlueMatcher("disk").to(device).eval()
 
-    def to_tensor_gray(img_bgr: np.ndarray) -> "torch.Tensor":
-        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-        t = K.image_to_tensor(gray, keepdim=True).float() / 255.0   # (1,1,H,W)
+    def to_tensor_rgb(img_bgr: np.ndarray) -> "torch.Tensor":
+        rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        t = K.image_to_tensor(rgb, keepdim=False).float() / 255.0   # (1,3,H,W)
         return t
 
-    t0 = to_tensor_gray(im0).to(device)
-    t1 = to_tensor_gray(im1).to(device)
+    t0 = to_tensor_rgb(im0).to(device)
+    t1 = to_tensor_rgb(im1).to(device)
 
     with torch.no_grad():
-        lafs0, desc0 = sp(t0)  # lafs: (1,N,2,3), desc: (1,N,256)
-        lafs1, desc1 = sp(t1)
-        kpts0 = lafs0[:, :, :, -1].squeeze(0).cpu().numpy()  # (N,2)
-        kpts1 = lafs1[:, :, :, -1].squeeze(0).cpu().numpy()
+        # Extract features with DISK
+        feats0_list = disk(t0, max_kp)
+        feats1_list = disk(t1, max_kp)
 
-        data = {
-            "descriptors0": desc0,
-            "descriptors1": desc1,
-            "keypoints0": lafs0,
-            "keypoints1": lafs1,
-        }
-        out = sg(data)
+        # Validar se detectou features
+        if len(feats0_list) == 0 or len(feats1_list) == 0:
+            return np.empty((0, 2), dtype=np.float32), np.empty((0, 2), dtype=np.float32), np.empty(0, dtype=np.float32)
 
-        # matches0: para cada kp0, índice do kp1 correspondente (ou -1)
-        matches0 = out["matches0"][0].detach().cpu().numpy()
-        conf = out["matching_scores0"][0].detach().cpu().numpy()
+        feats0 = feats0_list[0]  # DISKFeatures object
+        feats1 = feats1_list[0]
 
-    # coletar pares válidos
-    valid = matches0 > -1
+        # Get keypoints and descriptors
+        kpts0 = feats0.keypoints  # (N, 2)
+        kpts1 = feats1.keypoints  # (M, 2)
+        desc0 = feats0.descriptors  # (N, 128)
+        desc1 = feats1.descriptors  # (M, 128)
+
+        # Create LAFs from keypoints (center, scale=1, orientation=0)
+        n0 = kpts0.shape[0]
+        n1 = kpts1.shape[0]
+
+        # Verificar se há keypoints
+        if n0 == 0 or n1 == 0:
+            return np.empty((0, 2), dtype=np.float32), np.empty((0, 2), dtype=np.float32), np.empty(0, dtype=np.float32)
+        lafs0 = laf_from_center_scale_ori(
+            kpts0.unsqueeze(0),  # (1, N, 2)
+            torch.ones(1, n0, 1, 1, device=device),  # scale
+            torch.zeros(1, n0, 1, device=device)  # orientation
+        )  # (1, N, 2, 3)
+        lafs1 = laf_from_center_scale_ori(
+            kpts1.unsqueeze(0),
+            torch.ones(1, n1, 1, 1, device=device),
+            torch.zeros(1, n1, 1, device=device)
+        )
+
+        # Match with LightGlue
+        dists, matches = matcher(
+            desc0.unsqueeze(0), desc1.unsqueeze(0),  # (1, N, 128), (1, M, 128)
+            lafs0, lafs1,
+            hw1=tuple(t0.shape[-2:]), hw2=tuple(t1.shape[-2:])
+        )
+
+        # matches: (1, N) com índices válidos ou -1
+        matches = matches[0].cpu().numpy()  # (N,)
+        dists = dists[0].cpu().numpy()  # (N,)
+
+        # Convert distances to scores (lower distance = higher score)
+        scores = 1.0 / (1.0 + dists)
+
+    # Filter valid matches
+    valid = matches > -1
     if match_conf_thresh is not None and match_conf_thresh > 0:
-        valid = np.logical_and(valid, conf >= match_conf_thresh)
+        valid = np.logical_and(valid, scores >= match_conf_thresh)
 
     idx0 = np.where(valid)[0]
-    idx1 = matches0[valid].astype(int)
 
-    mk0 = kpts0[idx0]
-    mk1 = kpts1[idx1]
-    mconf = conf[idx0]
+    # Check if we have any matches
+    if len(idx0) == 0:
+        # Return empty arrays
+        return np.empty((0, 2), dtype=np.float32), np.empty((0, 2), dtype=np.float32), np.empty(0, dtype=np.float32)
+
+    idx1 = matches[valid].astype(int)
+
+    mk0 = kpts0[idx0].cpu().numpy()
+    mk1 = kpts1[idx1].cpu().numpy()
+    mconf = scores[idx0]
 
     return mk0, mk1, mconf
 
@@ -188,16 +233,37 @@ def stitch_sp_sg(imgs: List[np.ndarray], device: str = "cpu",
                                    sp_weights=sp_weights, sg_weights=sg_weights,
                                    keypoint_thresh=keypoint_thresh, max_kp=max_kp,
                                    match_conf_thresh=match_conf_thresh)
+
+        num_matches = k0.shape[0]
+        if num_matches == 0:
+            raise RuntimeError(f"Nenhum match encontrado entre imagens {i-1} e {i}. Tente: 1) Reduzir match_conf_thresh (atual: {match_conf_thresh}), 2) Aumentar max_kp (atual: {max_kp}), 3) Usar imagens com mais overlap")
+
         if save_matches_dir:
             sp = f"{save_matches_dir}/match_{i-1}_{i}.jpg"
             save_match_vis(imgs_r[i], imgs_r[i-1], k0, k1, sp)
+
         H = estimate_homography(k0, k1, ransac_thresh=ransac_thresh)
         if H is None:
-            raise SystemExit(f"homografia insuficiente no par {i-1}->{i} (matches={k0.shape[0]})")
+            raise RuntimeError(f"Homografia insuficiente no par {i-1}->{i}. Matches encontrados: {num_matches}, mas <4 inliers após RANSAC. Tente aumentar ransac_thresh ou verificar overlap entre imagens.")
         Hs.append((Hs[-1] @ H).astype(np.float32))
     warps, masks, size, T = warp_all_to_canvas(imgs_r, Hs)
     pano = blend_sequence(warps, masks)
     return pano
+
+# --- API para GUI ---
+def stitch(imgs: List[np.ndarray], device: str = "cpu", try_gpu: bool = False) -> np.ndarray:
+    """Interface simplificada para a GUI."""
+    if try_gpu and device == "cpu":
+        try:
+            import torch
+            if torch.cuda.is_available():
+                device = "cuda"
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                device = "mps"
+        except Exception:
+            pass
+    # Usar parâmetros mais permissivos para a GUI
+    return stitch_sp_sg(imgs, device=device, min_side=960, max_kp=2048, match_conf_thresh=0.0, ransac_thresh=5.0)
 
 # --------------- CLI ---------------
 def cli_main():
@@ -234,8 +300,8 @@ def cli_main():
         import os
         os.makedirs(a.save_matches_dir, exist_ok=True)
 
-    pano = stitch_sp_sg(imgs, device=a.device, sp_weights=a["sp_weights"] if isinstance(a,dict) else a.sp_weights,
-                        sg_weights=a["sg_weights"] if isinstance(a,dict) else a.sg_weights,
+    pano = stitch_sp_sg(imgs, device=a.device, sp_weights=a.sp_weights,
+                        sg_weights=a.sg_weights,
                         min_side=a.min_side, keypoint_thresh=a.keypoint_thresh, max_kp=a.max_kp,
                         match_conf_thresh=a.match_conf_thresh, ransac_thresh=a.ransac_thresh,
                         save_matches_dir=a.save_matches_dir)

@@ -154,18 +154,26 @@ def discover_algorithms():
         import modules.classic as classic_pkg
         for info in pkgutil.iter_modules(classic_pkg.__path__):
             name = info.name
-            if name.startswith("__") or name[0].isdigit():
+            if name.startswith("__"):
                 continue
-            add_bridge(f"modules.classic.{name}", f"classic/{name}", "Clássico • " + name.replace("_", " ").title())
+            # Gerar label mais limpo removendo números do início
+            clean_name = name
+            if name[0].isdigit():
+                # Remove "1_" ou "10_" etc do início para o label
+                parts = name.split("_", 1)
+                clean_name = parts[1] if len(parts) > 1 else name
+            add_bridge(f"modules.classic.{name}", f"classic/{name}", "Clássico • " + clean_name.replace("_", " ").title())
     except Exception:
         pass
 
     # Deep
     try:
         import modules.deep as deep_pkg
+        # Lista de módulos que NÃO são para stitching (harmonização/pós-processamento)
+        skip_modules = {"harmonize_cnn", "harmonize_gan"}
         for info in pkgutil.iter_modules(deep_pkg.__path__):
             name = info.name
-            if name.startswith("__"):
+            if name.startswith("__") or name in skip_modules:
                 continue
             add_bridge(f"modules.deep.{name}", f"deep/{name}", "Deep • " + name.replace("_", " ").title())
     except Exception:
@@ -274,13 +282,10 @@ def method_loftr_bridge(imgs, **kwargs):
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
-@register_method("deep/superglue", "Deep • SuperGlue (placeholder)")
-def method_superglue_placeholder(imgs, **kwargs):
-    raise RuntimeError("SuperGlue não está configurado. Integre modules/deep/sp.superglue.py e exponha stitch(imgs).")
-
-@register_method("deep/flow_stitch", "Deep • Optical Flow Stitch (placeholder)")
-def method_flow_placeholder(imgs, **kwargs):
-    raise RuntimeError("Flow Stitch não está configurado. Integre modules/deep/flow_stitch.py e exponha stitch(imgs).")
+# SuperGlue e Flow Stitch agora são descobertos automaticamente via discover_algorithms()
+# Os placeholders abaixo foram removidos pois os módulos reais estão em:
+# - modules/deep/sp_superglue.py (chave: deep/sp_superglue)
+# - modules/deep/flow_stitch.py (chave: deep/flow_stitch)
 
 class StitcherGUI(tk.Tk):
     def __init__(self):
@@ -299,7 +304,15 @@ class StitcherGUI(tk.Tk):
 
         self.modo = tk.StringVar(value="panorama")
         self.try_gpu = tk.BooleanVar(value=False)
-        self.method_key = tk.StringVar(value=list(METHODS.keys())[0])
+
+        # Criar mapeamento label -> key para o dropdown
+        self.label_to_key = {METHODS[k]["label"]: k for k in METHODS}
+        self.key_to_label = {k: METHODS[k]["label"] for k in METHODS}
+
+        # Usar label no dropdown, mas armazenar key internamente
+        first_label = self.key_to_label[list(METHODS.keys())[0]]
+        self.method_label = tk.StringVar(value=first_label)
+
         self.do_metrics = tk.BooleanVar(value=False)
         self.ref_path = tk.StringVar(value="")
         # >>> crie a StringVar ANTES de construir a UI da direita
@@ -341,8 +354,14 @@ class StitcherGUI(tk.Tk):
         meth_row = ttk.Frame(box)
         meth_row.pack(fill=tk.X, pady=(6, 0))
         ttk.Label(meth_row, text="Método:").pack(side=tk.LEFT)
-        values = list(METHODS.keys())
-        self.method_cb = ttk.Combobox(meth_row, textvariable=self.method_key, state="readonly", width=60, values=values)
+        # Ordenar: classics primeiro, depois deep (usando labels, não keys)
+        all_keys = list(METHODS.keys())
+        classic_keys = sorted([k for k in all_keys if k.startswith("classic/")])
+        deep_keys = sorted([k for k in all_keys if k.startswith("deep/")])
+        ordered_keys = classic_keys + deep_keys
+        # Converter keys para labels para exibição
+        values = [self.key_to_label[k] for k in ordered_keys]
+        self.method_cb = ttk.Combobox(meth_row, textvariable=self.method_label, state="readonly", width=60, values=values)
         self.method_cb.pack(side=tk.LEFT, padx=8)
 
         mode_row = ttk.Frame(box)
@@ -376,7 +395,9 @@ class StitcherGUI(tk.Tk):
         act_box = ttk.Frame(right)
         act_box.pack(fill=tk.X, pady=(12, 0))
         self.run_btn = ttk.Button(act_box, text="Executar Stitch", command=self.run_stitch)
-        self.run_btn.pack(side=tk.LEFT)
+        self.run_btn.pack(side=tk.LEFT, padx=(0, 6))
+        self.run_all_btn = ttk.Button(act_box, text="Executar Todos", command=self.run_all_methods)
+        self.run_all_btn.pack(side=tk.LEFT)
         self.progress = ttk.Progressbar(act_box, mode="indeterminate", length=200)
         self.progress.pack(side=tk.LEFT, padx=10)
 
@@ -468,7 +489,9 @@ class StitcherGUI(tk.Tk):
     def _run_stitch_worker(self):
         try:
             imgs = read_images(self.files)
-            key = self.method_key.get()
+            # Converter label para key
+            label = self.method_label.get()
+            key = self.label_to_key[label]
             fn = METHODS[key]["fn"]
 
             # Passa try_gpu apenas se o método realmente aceitar
@@ -538,10 +561,104 @@ class StitcherGUI(tk.Tk):
         finally:
             self._toggle_running(False)
 
+    def run_all_methods(self):
+        if len(self.files) < 2:
+            messagebox.showwarning("Aviso", "Selecione pelo menos 2 imagens.")
+            return
+        t = threading.Thread(target=self._run_all_methods_worker, daemon=True)
+        self._toggle_running(True)
+        t.start()
+
+    def _run_all_methods_worker(self):
+        from datetime import datetime
+        import shutil
+
+        try:
+            # Criar pasta com timestamp
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+            all_folder = self.output_dir / f"all_{ts}"
+            all_folder.mkdir(parents=True, exist_ok=True)
+
+            self._log(f"Executando todos os métodos... Salvando em: {all_folder.name}")
+
+            imgs = read_images(self.files)
+
+            # Ordenar métodos: classics primeiro, depois deep
+            all_keys = list(METHODS.keys())
+            classic_keys = sorted([k for k in all_keys if k.startswith("classic/")])
+            deep_keys = sorted([k for k in all_keys if k.startswith("deep/")])
+            ordered_keys = classic_keys + deep_keys
+
+            total = len(ordered_keys)
+            success_count = 0
+            error_count = 0
+
+            for idx, key in enumerate(ordered_keys, 1):
+                method_label = METHODS[key]["label"]
+                self._log(f"[{idx}/{total}] Executando: {method_label}")
+
+                try:
+                    fn = METHODS[key]["fn"]
+
+                    # Passa try_gpu apenas se o método realmente aceitar
+                    kwargs = {}
+                    if METHODS.get(key, {}).get("accepts_try_gpu", False):
+                        kwargs["try_gpu"] = self.try_gpu.get()
+
+                    if key == "classic/opencv_stitcher":
+                        pano = fn(imgs, modo=self.modo.get(), try_gpu=self.try_gpu.get())
+                    else:
+                        pano = fn(imgs, **kwargs) if kwargs else fn(imgs)
+
+                    # Salvar resultado
+                    safe_key = key.replace("/", "-")
+                    out_path = all_folder / f"pano_{safe_key}.jpg"
+                    ok = cv2.imwrite(str(out_path), pano)
+                    if not ok:
+                        raise RuntimeError("Falha ao salvar a imagem de saída.")
+
+                    self._log(f"  ✓ Concluído: {out_path.name}")
+                    success_count += 1
+
+                except Exception as e:
+                    error_msg = str(e).split('\n')[0][:100]  # Primeira linha, até 100 chars
+                    self._log(f"  ✗ Erro: {error_msg}")
+                    error_count += 1
+
+            # Resumo final
+            self._log(f"\n{'='*50}")
+            self._log(f"Concluído! Sucessos: {success_count}/{total}, Erros: {error_count}/{total}")
+            self._log(f"Resultados salvos em: {all_folder}")
+            self._log(f"{'='*50}")
+
+            # Abrir a pasta de saída automaticamente
+            try:
+                import os, subprocess, platform
+                folder = str(all_folder)
+                if platform.system() == "Windows":
+                    os.startfile(folder)  # type: ignore[attr-defined]
+                elif platform.system() == "Darwin":
+                    subprocess.Popen(["open", folder])
+                else:
+                    subprocess.Popen(["xdg-open", folder])
+            except Exception:
+                pass
+
+            self.after(0, lambda: messagebox.showinfo("Executar Todos",
+                f"Concluído!\n\nSucessos: {success_count}/{total}\nErros: {error_count}/{total}\n\nResultados em: {all_folder.name}"))
+
+        except Exception as exc:
+            msg = str(exc)
+            self._log("Erro fatal: " + msg)
+            self.after(0, lambda m=msg: messagebox.showerror("Erro ao executar todos", m))
+        finally:
+            self._toggle_running(False)
+
     # ---------- Utils ----------
     def _toggle_running(self, running: bool):
         def set_state():
             self.run_btn.config(state=(tk.DISABLED if running else tk.NORMAL))
+            self.run_all_btn.config(state=(tk.DISABLED if running else tk.NORMAL))
             if running:
                 self.progress.start(10)
             else:

@@ -219,6 +219,12 @@ def stitch_laplacian(imgs: List[np.ndarray], detector_name: str, matcher_name: s
         canvas = laplacian_blend_overlap(base, warp, base_mask, warp_mask, levels=levels)
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000, levels=5, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_laplacian(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters, levels)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.blend_laplacian")

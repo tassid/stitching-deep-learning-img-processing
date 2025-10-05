@@ -230,6 +230,14 @@ def stitch_multifocal(imgs: List[np.ndarray], detector_name: str, matcher_name: 
                                          levels=levels, method=focus, ksize=ksize)
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000,
+           levels=5, focus="lapvar", ksize=3, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_multifocal(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
+                             levels, focus, ksize)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.11_blend_multifocal")

@@ -129,6 +129,11 @@ def stitch_ecc(imgs: List[np.ndarray], warp_mode: str, min_side: int, iters: int
         gray_c = cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, warp_mode="affine", min_side=900, iters=300, eps=1e-6, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_ecc(imgs, warp_mode=warp_mode, min_side=min_side, iters=iters, eps=eps)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.ecc_alignment")

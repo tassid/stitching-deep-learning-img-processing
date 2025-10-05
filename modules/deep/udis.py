@@ -103,8 +103,9 @@ class ResidualFlowNet:
         """Treina rapidamente para minimizar diferença entre im_warp (a ser ajustada) e im_ref (alvo)."""
         import torch
         self.model.train()
-        t_w = torch.from_numpy(im_warp[:, :, ::-1].transpose(2,0,1)).float()[None]/255.0  # BGR->RGB
-        t_r = torch.from_numpy(im_ref [:, :, ::-1].transpose(2,0,1)).float()[None]/255.0
+        # .copy() evita negative stride
+        t_w = torch.from_numpy(im_warp[:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0  # BGR->RGB
+        t_r = torch.from_numpy(im_ref [:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0
         x = torch.cat([t_w, t_r], dim=1).to(self.device)  # (1,6,H,W)
         grid_y, grid_x = torch.meshgrid(torch.arange(x.shape[2]), torch.arange(x.shape[3]), indexing='ij')
         grid = torch.stack([grid_x, grid_y], dim=-1).float().to(self.device)  # (H,W,2)
@@ -191,9 +192,10 @@ def blend_sequence(warps: List[np.ndarray], masks: List[np.ndarray]) -> np.ndarr
 # ----------------- Pipeline -----------------
 def stitch_udis(imgs: List[np.ndarray], steps: int = 200, lr: float = 1e-3,
                 min_side: int = 960, lam_smooth: float = 0.1,
-                save_debug: Optional[str] = None) -> np.ndarray:
+                save_debug: Optional[str] = None, device: str = "cpu") -> np.ndarray:
     import torch
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if device == "cpu":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
     imgs_r = [resize_min_side(im, min_side) for im in imgs]
 
     Hs = [np.eye(3, dtype=np.float32)]
@@ -214,6 +216,7 @@ def stitch_udis(imgs: List[np.ndarray], steps: int = 200, lr: float = 1e-3,
         # compor transformações globais via H0 (geometria global)
         Hs.append((Hs[-1] @ H0).astype(np.float32))
         if save_debug:
+            import os
             os.makedirs(save_debug, exist_ok=True)
             fine = warp_with_flow(coarse, flow)
             cv2.imwrite(f"{save_debug}/coarse_{i-1}_{i}.jpg", coarse)
@@ -232,6 +235,21 @@ def stitch_udis(imgs: List[np.ndarray], steps: int = 200, lr: float = 1e-3,
 
     pano = blend_sequence(warps, masks)
     return pano
+
+# --- API para GUI ---
+def stitch(imgs: List[np.ndarray], device: str = "cpu", try_gpu: bool = False) -> np.ndarray:
+    """Interface simplificada para a GUI."""
+    if try_gpu and device == "cpu":
+        try:
+            import torch
+            if torch.cuda.is_available():
+                device = "cuda"
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                device = "mps"
+        except Exception:
+            pass
+    # Usa menos passos para ser mais rápido na GUI
+    return stitch_udis(imgs, steps=100, device=device)
 
 # ----------------- CLI -----------------
 def cli_main():

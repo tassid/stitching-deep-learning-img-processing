@@ -123,6 +123,12 @@ def stitch_sequence(imgs: List[np.ndarray], ratio: float, min_side: int):
     return canvas
 
 
+# ---- API para GUI ----
+
+def stitch(imgs, try_gpu=False, ratio=0.75, min_side=900, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_sequence(imgs, ratio=ratio, min_side=min_side)
+
 # ---- CLI ----
 
 def cli_main():

@@ -155,6 +155,12 @@ def stitch_exposure(imgs: List[np.ndarray], detector_name: str, matcher_name: st
         canvas = exposure_compensate_pair(base, warp, base_mask, warp_mask, comp_type=comp_type)
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000, comp_type="gain_blocks", **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_exposure(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters, comp_type)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.exposure_comp_only")

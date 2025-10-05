@@ -155,6 +155,14 @@ def stitch_mertens(imgs: List[np.ndarray], detector_name: str, matcher_name: str
         )
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000,
+           w_contrast=1.0, w_saturation=1.0, w_exposure=1.0, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_mertens(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
+                          w_contrast, w_saturation, w_exposure)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.blend_exposure")

@@ -127,7 +127,7 @@ def warp_and_blend(canvas, cur, H, dilate=3):
     return np.clip(out,0,255).astype(np.uint8)
 
 # ---------- pipeline ----------
-def stitch(imgs: List[np.ndarray], detector_name: str, matcher_name: str, ratio: float, ransac: float,
+def stitch_features(imgs: List[np.ndarray], detector_name: str, matcher_name: str, ratio: float, ransac: float,
            conf: float, min_side: int, maxIters: int):
     det = build_detector(detector_name)
     mat = build_matcher(matcher_name, detector_name)
@@ -140,6 +140,12 @@ def stitch(imgs: List[np.ndarray], detector_name: str, matcher_name: str, ratio:
             raise SystemExit(f"homografia insuficiente na imagem {i} (matches={len(good)})")
         canvas = warp_and_blend(canvas, cur, H)
     return canvas
+
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_features(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters)
 
 # ---------- CLI ----------
 def cli_main():
@@ -169,7 +175,7 @@ def cli_main():
     if any(im is None for im in imgs):
         sys.exit("Falha ao ler alguma imagem.")
 
-    pano = stitch(imgs, a.detector, a.matcher, a.ratio, a.ransac, a.conf, a.min_side, a.maxIters)
+    pano = stitch_features(imgs, a.detector, a.matcher, a.ratio, a.ransac, a.conf, a.min_side, a.maxIters)
     cv2.imwrite(a.out, pano)
     print(f"ok: {a.out}")
     return 0

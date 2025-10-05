@@ -67,11 +67,11 @@ def load_model(model_name: str = "raft", device: str = "cpu"):
     if model_name == "raft":
         # RAFT via torch.hub (princeton-vl/RAFT). Precisa internet na 1ª vez
         try:
-            raft = torch.hub.load('princeton-vl/RAFT', 'raft_large', pretrained=True)
+            raft = torch.hub.load('princeton-vl/RAFT', 'raft_large', pretrained=True, source='github', force_reload=False, trust_repo=True)
             raft = raft.to(device).eval()
             return ("raft", raft)
         except Exception as e:
-            raise RuntimeError(f"Falha ao carregar RAFT via torch.hub: {e}")
+            raise RuntimeError(f"Falha ao carregar RAFT via torch.hub: {e}\n\nDica: Flow Stitch requer download do modelo RAFT (primeira vez). Verifique conexão com internet.")
     elif model_name == "pwc":
         try:
             # Exemplo usando 'sniklaus/pytorch-pwc' (interface difere; código abaixo é ilustrativo).
@@ -89,7 +89,8 @@ def flow_raft(model, im0: np.ndarray, im1: np.ndarray, device: str = "cpu") -> n
     import torch.nn.functional as F
 
     def prep(img):
-        t = torch.from_numpy(img[:, :, ::-1].transpose(2,0,1)).float()[None]/255.0  # BGR->RGB, (1,3,H,W)
+        # .copy() evita negative stride
+        t = torch.from_numpy(img[:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0  # BGR->RGB, (1,3,H,W)
         return t.to(device)
 
     t0 = prep(im0); t1 = prep(im1)
@@ -181,6 +182,20 @@ def stitch_flow(imgs: List[np.ndarray], model_name: str = "raft", device: str = 
     warps, masks = warp_all_to_canvas(imgs_r, Hs)
     pano = blend_sequence(warps, masks)
     return pano
+
+# --- API para GUI ---
+def stitch(imgs: List[np.ndarray], device: str = "cpu", try_gpu: bool = False) -> np.ndarray:
+    """Interface simplificada para a GUI."""
+    if try_gpu and device == "cpu":
+        try:
+            import torch
+            if torch.cuda.is_available():
+                device = "cuda"
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                device = "mps"
+        except Exception:
+            pass
+    return stitch_flow(imgs, model_name="raft", device=device)
 
 # -------- CLI --------
 def cli_main():

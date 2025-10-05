@@ -164,6 +164,12 @@ def stitch_poisson(imgs: List[np.ndarray], detector_name: str, matcher_name: str
         canvas = poisson_blend_overlap(base, warp, base_mask, warp_mask, mode=mode, blur=blur)
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000, mode="mixed", blur=7, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_poisson(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters, mode, blur)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.10_blend_poisson")

@@ -119,6 +119,11 @@ def apply_exposure_comp(corners, images, masks):
     comp = cv2.detail.ExposureCompensator_createDefault(cv2.detail.ExposureCompensator_GAIN_BLOCKS)
     comp.feed(corners, images, masks)
     for i in range(len(images)):
+        # Garantir que a imagem seja CV_8UC3
+        if images[i].dtype != np.uint8:
+            images[i] = np.clip(images[i], 0, 255).astype(np.uint8)
+        if len(images[i].shape) == 2:
+            images[i] = cv2.cvtColor(images[i], cv2.COLOR_GRAY2BGR)
         comp.apply(i, corners[i], images[i], masks[i])
 
 def multiband_blend_pair(corner, size, images, masks, num_bands=5):
@@ -202,6 +207,14 @@ def stitch_seams(imgs: List[np.ndarray], detector_name: str, matcher_name: str, 
         canvas = result
 
     return canvas
+
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000,
+           seam="dp", bands=5, **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_seams(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
+                        seam, bands)
 
 # ---------- CLI ----------
 def cli_main():

@@ -203,6 +203,14 @@ def stitch_wavelet(imgs: List[np.ndarray], detector_name: str, matcher_name: str
         )
     return canvas
 
+# ---------- API para GUI ----------
+def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
+           ransac=3.0, conf=0.999, min_side=900, maxIters=20000,
+           wavelet="db2", levels=3, rule="max", **kwargs):
+    """Interface simplificada para a GUI."""
+    return stitch_wavelet(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
+                          wavelet, levels, rule)
+
 # ---------- CLI ----------
 def cli_main():
     p = argparse.ArgumentParser(prog="classic.blend_wavelet")

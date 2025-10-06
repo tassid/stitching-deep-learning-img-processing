@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(timeout:*)",
+      "Bash(python:*)",
+      "Bash(move sp_superglue.py sp.superglue.py)",
+      "Bash(dir \"C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\" /s /b)",
+      "Bash(findstr:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

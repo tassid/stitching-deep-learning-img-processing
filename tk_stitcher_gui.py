@@ -4,8 +4,10 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from pathlib import Path
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 import json
+import time
+from PIL import Image, ImageTk
 
 # ===== Dependências =====
 try:
@@ -16,6 +18,34 @@ except Exception as err:
     raise
 
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"}
+
+# ===== Tooltip Helper =====
+class ToolTip:
+    """Cria tooltips para widgets"""
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tooltip = None
+        self.widget.bind("<Enter>", self.show_tooltip)
+        self.widget.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event=None):
+        x, y, _, _ = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 25
+
+        self.tooltip = tk.Toplevel(self.widget)
+        self.tooltip.wm_overrideredirect(True)
+        self.tooltip.wm_geometry(f"+{x}+{y}")
+
+        label = tk.Label(self.tooltip, text=self.text, background="#ffffe0",
+                        relief=tk.SOLID, borderwidth=1, font=("Arial", 9))
+        label.pack()
+
+    def hide_tooltip(self, event=None):
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
 
 # OpenCV constants (compat)
 ST_OK = getattr(cv2, "STITCHER_OK", 0)
@@ -84,9 +114,33 @@ def append_metrics_log(output_dir: Path, key: str, ts: str, metrics: dict, extra
 # ===== Registry de métodos =====
 METHODS = {}
 
-def register_method(key, label):
+# Descrições dos métodos para tooltips
+METHOD_DESCRIPTIONS = {
+    "classic/1_stitcher_basico": "SIFT + homografia simples. Base sólida e rápida.",
+    "classic/2_manual_sift_ransac_feather": "SIFT manual com feather blending suave.",
+    "classic/3_features_homography": "Features clássicos (SIFT/ORB) com múltiplas opções.",
+    "classic/4_blend_exposure": "Feather blend suave baseado em distância. Natural e rápido.",
+    "classic/5_blend_wavelet": "Fusão por wavelets (Daubechies). Preserva detalhes finos.",
+    "classic/6_seams_exposure_multiband": "Graph-cut seams + multiband blending. Resultado profissional.",
+    "classic/7_detectors_harris_fast": "Detectores de cantos Harris/FAST. Leve e rápido.",
+    "classic/8_blend_laplacian": "Pirâmide Laplaciana para blend multi-escala. Suave e natural.",
+    "classic/9_exposure_comp_only": "Compensação de exposição + feather. Remove diferenças de iluminação.",
+    "classic/10_blend_poisson": "Seamless cloning de Poisson nas áreas de overlap. Ótimo para remover costuras.",
+    "classic/11_blend_multifocal": "Blend baseado em foco. Combina áreas nítidas de múltiplas imagens.",
+    "classic/12_blend_hybrid": "Combina contraste, saturação e exposição. Flexível e personalizável.",
+    "classic/13_ecc_alignment": "Enhanced Correlation Coefficient para alinhamento preciso.",
+    "classic/opencv_stitcher": "Stitcher oficial do OpenCV com auto-detecção. Rápido e confiável.",
+    "classic/orb_homography": "Features ORB + RANSAC. Bom para imagens com pouca textura.",
+    "deep/deep_homography": "CNN para estimativa de homografia. Robusto a grandes deslocamentos.",
+    "deep/flow_stitch": "SIFT robusto com fallback. Confiável para panoramas gerais.",
+    "deep/loftr": "Detector-free matching. Excelente para pares com pouca textura.",
+    "deep/sp_superglue": "SIFT com blend adaptativo. Robusto e versátil.",
+    "deep/udis": "SIFT simplificado. Rápido e eficiente.",
+}
+
+def register_method(key, label, description=""):
     def deco(fn):
-        METHODS[key] = {"label": label, "fn": fn, "accepts_try_gpu": True}
+        METHODS[key] = {"label": label, "fn": fn, "accepts_try_gpu": True, "description": description}
         return fn
     return deco
 
@@ -318,8 +372,26 @@ class StitcherGUI(tk.Tk):
         # >>> crie a StringVar ANTES de construir a UI da direita
         self.out_dir_var = tk.StringVar(value=str(self.output_dir))
 
+        # Novas variáveis para melhorias
+        self.last_result_path: Optional[Path] = None
+        self.execution_start_time: Optional[float] = None
+        self.thumbnails = {}  # Cache de thumbnails
+        self.progress_var = tk.IntVar(value=0)
+        self.status_var = tk.StringVar(value="Pronto")
+        self.time_var = tk.StringVar(value="--:--")
+        self.presets = {}  # Presets salvos
+        self.history = []  # Histórico de execuções
+
         self._build_left()
         self._build_right()
+        self._build_status_bar()
+        self._setup_shortcuts()
+        self._setup_drag_drop()
+        self._update_status()
+
+        # Carregar presets e histórico
+        self._load_presets()
+        self._load_history()
 
     # ---------- UI ----------
     def _build_left(self):
@@ -338,11 +410,21 @@ class StitcherGUI(tk.Tk):
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, pady=(8, 0))
         yscroll.pack(side=tk.LEFT, fill=tk.Y, pady=(8, 0))
 
+        # Contador de imagens
+        self.img_count_label = ttk.Label(left, text="0 imagens", font=("", 9, "italic"))
+        self.img_count_label.pack(anchor=tk.W, pady=(4, 0))
+
         sort_bar = ttk.Frame(left)
         sort_bar.pack(fill=tk.X, pady=6)
         ttk.Button(sort_bar, text="▲ Subir", command=lambda: self.move_selection(-1)).pack(side=tk.LEFT)
         ttk.Button(sort_bar, text="▼ Descer", command=lambda: self.move_selection(1)).pack(side=tk.LEFT, padx=6)
         ttk.Button(sort_bar, text="Remover selecionados", command=self.remove_selected).pack(side=tk.LEFT)
+
+        # Preview da primeira imagem
+        preview_frame = ttk.LabelFrame(left, text="Preview")
+        preview_frame.pack(fill=tk.X, pady=6)
+        self.preview_label = ttk.Label(preview_frame, text="Selecione imagens...", anchor=tk.CENTER)
+        self.preview_label.pack(pady=10, fill=tk.BOTH, expand=True)
 
     def _build_right(self):
         right = ttk.Frame(self)
@@ -363,6 +445,7 @@ class StitcherGUI(tk.Tk):
         values = [self.key_to_label[k] for k in ordered_keys]
         self.method_cb = ttk.Combobox(meth_row, textvariable=self.method_label, state="readonly", width=60, values=values)
         self.method_cb.pack(side=tk.LEFT, padx=8)
+        self.method_cb.bind("<<ComboboxSelected>>", self._on_method_change)
 
         mode_row = ttk.Frame(box)
         mode_row.pack(fill=tk.X, pady=(6, 0))
@@ -373,6 +456,14 @@ class StitcherGUI(tk.Tk):
         gpu_row = ttk.Frame(box)
         gpu_row.pack(fill=tk.X, pady=6)
         ttk.Checkbutton(gpu_row, text="Tentar GPU (Deep/LoFTR)", variable=self.try_gpu).pack(side=tk.LEFT)
+
+        # Presets
+        preset_box = ttk.LabelFrame(right, text="Presets")
+        preset_box.pack(fill=tk.X, pady=(10, 0))
+        preset_row1 = ttk.Frame(preset_box)
+        preset_row1.pack(fill=tk.X, pady=6)
+        ttk.Button(preset_row1, text="💾 Salvar Preset", command=self.save_preset).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(preset_row1, text="📂 Carregar Preset", command=self.load_preset).pack(side=tk.LEFT)
 
         met_box = ttk.LabelFrame(right, text="Métricas (opcional)")
         met_box.pack(fill=tk.X, pady=(10, 0))
@@ -394,12 +485,30 @@ class StitcherGUI(tk.Tk):
 
         act_box = ttk.Frame(right)
         act_box.pack(fill=tk.X, pady=(12, 0))
-        self.run_btn = ttk.Button(act_box, text="Executar Stitch", command=self.run_stitch)
-        self.run_btn.pack(side=tk.LEFT, padx=(0, 6))
-        self.run_all_btn = ttk.Button(act_box, text="Executar Todos", command=self.run_all_methods)
-        self.run_all_btn.pack(side=tk.LEFT)
-        self.progress = ttk.Progressbar(act_box, mode="indeterminate", length=200)
-        self.progress.pack(side=tk.LEFT, padx=10)
+        self.run_btn = ttk.Button(act_box, text="▶ Executar", command=self.run_stitch)
+        self.run_btn.pack(side=tk.LEFT, padx=(0, 4))
+        self.run_all_btn = ttk.Button(act_box, text="▶▶ Todos", command=self.run_all_methods)
+        self.run_all_btn.pack(side=tk.LEFT, padx=(0, 4))
+        self.rerun_btn = ttk.Button(act_box, text="🔄 Re-executar", command=self.rerun_last, state=tk.DISABLED)
+        self.rerun_btn.pack(side=tk.LEFT, padx=(0, 4))
+        self.open_result_btn = ttk.Button(act_box, text="🖼 Abrir", command=self.open_result, state=tk.DISABLED)
+        self.open_result_btn.pack(side=tk.LEFT)
+
+        # Botões de utilidades
+        util_box = ttk.Frame(right)
+        util_box.pack(fill=tk.X, pady=(6, 0))
+        ttk.Button(util_box, text="📊 Histórico", command=self.show_history, width=12).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(util_box, text="📄 Relatório", command=self.export_batch_report, width=12).pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Button(util_box, text="❓ Ajuda", command=self.show_help, width=12).pack(side=tk.LEFT)
+
+        # Status e progresso em nova linha
+        status_box = ttk.Frame(right)
+        status_box.pack(fill=tk.X, pady=(6, 0))
+        self.progress = ttk.Progressbar(status_box, mode="determinate", maximum=100, length=300)
+        self.progress.pack(side=tk.LEFT, padx=(0, 8))
+        self.progress_label = ttk.Label(status_box, text="0%", width=4)
+        self.progress_label.pack(side=tk.LEFT, padx=(0, 4))
+        ttk.Label(status_box, textvariable=self.time_var, width=8).pack(side=tk.LEFT)
 
         log_box = ttk.LabelFrame(right, text="Log")
         log_box.pack(fill=tk.BOTH, expand=True, pady=(12, 0))
@@ -435,11 +544,15 @@ class StitcherGUI(tk.Tk):
                 self.listbox.insert(tk.END, str(p))
                 add += 1
         self._log(f"Adicionados {add} arquivo(s). Total: {len(self.files)}")
+        self._update_status()
+        self._show_preview()
 
     def clear_files(self):
         self.files.clear()
         self.listbox.delete(0, tk.END)
         self._log("Lista limpa.")
+        self._update_status()
+        self._show_preview()
 
     def remove_selected(self):
         sel = list(self.listbox.curselection())
@@ -449,6 +562,8 @@ class StitcherGUI(tk.Tk):
             self.listbox.delete(idx)
             del self.files[idx]
         self._log(f"Removidos {len(sel)} item(ns).")
+        self._update_status()
+        self._show_preview()
 
     def move_selection(self, delta: int):
         sel = list(self.listbox.curselection())
@@ -488,6 +603,10 @@ class StitcherGUI(tk.Tk):
 
     def _run_stitch_worker(self):
         try:
+            # Iniciar timer
+            self.execution_start_time = time.time()
+            self._update_timer()
+
             imgs = read_images(self.files)
             # Converter label para key
             label = self.method_label.get()
@@ -518,12 +637,22 @@ class StitcherGUI(tk.Tk):
 
             # Calcula métricas apenas se a usuária quiser (checkbox) e houver referência;
             # ainda assim o TXT é sempre criado (com NaN se não calcular).
-            if self.do_metrics.get() and self.ref_path.get():
-                try:
-                    metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
-                    calc_done = True
-                except Exception as met_err:
-                    self._log("Falha nas métricas: " + str(met_err))
+            if self.do_metrics.get():
+                if self.ref_path.get():
+                    try:
+                        self._log("📊 Calculando métricas vs referência...")
+                        metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
+                        calc_done = True
+                        self._log(f"✅ Métricas calculadas: PSNR={metrics_data.get('psnr', float('nan')):.3f} dB | SSIM={metrics_data.get('ssim', float('nan')):.4f}")
+                    except Exception as met_err:
+                        self._log(f"❌ Falha nas métricas: {str(met_err)}")
+                        self.after(0, lambda: messagebox.showwarning("Erro nas Métricas",
+                            f"Não foi possível calcular métricas:\n{str(met_err)}\n\nVerifique se a imagem de referência existe e é válida."))
+                else:
+                    self._log("⚠️  Checkbox de métricas marcado, mas nenhuma referência selecionada!")
+                    self.after(0, lambda: messagebox.showwarning("Referência Necessária",
+                        "Para calcular métricas, selecione uma imagem de referência (ground truth).\n\n"
+                        "Clique em 'Escolher...' na seção 'Métricas (opcional)'."))
 
             save_metrics_txt(
                 metrics_txt,
@@ -535,10 +664,17 @@ class StitcherGUI(tk.Tk):
             )
             append_metrics_log(self.output_dir, safe_key, ts, metrics_data, extra={"out": out_path.name})
 
-            if calc_done:
-                self._log(f"Métricas: PSNR={metrics_data.get('psnr', float('nan')):.3f} dB | SSIM={metrics_data.get('ssim', float('nan')):.4f}")
+            # Salvar último resultado e habilitar botão
+            self.last_result_path = out_path
+            self.after(0, lambda: self.open_result_btn.config(state=tk.NORMAL))
 
-            self._log("Concluído: " + str(out_path))
+            # Calcular tempo total
+            elapsed = time.time() - self.execution_start_time if self.execution_start_time else 0
+            self._log(f"Concluído em {elapsed:.1f}s: {out_path.name}")
+
+            # Salvar no histórico
+            self._save_to_history(key, elapsed, True, str(out_path))
+
             self._notify_done(out_path)
 
             # Abrir a pasta de saída automaticamente
@@ -557,8 +693,17 @@ class StitcherGUI(tk.Tk):
         except Exception as exc:
             msg = str(exc)
             self._log("Erro: " + msg)
+
+            # Salvar erro no histórico
+            label = self.method_label.get()
+            key = self.label_to_key.get(label, "unknown")
+            elapsed = time.time() - self.execution_start_time if self.execution_start_time else 0
+            self._save_to_history(key, elapsed, False, "")
+
             self.after(0, lambda m=msg: messagebox.showerror("Erro no stitch", m))
         finally:
+            # Parar timer
+            self.execution_start_time = None
             self._toggle_running(False)
 
     def run_all_methods(self):
@@ -572,6 +717,7 @@ class StitcherGUI(tk.Tk):
     def _run_all_methods_worker(self):
         from datetime import datetime
         import shutil
+        import pandas as pd
 
         try:
             # Criar pasta com timestamp
@@ -581,6 +727,14 @@ class StitcherGUI(tk.Tk):
 
             self._log(f"Executando todos os métodos... Salvando em: {all_folder.name}")
 
+            # Verificar se há imagem de referência
+            has_reference = bool(self.ref_path.get())
+            if has_reference:
+                self._log(f"Imagem de referência: {Path(self.ref_path.get()).name}")
+                self._log("Métricas serão calculadas automaticamente para todos os métodos!")
+            else:
+                self._log("AVISO: Sem imagem de referência. Métricas PSNR/SSIM não serão calculadas.")
+
             imgs = read_images(self.files)
 
             # Ordenar métodos: classics primeiro, depois deep
@@ -589,26 +743,86 @@ class StitcherGUI(tk.Tk):
             deep_keys = sorted([k for k in all_keys if k.startswith("deep/")])
             ordered_keys = classic_keys + deep_keys
 
+            # Todos os métodos corrigidos - não precisamos pular nenhum
+            skip_methods = set()
+            ordered_keys = [k for k in ordered_keys if k not in skip_methods]
+
             total = len(ordered_keys)
             success_count = 0
             error_count = 0
+            skipped_count = len(skip_methods)
+
+            # Lista para armazenar resultados das métricas
+            resultados_metricas = []
 
             for idx, key in enumerate(ordered_keys, 1):
                 method_label = METHODS[key]["label"]
-                self._log(f"[{idx}/{total}] Executando: {method_label}")
+                progress = int((idx / total) * 100)
+                self.after(0, lambda p=progress: self.progress.config(value=p))
+                self.after(0, lambda p=progress: self.progress_label.config(text=f"{p}%"))
+                self._log(f"[{idx}/{total}] ({progress}%) Executando: {method_label}")
+
+                tempo_inicio = time.time()
+                resultado_metodo = {
+                    'metodo': key.replace("/", "-"),
+                    'label': method_label,
+                    'tempo_segundos': None,
+                    'psnr_db': None,
+                    'ssim': None,
+                    'entropia': None,
+                    'nitidez': None,
+                    'status': 'erro',
+                    'arquivo': None,
+                    'erro': None
+                }
 
                 try:
-                    fn = METHODS[key]["fn"]
+                    import signal
+                    import multiprocessing
+                    from multiprocessing import Process, Queue
 
-                    # Passa try_gpu apenas se o método realmente aceitar
-                    kwargs = {}
-                    if METHODS.get(key, {}).get("accepts_try_gpu", False):
-                        kwargs["try_gpu"] = self.try_gpu.get()
+                    def run_method_with_timeout(imgs, key, modo, try_gpu_val, result_queue):
+                        """Executa método em processo separado"""
+                        try:
+                            fn = METHODS[key]["fn"]
+                            kwargs = {}
+                            if METHODS.get(key, {}).get("accepts_try_gpu", False):
+                                kwargs["try_gpu"] = try_gpu_val
 
-                    if key == "classic/opencv_stitcher":
-                        pano = fn(imgs, modo=self.modo.get(), try_gpu=self.try_gpu.get())
-                    else:
-                        pano = fn(imgs, **kwargs) if kwargs else fn(imgs)
+                            if key == "classic/opencv_stitcher":
+                                pano = fn(imgs, modo=modo, try_gpu=try_gpu_val)
+                            else:
+                                pano = fn(imgs, **kwargs) if kwargs else fn(imgs)
+
+                            result_queue.put(("success", pano))
+                        except Exception as e:
+                            result_queue.put(("error", str(e)))
+
+                    # Timeout de 120 segundos por método
+                    timeout = 120
+                    result_queue = Queue()
+
+                    # Executar em thread (Windows não suporta bem multiprocessing aqui)
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        fn = METHODS[key]["fn"]
+                        kwargs = {}
+                        if METHODS.get(key, {}).get("accepts_try_gpu", False):
+                            kwargs["try_gpu"] = self.try_gpu.get()
+
+                        if key == "classic/opencv_stitcher":
+                            future = executor.submit(fn, imgs, modo=self.modo.get(), try_gpu=self.try_gpu.get())
+                        else:
+                            future = executor.submit(fn, imgs, **kwargs) if kwargs else executor.submit(fn, imgs)
+
+                        try:
+                            pano = future.result(timeout=timeout)
+                        except concurrent.futures.TimeoutError:
+                            raise RuntimeError(f"Timeout ({timeout}s excedido)")
+
+                    # Calcular tempo
+                    tempo_total = time.time() - tempo_inicio
+                    resultado_metodo['tempo_segundos'] = tempo_total
 
                     # Salvar resultado
                     safe_key = key.replace("/", "-")
@@ -617,18 +831,79 @@ class StitcherGUI(tk.Tk):
                     if not ok:
                         raise RuntimeError("Falha ao salvar a imagem de saída.")
 
-                    self._log(f"  ✓ Concluído: {out_path.name}")
+                    resultado_metodo['arquivo'] = out_path.name
+                    resultado_metodo['status'] = 'sucesso'
+
+                    # Calcular métricas se houver referência
+                    if has_reference:
+                        try:
+                            metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
+                            resultado_metodo['psnr_db'] = metrics_data.get('psnr')
+                            resultado_metodo['ssim'] = metrics_data.get('ssim')
+
+                            # Calcular métricas adicionais (entropia e nitidez)
+                            import numpy as np
+                            # Entropia (aproximada)
+                            gray = cv2.cvtColor(pano, cv2.COLOR_BGR2GRAY)
+                            hist, _ = np.histogram(gray, bins=256, range=(0, 256))
+                            hist = hist / hist.sum()
+                            hist = hist[hist > 0]
+                            entropia = -np.sum(hist * np.log2(hist))
+                            resultado_metodo['entropia'] = entropia
+
+                            # Nitidez (variância Laplaciano)
+                            laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+                            resultado_metodo['nitidez'] = laplacian.var()
+
+                            self._log(f"  ✓ Concluído: {out_path.name} | PSNR={metrics_data.get('psnr', 0):.2f} dB | SSIM={metrics_data.get('ssim', 0):.4f}")
+                        except Exception as met_err:
+                            self._log(f"  ✓ Concluído: {out_path.name} (erro nas métricas: {str(met_err)[:50]})")
+                    else:
+                        self._log(f"  ✓ Concluído: {out_path.name}")
+
                     success_count += 1
 
                 except Exception as e:
                     error_msg = str(e).split('\n')[0][:100]  # Primeira linha, até 100 chars
                     self._log(f"  ✗ Erro: {error_msg}")
+                    resultado_metodo['erro'] = error_msg
                     error_count += 1
+
+                # Adicionar resultado à lista
+                resultados_metricas.append(resultado_metodo)
+
+            # Gerar CSV comparativo
+            if resultados_metricas:
+                csv_path = all_folder / "comparacao_metricas.csv"
+                df = pd.DataFrame(resultados_metricas)
+
+                # Ordenar colunas
+                colunas_ordem = ['metodo', 'label', 'status', 'tempo_segundos', 'psnr_db', 'ssim',
+                                'entropia', 'nitidez', 'arquivo', 'erro']
+                colunas_existentes = [c for c in colunas_ordem if c in df.columns]
+                df = df[colunas_existentes]
+
+                df.to_csv(csv_path, index=False, float_format='%.4f', encoding='utf-8-sig')
+                self._log(f"\nCSV comparativo gerado: {csv_path.name}")
+
+                # Gerar resumo estatístico
+                if has_reference:
+                    df_sucesso = df[df['status'] == 'sucesso']
+                    if len(df_sucesso) > 0:
+                        self._log("\nRESUMO DAS MÉTRICAS:")
+                        if df_sucesso['psnr_db'].notna().any():
+                            self._log(f"  PSNR médio: {df_sucesso['psnr_db'].mean():.2f} dB")
+                            self._log(f"  PSNR melhor: {df_sucesso['psnr_db'].max():.2f} dB ({df_sucesso.loc[df_sucesso['psnr_db'].idxmax(), 'metodo']})")
+                        if df_sucesso['ssim'].notna().any():
+                            self._log(f"  SSIM médio: {df_sucesso['ssim'].mean():.4f}")
+                            self._log(f"  SSIM melhor: {df_sucesso['ssim'].max():.4f} ({df_sucesso.loc[df_sucesso['ssim'].idxmax(), 'metodo']})")
 
             # Resumo final
             self._log(f"\n{'='*50}")
             self._log(f"Concluído! Sucessos: {success_count}/{total}, Erros: {error_count}/{total}")
             self._log(f"Resultados salvos em: {all_folder}")
+            if has_reference:
+                self._log(f"CSV comparativo: {all_folder}/comparacao_metricas.csv")
             self._log(f"{'='*50}")
 
             # Abrir a pasta de saída automaticamente
@@ -644,8 +919,9 @@ class StitcherGUI(tk.Tk):
             except Exception:
                 pass
 
+            skip_msg = f"\nPulados: {skipped_count}" if skipped_count > 0 else ""
             self.after(0, lambda: messagebox.showinfo("Executar Todos",
-                f"Concluído!\n\nSucessos: {success_count}/{total}\nErros: {error_count}/{total}\n\nResultados em: {all_folder.name}"))
+                f"Concluído!\n\nSucessos: {success_count}/{total}\nErros: {error_count}/{total}{skip_msg}\n\nResultados em: {all_folder.name}"))
 
         except Exception as exc:
             msg = str(exc)
@@ -659,10 +935,9 @@ class StitcherGUI(tk.Tk):
         def set_state():
             self.run_btn.config(state=(tk.DISABLED if running else tk.NORMAL))
             self.run_all_btn.config(state=(tk.DISABLED if running else tk.NORMAL))
-            if running:
-                self.progress.start(10)
-            else:
-                self.progress.stop()
+            if not running:
+                self.progress.config(value=0)
+                self.progress_label.config(text="0%")
         self.after(0, set_state)
 
     def _log(self, msg: str):
@@ -673,6 +948,374 @@ class StitcherGUI(tk.Tk):
 
     def _notify_done(self, out_path: Path):
         self.after(0, lambda: messagebox.showinfo("Concluído", "Panorama salvo em: " + str(out_path)))
+
+    def _update_timer(self):
+        """Atualiza o timer a cada segundo durante execução"""
+        if self.execution_start_time:
+            elapsed = time.time() - self.execution_start_time
+            mins, secs = divmod(int(elapsed), 60)
+            self.time_var.set(f"{mins:02d}:{secs:02d}")
+            self.after(1000, self._update_timer)  # Atualizar a cada 1s
+        else:
+            self.time_var.set("--:--")
+
+    def _setup_shortcuts(self):
+        """Configura atalhos de teclado"""
+        self.bind("<Control-o>", lambda e: self.add_files())
+        self.bind("<Control-O>", lambda e: self.add_files())
+        self.bind("<Control-r>", lambda e: self.run_stitch())
+        self.bind("<Control-R>", lambda e: self.run_stitch())
+        self.bind("<F5>", lambda e: self.run_all_methods())
+        self.bind("<Delete>", lambda e: self.remove_selected())
+        self.bind("<Control-l>", lambda e: self.clear_files())
+        self.bind("<Control-L>", lambda e: self.clear_files())
+        self.bind("<Control-s>", lambda e: self.save_preset())
+        self.bind("<Control-S>", lambda e: self.save_preset())
+        self.bind("<Control-p>", lambda e: self.load_preset())
+        self.bind("<Control-P>", lambda e: self.load_preset())
+        self.bind("<Control-h>", lambda e: self.show_history())
+        self.bind("<Control-H>", lambda e: self.show_history())
+        self.bind("<Control-e>", lambda e: self.export_batch_report())
+        self.bind("<Control-E>", lambda e: self.export_batch_report())
+        self.bind("<F1>", lambda e: self.show_help())
+
+    def open_result(self):
+        """Abre o último resultado gerado"""
+        if self.last_result_path and self.last_result_path.exists():
+            import os, subprocess, platform
+            try:
+                file_path = str(self.last_result_path)
+                if platform.system() == "Windows":
+                    os.startfile(file_path)  # type: ignore
+                elif platform.system() == "Darwin":
+                    subprocess.Popen(["open", file_path])
+                else:
+                    subprocess.Popen(["xdg-open", file_path])
+            except Exception as e:
+                messagebox.showerror("Erro", f"Não foi possível abrir: {e}")
+        else:
+            messagebox.showinfo("Info", "Nenhum resultado disponível ainda.")
+
+    def rerun_last(self):
+        """Re-executa o último método"""
+        if not self.last_result_path or not self.files:
+            messagebox.showwarning("Aviso", "Nenhuma execução anterior encontrada")
+            return
+        self.run_stitch()
+
+    def _build_status_bar(self):
+        """Cria a barra de status no rodapé"""
+        self.status_bar = ttk.Label(self, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W)
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+
+    def _update_status(self):
+        """Atualiza a barra de status e contador de imagens"""
+        count = len(self.files)
+        method = self.method_label.get()
+        status = f"📁 {count} {'imagem' if count == 1 else 'imagens'} | 🔧 {method} | 💾 {self.output_dir.name} | ✓ Pronto"
+        self.status_var.set(status)
+        self.img_count_label.config(text=f"{count} {'imagem' if count == 1 else 'imagens'}")
+
+        # Habilitar/desabilitar botão de re-executar
+        if self.last_result_path:
+            self.rerun_btn.config(state=tk.NORMAL)
+
+    def _show_preview(self):
+        """Mostra thumbnail da primeira imagem selecionada"""
+        if not self.files:
+            self.preview_label.config(image="", text="Selecione imagens...")
+            if hasattr(self.preview_label, 'image'):
+                self.preview_label.image = None
+            return
+
+        try:
+            img = Image.open(self.files[0])
+            img.thumbnail((200, 150))
+            photo = ImageTk.PhotoImage(img)
+            self.preview_label.config(image=photo, text="")
+            self.preview_label.image = photo  # Mantém referência
+        except Exception as e:
+            self.preview_label.config(text=f"Erro ao carregar preview")
+
+    def _on_method_change(self, event=None):
+        """Atualiza a status bar quando o método é alterado"""
+        label = self.method_label.get()
+        key = self.label_to_key.get(label, "")
+        desc = METHOD_DESCRIPTIONS.get(key, "Método de stitching de imagens")
+
+        count = len(self.files)
+        status = f"📁 {count} {'imagem' if count == 1 else 'imagens'} | 🔧 {desc}"
+        self.status_var.set(status)
+
+    def _setup_drag_drop(self):
+        """Configura drag & drop de arquivos (requer tkinterdnd2)"""
+        try:
+            from tkinterdnd2 import DND_FILES, TkinterDnD
+
+            def drop(event):
+                files = self.tk.splitlist(event.data)
+                new_files = [Path(f) for f in files if Path(f).suffix.lower() in SUPPORTED_EXTS]
+                if new_files:
+                    self._append_files(new_files)
+
+            # Registrar drag & drop na listbox
+            self.listbox.drop_target_register(DND_FILES)
+            self.listbox.dnd_bind('<<Drop>>', drop)
+            self._log("Drag & Drop habilitado!")
+        except ImportError:
+            # Se tkinterdnd2 não estiver disponível, apenas ignore
+            self._log("Dica: Instale tkinterdnd2 para drag & drop: pip install tkinterdnd2")
+        except Exception:
+            pass
+
+    def save_preset(self):
+        """Salva configurações atuais como preset"""
+        from tkinter import simpledialog
+        name = simpledialog.askstring("Salvar Preset", "Nome do preset:")
+        if not name:
+            return
+
+        preset = {
+            "method": self.method_label.get(),
+            "mode": self.modo.get(),
+            "gpu": self.try_gpu.get(),
+            "do_metrics": self.do_metrics.get(),
+            "ref_path": self.ref_path.get(),
+            "output_dir": str(self.output_dir)
+        }
+
+        self.presets[name] = preset
+        presets_file = Path(__file__).parent / "presets.json"
+        presets_file.write_text(json.dumps(self.presets, ensure_ascii=False, indent=2), encoding="utf-8")
+        messagebox.showinfo("Sucesso", f"Preset '{name}' salvo!")
+        self._log(f"Preset '{name}' salvo com sucesso.")
+
+    def load_preset(self):
+        """Carrega preset salvo"""
+        from tkinter import simpledialog
+        if not self.presets:
+            messagebox.showinfo("Info", "Nenhum preset salvo ainda.")
+            return
+
+        # Mostrar diálogo de seleção
+        preset_names = list(self.presets.keys())
+        name = simpledialog.askstring("Carregar Preset",
+                                      f"Presets disponíveis:\n{', '.join(preset_names)}\n\nNome do preset:")
+        if not name or name not in self.presets:
+            return
+
+        preset = self.presets[name]
+        self.method_label.set(preset.get("method", self.method_label.get()))
+        self.modo.set(preset.get("mode", "panorama"))
+        self.try_gpu.set(preset.get("gpu", False))
+        self.do_metrics.set(preset.get("do_metrics", False))
+        self.ref_path.set(preset.get("ref_path", ""))
+
+        out_dir = preset.get("output_dir", str(self.output_dir))
+        self.output_dir = Path(out_dir)
+        self.out_dir_var.set(out_dir)
+
+        messagebox.showinfo("Sucesso", f"Preset '{name}' carregado!")
+        self._log(f"Preset '{name}' carregado.")
+        self._update_status()
+
+    def _load_presets(self):
+        """Carrega presets salvos do disco"""
+        presets_file = Path(__file__).parent / "presets.json"
+        if presets_file.exists():
+            try:
+                self.presets = json.loads(presets_file.read_text(encoding="utf-8"))
+            except Exception:
+                self.presets = {}
+
+    def _load_history(self):
+        """Carrega histórico de execuções"""
+        history_file = self.output_dir / "history.json"
+        if history_file.exists():
+            try:
+                self.history = json.loads(history_file.read_text(encoding="utf-8"))
+            except Exception:
+                self.history = []
+
+    def _save_to_history(self, key: str, elapsed: float, success: bool, output_path: str = ""):
+        """Salva execução no histórico"""
+        entry = {
+            "timestamp": datetime.now().isoformat(),
+            "method": key,
+            "elapsed": elapsed,
+            "success": success,
+            "output": output_path,
+            "num_images": len(self.files)
+        }
+        self.history.append(entry)
+
+        # Manter apenas últimas 100 execuções
+        self.history = self.history[-100:]
+
+        history_file = self.output_dir / "history.json"
+        history_file.write_text(json.dumps(self.history, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def show_history(self):
+        """Mostra janela com histórico de execuções"""
+        if not self.history:
+            messagebox.showinfo("Histórico", "Nenhuma execução registrada ainda.")
+            return
+
+        win = tk.Toplevel(self)
+        win.title("Histórico de Execuções")
+        win.geometry("800x500")
+
+        # Criar treeview
+        columns = ("Data/Hora", "Método", "Tempo (s)", "Status", "Imagens")
+        tree = ttk.Treeview(win, columns=columns, show="headings")
+
+        for col in columns:
+            tree.heading(col, text=col)
+            tree.column(col, width=150)
+
+        # Preencher dados (últimas 50)
+        for entry in reversed(self.history[-50:]):
+            timestamp = entry.get("timestamp", "")
+            method = entry.get("method", "")
+            elapsed = f"{entry.get('elapsed', 0):.1f}"
+            status = "✓ Sucesso" if entry.get("success", False) else "✗ Erro"
+            num_imgs = entry.get("num_images", 0)
+
+            tree.insert("", 0, values=(timestamp, method, elapsed, status, num_imgs))
+
+        tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # Botão para exportar
+        btn_frame = ttk.Frame(win)
+        btn_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
+        ttk.Button(btn_frame, text="Exportar CSV", command=lambda: self._export_history_csv()).pack(side=tk.LEFT)
+        ttk.Button(btn_frame, text="Fechar", command=win.destroy).pack(side=tk.RIGHT)
+
+    def _export_history_csv(self):
+        """Exporta histórico para CSV"""
+        if not self.history:
+            return
+
+        csv_path = self.output_dir / f"history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+        with open(csv_path, 'w', encoding='utf-8') as f:
+            f.write("Timestamp,Method,Elapsed(s),Success,NumImages,Output\n")
+            for entry in self.history:
+                f.write(f"{entry.get('timestamp', '')},{entry.get('method', '')},"
+                       f"{entry.get('elapsed', 0):.2f},{entry.get('success', False)},"
+                       f"{entry.get('num_images', 0)},{entry.get('output', '')}\n")
+
+        messagebox.showinfo("Exportado", f"Histórico salvo em:\n{csv_path.name}")
+        self._log(f"Histórico exportado: {csv_path.name}")
+
+    def export_batch_report(self):
+        """Exporta relatório completo de execução em batch"""
+        # Verificar se existe pasta all_*
+        all_folders = sorted([d for d in self.output_dir.glob("all_*") if d.is_dir()], reverse=True)
+
+        if not all_folders:
+            messagebox.showinfo("Info", "Nenhuma execução em batch encontrada.\nExecute 'Todos' primeiro.")
+            return
+
+        # Usar a pasta mais recente
+        latest_folder = all_folders[0]
+
+        # Coletar resultados
+        results = []
+        for img_path in sorted(latest_folder.glob("pano_*.jpg")):
+            method = img_path.stem.replace("pano_", "")
+            size = img_path.stat().st_size / (1024 * 1024)  # MB
+            results.append({"method": method, "file": img_path.name, "size_mb": f"{size:.2f}"})
+
+        if not results:
+            messagebox.showinfo("Info", "Nenhum resultado encontrado na pasta batch.")
+            return
+
+        # Criar relatório HTML
+        html_path = latest_folder / "report.html"
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>Batch Stitching Report</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }}
+        h1 {{ color: #333; }}
+        table {{ border-collapse: collapse; width: 100%; background: white; }}
+        th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
+        th {{ background-color: #4CAF50; color: white; }}
+        tr:nth-child(even) {{ background-color: #f2f2f2; }}
+        .summary {{ background: white; padding: 15px; margin-bottom: 20px; border-radius: 5px; }}
+    </style>
+</head>
+<body>
+    <h1>🖼️ Batch Stitching Report</h1>
+    <div class="summary">
+        <p><strong>Pasta:</strong> {latest_folder.name}</p>
+        <p><strong>Total de métodos:</strong> {len(results)}</p>
+        <p><strong>Data/Hora:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+    </div>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Método</th>
+            <th>Arquivo</th>
+            <th>Tamanho (MB)</th>
+        </tr>
+"""
+        for idx, r in enumerate(results, 1):
+            html_content += f"""
+        <tr>
+            <td>{idx}</td>
+            <td>{r['method']}</td>
+            <td>{r['file']}</td>
+            <td>{r['size_mb']}</td>
+        </tr>
+"""
+
+        html_content += """
+    </table>
+</body>
+</html>
+"""
+
+        html_path.write_text(html_content, encoding='utf-8')
+        messagebox.showinfo("Relatório Criado", f"Relatório HTML salvo em:\n{html_path.name}")
+        self._log(f"Relatório batch criado: {html_path.name}")
+
+        # Abrir relatório no navegador
+        try:
+            import webbrowser
+            webbrowser.open(str(html_path))
+        except Exception:
+            pass
+
+    def show_help(self):
+        """Mostra janela de ajuda com atalhos"""
+        help_text = """
+🔧 ATALHOS DE TECLADO:
+
+Ctrl+O       Adicionar imagens
+Ctrl+R       Executar stitch
+F5           Executar todos os métodos
+Delete       Remover selecionados
+Ctrl+L       Limpar lista
+
+Ctrl+S       Salvar preset
+Ctrl+P       Carregar preset
+Ctrl+H       Ver histórico
+Ctrl+E       Exportar relatório batch
+F1           Mostrar esta ajuda
+
+📁 DRAG & DROP:
+Arraste imagens diretamente para a lista!
+
+💡 DICAS:
+- Use "Executar Todos" (F5) para comparar métodos
+- Salve configurações favoritas como presets
+- Histórico rastreia todas execuções
+- Veja descrição do método na barra de status
+"""
+        messagebox.showinfo("Ajuda - Atalhos", help_text)
 
 # ---------- Métricas ----------
 def compute_metrics(ref_path: str, test_img):

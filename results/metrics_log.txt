@@ -19,3 +19,6 @@
 20251005_190956 [deep-deep_homography] PSNR=nan SSIM=nan out=pano_deep-deep_homography_20251005_190956.jpg
 20251005_191012 [deep-loftr] PSNR=nan SSIM=nan out=pano_deep-loftr_20251005_191012.jpg
 20251005_191425 [deep-loftr] PSNR=nan SSIM=nan out=pano_deep-loftr_20251005_191425.jpg
+20251005_212128 [classic-opencv_stitcher] PSNR=nan SSIM=nan out=pano_classic-opencv_stitcher_20251005_212128.jpg
+20251005_215533 [classic-5_blend_wavelet] PSNR=nan SSIM=nan out=pano_classic-5_blend_wavelet_20251005_215533.jpg
+20251005_220806 [deep-udis] PSNR=nan SSIM=nan out=pano_deep-udis_20251005_220806.jpg

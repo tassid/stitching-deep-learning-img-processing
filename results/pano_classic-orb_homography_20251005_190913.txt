@@ -1,0 +1,6 @@
+timestamp: 20251005_190913
+method: classic/orb_homography
+output: pano_classic-orb_homography_20251005_190913.jpg
+reference: (sem referência)
+psnr_db: nan
+ssim: nan

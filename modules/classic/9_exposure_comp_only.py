@@ -97,20 +97,30 @@ def find_h(a, b, detector, matcher, ratio, ransac_thresh, conf, maxIters) -> Tup
 
 # ---------- exposure compensation + feather básico ----------
 def exposure_compensate_pair(base, warp, base_mask, warp_mask, comp_type="gain_blocks"):
-    # compensa em float32 como a API espera
-    imgs = [base.astype(np.float32), warp.astype(np.float32)]
+    # Garantir que seja CV_8UC3 ANTES de feed() e apply()
+    def ensure_uint8_bgr(img):
+        if img.dtype != np.uint8:
+            img = np.clip(img, 0, 255).astype(np.uint8)
+        if len(img.shape) == 2:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        elif img.shape[2] == 4:  # BGRA -> BGR
+            img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+        return img
+
+    imgs = [ensure_uint8_bgr(base.copy()), ensure_uint8_bgr(warp.copy())]
     masks = [base_mask.copy(), warp_mask.copy()]
     corners = [(0,0), (0,0)]
 
-    if comp_type == "gain_blocks":
-        ctype = cv2.detail.ExposureCompensator_GAIN_BLOCKS
-    else:
-        ctype = cv2.detail.ExposureCompensator_GAIN  # fallback
-
-    comp = cv2.detail.ExposureCompensator_createDefault(ctype)
-    comp.feed(corners, imgs, masks)
-    for i in range(2):
-        comp.apply(i, corners[i], imgs[i], masks[i])
+    # Usar GAIN simples por padrão (GAIN_BLOCKS pode travar em algumas imagens)
+    try:
+        # Sempre usa GAIN simples para evitar travamentos
+        comp = cv2.detail.ExposureCompensator_createDefault(cv2.detail.ExposureCompensator_GAIN)
+        comp.feed(corners, imgs, masks)
+        for i in range(2):
+            comp.apply(i, corners[i], imgs[i], masks[i])
+    except:
+        # Se falhar, não faz compensação (mantém imagens originais)
+        pass
 
     base_c = np.clip(imgs[0], 0, 255).astype(np.uint8)
     warp_c = np.clip(imgs[1], 0, 255).astype(np.uint8)

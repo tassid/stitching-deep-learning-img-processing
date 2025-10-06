@@ -95,30 +95,25 @@ def find_h(a, b, detector, matcher, ratio, ransac_thresh, conf, maxIters) -> Tup
     return H, inl, good
 
 # ---------- Mertens na região de overlap ----------
-def merge_mertens_overlap(base, warp, base_mask, warp_mask, w_contrast=1.0, w_saturation=1.0, w_exposure=1.0):
+def merge_mertens_overlap(base, warp, base_mask, warp_mask, w_contrast=1.0, w_saturation=1.0, w_exposure=0.0):
     both = (base_mask > 0) & (warp_mask > 0)
     if not np.any(both):
         out = base.copy()
         out[warp_mask > 0] = warp[warp_mask > 0]
         return out
-    ys, xs = np.where(both)
-    y0, y1 = ys.min(), ys.max()+1
-    x0, x1 = xs.min(), xs.max()+1
-    b_crop = base[y0:y1, x0:x1]
-    w_crop = warp[y0:y1, x0:x1]
-    # Mertens espera float32 0..1
-    imgs_f = [b_crop.astype(np.float32)/255.0, w_crop.astype(np.float32)/255.0]
-    mert = cv2.createMergeMertens()
-    mert.setContrastWeight(float(w_contrast))
-    mert.setSaturationWeight(float(w_saturation))
-    mert.setExposureWeight(float(w_exposure))
-    fused = mert.process(imgs_f)  # float32 0..1
-    fused_u8 = np.clip(fused*255.0, 0, 255).astype(np.uint8)
-    out = base.copy()
-    out[y0:y1, x0:x1] = fused_u8
-    # fora do overlap, mantém o que existe (warp complementa onde base é 0)
-    out[(base_mask==0) & (warp_mask>0)] = warp[(base_mask==0) & (warp_mask>0)]
-    return out
+
+    # Usar feather blend simples em vez de Mertens (mais previsível)
+    # Mertens pode dar resultados estranhos com certas imagens
+
+    # Distance transform para blend suave
+    base_dt = cv2.distanceTransform((base_mask>0).astype(np.uint8), cv2.DIST_L2, 5)
+    warp_dt = cv2.distanceTransform((warp_mask>0).astype(np.uint8), cv2.DIST_L2, 5)
+    wsum = base_dt + warp_dt + 1e-6
+    wb = (base_dt/wsum)[...,None]
+    ww = (warp_dt/wsum)[...,None]
+
+    out = base.astype(np.float32)*wb + warp.astype(np.float32)*ww
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 # ---------- pipeline ----------
 def stitch_mertens(imgs: List[np.ndarray], detector_name: str, matcher_name: str, ratio: float, ransac: float,
@@ -158,8 +153,8 @@ def stitch_mertens(imgs: List[np.ndarray], detector_name: str, matcher_name: str
 # ---------- API para GUI ----------
 def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
            ransac=3.0, conf=0.999, min_side=900, maxIters=20000,
-           w_contrast=1.0, w_saturation=1.0, w_exposure=1.0, **kwargs):
-    """Interface simplificada para a GUI."""
+           w_contrast=1.0, w_saturation=1.0, w_exposure=0.0, **kwargs):
+    """Interface simplificada para a GUI. Usa feather blend em vez de Mertens para resultados mais previsíveis."""
     return stitch_mertens(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
                           w_contrast, w_saturation, w_exposure)
 

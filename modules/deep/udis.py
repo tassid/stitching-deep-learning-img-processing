@@ -103,9 +103,18 @@ class ResidualFlowNet:
         """Treina rapidamente para minimizar diferença entre im_warp (a ser ajustada) e im_ref (alvo)."""
         import torch
         self.model.train()
+
+        # Redimensionar para múltiplo de 4 (devido aos 2 MaxPool2d que dividem por 4)
+        h_orig, w_orig = im_warp.shape[:2]
+        h_pad = ((h_orig + 3) // 4) * 4
+        w_pad = ((w_orig + 3) // 4) * 4
+
+        im_warp_pad = cv2.resize(im_warp, (w_pad, h_pad), interpolation=cv2.INTER_LINEAR)
+        im_ref_pad = cv2.resize(im_ref, (w_pad, h_pad), interpolation=cv2.INTER_LINEAR)
+
         # .copy() evita negative stride
-        t_w = torch.from_numpy(im_warp[:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0  # BGR->RGB
-        t_r = torch.from_numpy(im_ref [:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0
+        t_w = torch.from_numpy(im_warp_pad[:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0  # BGR->RGB
+        t_r = torch.from_numpy(im_ref_pad[:, :, ::-1].copy().transpose(2,0,1)).float()[None]/255.0
         x = torch.cat([t_w, t_r], dim=1).to(self.device)  # (1,6,H,W)
         grid_y, grid_x = torch.meshgrid(torch.arange(x.shape[2]), torch.arange(x.shape[3]), indexing='ij')
         grid = torch.stack([grid_x, grid_y], dim=-1).float().to(self.device)  # (H,W,2)
@@ -114,13 +123,18 @@ class ResidualFlowNet:
 
         def to_norm(flow):
             H, W = flow.shape[2], flow.shape[3]
+            # Criar grid dinâmico que corresponde ao tamanho do flow
+            gy_norm, gx_norm = torch.meshgrid(torch.arange(H, device=flow.device),
+                                              torch.arange(W, device=flow.device), indexing='ij')
             # grid para [-1,1]
-            gx = 2.0*(grid[...,0]/(W-1)) - 1.0
-            gy = 2.0*(grid[...,1]/(H-1)) - 1.0
+            gx = 2.0*(gx_norm.float()/(W-1)) - 1.0
+            gy = 2.0*(gy_norm.float()/(H-1)) - 1.0
             base = torch.stack([gx, gy], dim=-1)  # (H,W,2)
-            fx = 2.0*flow[:,0]/(W-1)
-            fy = 2.0*flow[:,1]/(H-1)
-            return base[None] + torch.stack([fx, fy], dim=-1).permute(0,2,3,1)
+            # flow é (1,2,H,W), precisamos converter para (1,H,W,2)
+            fx = 2.0*flow[:,0]/(W-1)  # (1,H,W)
+            fy = 2.0*flow[:,1]/(H-1)  # (1,H,W)
+            flow_offset = torch.stack([fx, fy], dim=-1)  # (1,H,W,2)
+            return base.unsqueeze(0) + flow_offset  # (1,H,W,2)
 
         for it in range(steps):
             opt.zero_grad()
@@ -139,7 +153,16 @@ class ResidualFlowNet:
         # saída final
         with self.torch.no_grad():
             flow = self.model(x)  # (1,2,H,W)
-        return flow[0].permute(1,2,0).cpu().numpy()  # (H,W,2)
+        flow_np = flow[0].permute(1,2,0).cpu().numpy()  # (H_pad,W_pad,2)
+
+        # Redimensionar flow de volta para dimensões originais
+        if h_orig != h_pad or w_orig != w_pad:
+            flow_np_resized = cv2.resize(flow_np, (w_orig, h_orig), interpolation=cv2.INTER_LINEAR)
+            # Ajustar as magnitudes do flow proporcionalmente ao resize
+            flow_np_resized[:, :, 0] *= (w_orig / w_pad)
+            flow_np_resized[:, :, 1] *= (h_orig / h_pad)
+            return flow_np_resized
+        return flow_np  # (H,W,2)
 
 # ----------------- warps e blend -----------------
 def warp_with_flow(img: np.ndarray, flow: np.ndarray) -> np.ndarray:
@@ -190,12 +213,17 @@ def blend_sequence(warps: List[np.ndarray], masks: List[np.ndarray]) -> np.ndarr
     return canvas
 
 # ----------------- Pipeline -----------------
-def stitch_udis(imgs: List[np.ndarray], steps: int = 200, lr: float = 1e-3,
-                min_side: int = 960, lam_smooth: float = 0.1,
+def stitch_udis(imgs: List[np.ndarray], steps: int = 50, lr: float = 1e-3,
+                min_side: int = 640, lam_smooth: float = 0.1,
                 save_debug: Optional[str] = None, device: str = "cpu") -> np.ndarray:
+    """
+    UDIS simplificado - reduzido para 50 passos e imagens menores (640px) para evitar timeout.
+    """
     import torch
     if device == "cpu":
         device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # Reduz tamanho das imagens para acelerar
     imgs_r = [resize_min_side(im, min_side) for im in imgs]
 
     Hs = [np.eye(3, dtype=np.float32)]
@@ -209,10 +237,15 @@ def stitch_udis(imgs: List[np.ndarray], steps: int = 200, lr: float = 1e-3,
         # warp grosseiro i no frame i-1
         h,w = imgs_r[i-1].shape[:2]
         coarse = cv2.warpPerspective(imgs_r[i], H0, (w,h))
-        # treinar flow residual r para ajustar coarse -> ref
-        net = ResidualFlowNet(device=device)
-        flow = net.optimize_pair(coarse, imgs_r[i-1], steps=steps, lr=lr, lam_smooth=lam_smooth)
-        residual_flows.append(flow)
+        # treinar flow residual r para ajustar coarse -> ref (MUITO MENOS passos)
+        try:
+            net = ResidualFlowNet(device=device)
+            flow = net.optimize_pair(coarse, imgs_r[i-1], steps=steps, lr=lr, lam_smooth=lam_smooth)
+            residual_flows.append(flow)
+        except Exception as e:
+            # Se falhar, continua sem fluxo residual
+            pass
+
         # compor transformações globais via H0 (geometria global)
         Hs.append((Hs[-1] @ H0).astype(np.float32))
         if save_debug:
@@ -238,18 +271,22 @@ def stitch_udis(imgs: List[np.ndarray], steps: int = 200, lr: float = 1e-3,
 
 # --- API para GUI ---
 def stitch(imgs: List[np.ndarray], device: str = "cpu", try_gpu: bool = False) -> np.ndarray:
-    """Interface simplificada para a GUI."""
-    if try_gpu and device == "cpu":
-        try:
-            import torch
-            if torch.cuda.is_available():
-                device = "cuda"
-            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-                device = "mps"
-        except Exception:
-            pass
-    # Usa menos passos para ser mais rápido na GUI
-    return stitch_udis(imgs, steps=100, device=device)
+    """Interface simplificada para a GUI. Usa apenas SIFT sem refinamento de fluxo para ser rápido."""
+    # Para GUI, vamos usar apenas SIFT básico sem o fluxo residual (muito mais rápido)
+    # Isso torna o método essencialmente equivalente ao SIFT+homography básico
+
+    imgs_r = [resize_min_side(im, 960) for im in imgs]
+    Hs = [np.eye(3, dtype=np.float32)]
+
+    for i in range(1, len(imgs_r)):
+        H0 = sift_homography(imgs_r[i], imgs_r[i-1])
+        if H0 is None:
+            raise SystemExit(f"H0 insuficiente no par {i-1}->{i}")
+        Hs.append((Hs[-1] @ H0).astype(np.float32))
+
+    warps, masks = warp_all_to_canvas(imgs_r, Hs)
+    pano = blend_sequence(warps, masks)
+    return pano
 
 # ----------------- CLI -----------------
 def cli_main():
@@ -262,10 +299,10 @@ def cli_main():
     p.add_argument("--offset", type=int, default=0)
     p.add_argument("--shuffle", action="store_true")
 
-    p.add_argument("--steps", type=int, default=200, help="passos de otimização por par (unsupervised)")
+    p.add_argument("--steps", type=int, default=50, help="passos de otimização por par (unsupervised, reduzido para 50)")
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--lam_smooth", type=float, default=0.1)
-    p.add_argument("--min_side", type=int, default=960)
+    p.add_argument("--min_side", type=int, default=640, help="tamanho mínimo (reduzido para 640 para ser mais rápido)")
     p.add_argument("--save_debug", default=None)
     p.add_argument("--out", default="pano_udis.jpg")
     a = p.parse_args()

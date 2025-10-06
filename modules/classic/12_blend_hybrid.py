@@ -185,10 +185,10 @@ def hybrid_blend_overlap(base, warp, base_mask, warp_mask,
 
     # mapas para base e warp
     def weight_components(img_bgr, img_gray):
-        wc = contrast_weight(img_gray) if w_contrast>0 else 0
-        ws = saturation_weight(img_bgr) if w_saturation>0 else 0
-        we = exposure_weight(img_bgr)  if w_exposure>0 else 0
-        wf = focus_map(img_gray, focus, ksize) if w_focus>0 else 0
+        wc = contrast_weight(img_gray) if w_contrast>0 else np.zeros(img_gray.shape, dtype=np.float32)
+        ws = saturation_weight(img_bgr) if w_saturation>0 else np.zeros(img_gray.shape, dtype=np.float32)
+        we = exposure_weight(img_bgr)  if w_exposure>0 else np.zeros(img_gray.shape, dtype=np.float32)
+        wf = focus_map(img_gray, focus, ksize) if w_focus>0 else np.zeros(img_gray.shape, dtype=np.float32)
         comp = w_contrast*normalize01(wc) + \
                w_saturation*normalize01(ws) + \
                w_exposure*normalize01(we) + \

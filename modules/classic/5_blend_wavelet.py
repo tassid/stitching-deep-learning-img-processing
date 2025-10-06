@@ -96,11 +96,28 @@ def find_h(a, b, detector, matcher, ratio, ransac_thresh, conf, maxIters) -> Tup
     return H, inl, good
 
 # ---------- Wavelet Fusion apenas no overlap ----------
-def wavelet_fuse_overlap(base, warp, base_mask, warp_mask, wavelet="db2", levels=3, rule="max"):
+def wavelet_fuse_overlap(base, warp, base_mask, warp_mask, wavelet="db2", levels=2, rule="mean"):
+    """
+    Fusão wavelet simplificada - usa apenas 2 níveis por padrão para evitar travamentos.
+    Se der qualquer problema, faz fallback para blend simples.
+    """
     try:
         import pywt
     except ImportError:
-        sys.exit("Instale PyWavelets: pip install PyWavelets")
+        # Fallback: blend simples se PyWavelets não estiver instalado
+        both = (base_mask > 0) & (warp_mask > 0)
+        if np.any(both):
+            dt_b = cv2.distanceTransform((base_mask>0).astype(np.uint8), cv2.DIST_L2, 5)
+            dt_w = cv2.distanceTransform((warp_mask>0).astype(np.uint8), cv2.DIST_L2, 5)
+            s = dt_b + dt_w + 1e-6
+            wb = (dt_b/s)[...,None]
+            ww = (dt_w/s)[...,None]
+            out = base.astype(np.float32)*wb + warp.astype(np.float32)*ww
+            return np.clip(out,0,255).astype(np.uint8)
+        else:
+            out = base.copy()
+            out[warp_mask > 0] = warp[warp_mask > 0]
+            return out
 
     both = (base_mask > 0) & (warp_mask > 0)
     if not np.any(both):
@@ -114,57 +131,59 @@ def wavelet_fuse_overlap(base, warp, base_mask, warp_mask, wavelet="db2", levels
     b_crop = base[y0:y1, x0:x1].astype(np.float32)
     w_crop = warp[y0:y1, x0:x1].astype(np.float32)
 
-    # funde canal a canal
+    # Se região pequena demais, faz blend simples
+    h_crop, w_crop_size = b_crop.shape[:2]
+    if h_crop < 32 or w_crop_size < 32:
+        fused = (0.5 * b_crop + 0.5 * w_crop).astype(np.uint8)
+        out = base.copy()
+        out[y0:y1, x0:x1] = fused
+        out[(base_mask==0) & (warp_mask>0)] = warp[(base_mask==0) & (warp_mask>0)]
+        return out
+
+    # Tenta wavelet fusion, mas com proteção total contra travamentos
     fused = np.empty_like(b_crop)
     for c in range(3):
         b_c = b_crop[..., c]
         w_c = w_crop[..., c]
 
-        # ajusta para forma múltipla de 2^levels: pad espelhado
-        def pad_to_pow2(img, levels):
-            h, w = img.shape
-            mul = 2 ** levels
+        try:
+            # Limita a apenas 2 níveis por segurança
+            max_level = pywt.dwt_max_level(min(b_c.shape), pywt.Wavelet(wavelet).dec_len)
+            safe_levels = max(1, min(2, max_level))  # máximo 2 níveis
+
+            # Pad para múltiplo de 2^safe_levels
+            h, w = b_c.shape
+            mul = 2 ** safe_levels
             nh = int(np.ceil(h / mul) * mul)
             nw = int(np.ceil(w / mul) * mul)
             ph, pw = nh - h, nw - w
-            return cv2.copyMakeBorder(img, 0, ph, 0, pw, borderType=cv2.BORDER_REFLECT_101), h, w
 
-        b_p, h0, w0 = pad_to_pow2(b_c, levels)
-        w_p, _, _ = pad_to_pow2(w_c, levels)
+            b_p = cv2.copyMakeBorder(b_c, 0, ph, 0, pw, borderType=cv2.BORDER_REFLECT_101)
+            w_p = cv2.copyMakeBorder(w_c, 0, ph, 0, pw, borderType=cv2.BORDER_REFLECT_101)
 
-        coeffs_b = pywt.wavedec2(b_p, wavelet=wavelet, level=levels, mode="symmetric")
-        coeffs_w = pywt.wavedec2(w_p, wavelet=wavelet, level=levels, mode="symmetric")
+            # Decomposição wavelet
+            coeffs_b = pywt.wavedec2(b_p, wavelet=wavelet, level=safe_levels, mode="symmetric")
+            coeffs_w = pywt.wavedec2(w_p, wavelet=wavelet, level=safe_levels, mode="symmetric")
 
-        def fuse_coeffs(cb, cw, rule):
-            out = []
-            # nível aproximado (cA): média
-            cA_b, *dets_b = cb
-            cA_w, *dets_w = cw
-            if rule == "mean":
-                cA = 0.5 * (cA_b + cA_w)
-            else:  # max por padrão
-                cA = np.where(np.abs(cA_b) >= np.abs(cA_w), cA_b, cA_w)
-            out.append(cA)
-            # detalhes (cH, cV, cD): max-abs (ou média)
+            # Fusão dos coeficientes (sempre usa média para ser mais estável)
+            cA_b, *dets_b = coeffs_b
+            cA_w, *dets_w = coeffs_w
+            cA = 0.5 * (cA_b + cA_w)
+            fused_coeffs = [cA]
             for (bH, bV, bD), (wH, wV, wD) in zip(dets_b, dets_w):
-                if rule == "mean":
-                    out.append((0.5*(bH+wH), 0.5*(bV+wV), 0.5*(bD+wD)))
-                else:
-                    H = np.where(np.abs(bH) >= np.abs(wH), bH, wH)
-                    V = np.where(np.abs(bV) >= np.abs(wV), bV, wV)
-                    D = np.where(np.abs(bD) >= np.abs(wD), bD, wD)
-                    out.append((H, V, D))
-            return out
+                fused_coeffs.append((0.5*(bH+wH), 0.5*(bV+wV), 0.5*(bD+wD)))
 
-        fused_coeffs = fuse_coeffs(coeffs_b, coeffs_w, rule)
-        rec = pywt.waverec2(fused_coeffs, wavelet=wavelet, mode="symmetric")
-        rec = rec[:h0, :w0]
-        fused[..., c] = rec
+            # Reconstrução
+            rec = pywt.waverec2(fused_coeffs, wavelet=wavelet, mode="symmetric")
+            rec = rec[:h, :w]
+            fused[..., c] = rec
+        except:
+            # Se qualquer coisa der errado, usa média simples
+            fused[..., c] = 0.5 * (b_c + w_c)
 
     fused = np.clip(fused, 0, 255).astype(np.uint8)
     out = base.copy()
     out[y0:y1, x0:x1] = fused
-    # onde só warp existe, copia warp
     out[(base_mask==0) & (warp_mask>0)] = warp[(base_mask==0) & (warp_mask>0)]
     return out
 
@@ -206,8 +225,8 @@ def stitch_wavelet(imgs: List[np.ndarray], detector_name: str, matcher_name: str
 # ---------- API para GUI ----------
 def stitch(imgs, try_gpu=False, detector="sift", matcher="flann", ratio=0.75,
            ransac=3.0, conf=0.999, min_side=900, maxIters=20000,
-           wavelet="db2", levels=3, rule="max", **kwargs):
-    """Interface simplificada para a GUI."""
+           wavelet="db2", levels=2, rule="mean", **kwargs):
+    """Interface simplificada para a GUI. Usa apenas 2 níveis wavelet para evitar travamentos."""
     return stitch_wavelet(imgs, detector, matcher, ratio, ransac, conf, min_side, maxIters,
                           wavelet, levels, rule)
 

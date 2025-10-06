@@ -129,7 +129,8 @@ def apply_exposure_comp(corners, images, masks):
 def multiband_blend_pair(corner, size, images, masks, num_bands=5):
     blender = cv2.detail_MultiBandBlender()
     blender.setNumBands(int(num_bands))
-    blender.prepare(corner, size)
+    # prepare() em OpenCV 4.x requer apenas o Rect (canto e tamanho combinados)
+    blender.prepare(cv2.detail.resultRoi(corners=[corner], sizes=[size]))
     for img, msk, cor in zip(images, masks, [corner]*len(images)):
         blender.feed(img.astype(np.int16), msk, cor)
     result, result_mask = blender.blend(None, None)

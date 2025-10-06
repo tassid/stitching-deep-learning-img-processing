@@ -1,0 +1,6 @@
+timestamp: 20251005_190932
+method: classic/8_blend_laplacian
+output: pano_classic-8_blend_laplacian_20251005_190932.jpg
+reference: (sem referência)
+psnr_db: nan
+ssim: nan

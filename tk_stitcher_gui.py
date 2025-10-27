@@ -637,12 +637,22 @@ class StitcherGUI(tk.Tk):
 
             # Calcula métricas apenas se a usuária quiser (checkbox) e houver referência;
             # ainda assim o TXT é sempre criado (com NaN se não calcular).
-            if self.do_metrics.get() and self.ref_path.get():
-                try:
-                    metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
-                    calc_done = True
-                except Exception as met_err:
-                    self._log("Falha nas métricas: " + str(met_err))
+            if self.do_metrics.get():
+                if self.ref_path.get():
+                    try:
+                        self._log("📊 Calculando métricas vs referência...")
+                        metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
+                        calc_done = True
+                        self._log(f"✅ Métricas calculadas: PSNR={metrics_data.get('psnr', float('nan')):.3f} dB | SSIM={metrics_data.get('ssim', float('nan')):.4f}")
+                    except Exception as met_err:
+                        self._log(f"❌ Falha nas métricas: {str(met_err)}")
+                        self.after(0, lambda: messagebox.showwarning("Erro nas Métricas",
+                            f"Não foi possível calcular métricas:\n{str(met_err)}\n\nVerifique se a imagem de referência existe e é válida."))
+                else:
+                    self._log("⚠️  Checkbox de métricas marcado, mas nenhuma referência selecionada!")
+                    self.after(0, lambda: messagebox.showwarning("Referência Necessária",
+                        "Para calcular métricas, selecione uma imagem de referência (ground truth).\n\n"
+                        "Clique em 'Escolher...' na seção 'Métricas (opcional)'."))
 
             save_metrics_txt(
                 metrics_txt,
@@ -653,9 +663,6 @@ class StitcherGUI(tk.Tk):
                 self.ref_path.get() or "(sem referência)"
             )
             append_metrics_log(self.output_dir, safe_key, ts, metrics_data, extra={"out": out_path.name})
-
-            if calc_done:
-                self._log(f"Métricas: PSNR={metrics_data.get('psnr', float('nan')):.3f} dB | SSIM={metrics_data.get('ssim', float('nan')):.4f}")
 
             # Salvar último resultado e habilitar botão
             self.last_result_path = out_path
@@ -710,6 +717,7 @@ class StitcherGUI(tk.Tk):
     def _run_all_methods_worker(self):
         from datetime import datetime
         import shutil
+        import pandas as pd
 
         try:
             # Criar pasta com timestamp
@@ -718,6 +726,14 @@ class StitcherGUI(tk.Tk):
             all_folder.mkdir(parents=True, exist_ok=True)
 
             self._log(f"Executando todos os métodos... Salvando em: {all_folder.name}")
+
+            # Verificar se há imagem de referência
+            has_reference = bool(self.ref_path.get())
+            if has_reference:
+                self._log(f"Imagem de referência: {Path(self.ref_path.get()).name}")
+                self._log("Métricas serão calculadas automaticamente para todos os métodos!")
+            else:
+                self._log("AVISO: Sem imagem de referência. Métricas PSNR/SSIM não serão calculadas.")
 
             imgs = read_images(self.files)
 
@@ -736,12 +752,29 @@ class StitcherGUI(tk.Tk):
             error_count = 0
             skipped_count = len(skip_methods)
 
+            # Lista para armazenar resultados das métricas
+            resultados_metricas = []
+
             for idx, key in enumerate(ordered_keys, 1):
                 method_label = METHODS[key]["label"]
                 progress = int((idx / total) * 100)
                 self.after(0, lambda p=progress: self.progress.config(value=p))
                 self.after(0, lambda p=progress: self.progress_label.config(text=f"{p}%"))
                 self._log(f"[{idx}/{total}] ({progress}%) Executando: {method_label}")
+
+                tempo_inicio = time.time()
+                resultado_metodo = {
+                    'metodo': key.replace("/", "-"),
+                    'label': method_label,
+                    'tempo_segundos': None,
+                    'psnr_db': None,
+                    'ssim': None,
+                    'entropia': None,
+                    'nitidez': None,
+                    'status': 'erro',
+                    'arquivo': None,
+                    'erro': None
+                }
 
                 try:
                     import signal
@@ -787,6 +820,10 @@ class StitcherGUI(tk.Tk):
                         except concurrent.futures.TimeoutError:
                             raise RuntimeError(f"Timeout ({timeout}s excedido)")
 
+                    # Calcular tempo
+                    tempo_total = time.time() - tempo_inicio
+                    resultado_metodo['tempo_segundos'] = tempo_total
+
                     # Salvar resultado
                     safe_key = key.replace("/", "-")
                     out_path = all_folder / f"pano_{safe_key}.jpg"
@@ -794,18 +831,79 @@ class StitcherGUI(tk.Tk):
                     if not ok:
                         raise RuntimeError("Falha ao salvar a imagem de saída.")
 
-                    self._log(f"  ✓ Concluído: {out_path.name}")
+                    resultado_metodo['arquivo'] = out_path.name
+                    resultado_metodo['status'] = 'sucesso'
+
+                    # Calcular métricas se houver referência
+                    if has_reference:
+                        try:
+                            metrics_data = compute_metrics(ref_path=self.ref_path.get(), test_img=pano)
+                            resultado_metodo['psnr_db'] = metrics_data.get('psnr')
+                            resultado_metodo['ssim'] = metrics_data.get('ssim')
+
+                            # Calcular métricas adicionais (entropia e nitidez)
+                            import numpy as np
+                            # Entropia (aproximada)
+                            gray = cv2.cvtColor(pano, cv2.COLOR_BGR2GRAY)
+                            hist, _ = np.histogram(gray, bins=256, range=(0, 256))
+                            hist = hist / hist.sum()
+                            hist = hist[hist > 0]
+                            entropia = -np.sum(hist * np.log2(hist))
+                            resultado_metodo['entropia'] = entropia
+
+                            # Nitidez (variância Laplaciano)
+                            laplacian = cv2.Laplacian(gray, cv2.CV_64F)
+                            resultado_metodo['nitidez'] = laplacian.var()
+
+                            self._log(f"  ✓ Concluído: {out_path.name} | PSNR={metrics_data.get('psnr', 0):.2f} dB | SSIM={metrics_data.get('ssim', 0):.4f}")
+                        except Exception as met_err:
+                            self._log(f"  ✓ Concluído: {out_path.name} (erro nas métricas: {str(met_err)[:50]})")
+                    else:
+                        self._log(f"  ✓ Concluído: {out_path.name}")
+
                     success_count += 1
 
                 except Exception as e:
                     error_msg = str(e).split('\n')[0][:100]  # Primeira linha, até 100 chars
                     self._log(f"  ✗ Erro: {error_msg}")
+                    resultado_metodo['erro'] = error_msg
                     error_count += 1
+
+                # Adicionar resultado à lista
+                resultados_metricas.append(resultado_metodo)
+
+            # Gerar CSV comparativo
+            if resultados_metricas:
+                csv_path = all_folder / "comparacao_metricas.csv"
+                df = pd.DataFrame(resultados_metricas)
+
+                # Ordenar colunas
+                colunas_ordem = ['metodo', 'label', 'status', 'tempo_segundos', 'psnr_db', 'ssim',
+                                'entropia', 'nitidez', 'arquivo', 'erro']
+                colunas_existentes = [c for c in colunas_ordem if c in df.columns]
+                df = df[colunas_existentes]
+
+                df.to_csv(csv_path, index=False, float_format='%.4f', encoding='utf-8-sig')
+                self._log(f"\nCSV comparativo gerado: {csv_path.name}")
+
+                # Gerar resumo estatístico
+                if has_reference:
+                    df_sucesso = df[df['status'] == 'sucesso']
+                    if len(df_sucesso) > 0:
+                        self._log("\nRESUMO DAS MÉTRICAS:")
+                        if df_sucesso['psnr_db'].notna().any():
+                            self._log(f"  PSNR médio: {df_sucesso['psnr_db'].mean():.2f} dB")
+                            self._log(f"  PSNR melhor: {df_sucesso['psnr_db'].max():.2f} dB ({df_sucesso.loc[df_sucesso['psnr_db'].idxmax(), 'metodo']})")
+                        if df_sucesso['ssim'].notna().any():
+                            self._log(f"  SSIM médio: {df_sucesso['ssim'].mean():.4f}")
+                            self._log(f"  SSIM melhor: {df_sucesso['ssim'].max():.4f} ({df_sucesso.loc[df_sucesso['ssim'].idxmax(), 'metodo']})")
 
             # Resumo final
             self._log(f"\n{'='*50}")
             self._log(f"Concluído! Sucessos: {success_count}/{total}, Erros: {error_count}/{total}")
             self._log(f"Resultados salvos em: {all_folder}")
+            if has_reference:
+                self._log(f"CSV comparativo: {all_folder}/comparacao_metricas.csv")
             self._log(f"{'='*50}")
 
             # Abrir a pasta de saída automaticamente

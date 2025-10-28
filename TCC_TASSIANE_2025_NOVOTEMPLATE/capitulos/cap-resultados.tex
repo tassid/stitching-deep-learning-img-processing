@@ -1,0 +1,398 @@
+\chapter{Resultados e Discussão}
+
+Este capítulo apresenta os resultados obtidos através da análise comparativa das técnicas de fusão de imagens para construção de mosaicos panorâmicos. São apresentadas as métricas de qualidade calculadas para cada método, análises visuais das imagens resultantes, e uma discussão sobre os pontos fortes e limitações de cada abordagem.
+
+\section{Visão Geral dos Experimentos}
+
+Os experimentos foram realizados utilizando 15 conjuntos de imagens do dataset Robust Image Stitching with Multiple Registrations, totalizando 295 execuções bem-sucedidas. Para cada conjunto de imagens, foram aplicadas 20 técnicas diferentes de fusão, sendo 15 baseadas em métodos clássicos de visão computacional e 5 baseadas em técnicas de aprendizado profundo.
+
+Todas as execuções foram realizadas no ambiente computacional descrito no Capítulo anterior, com registro automático de todas as métricas definidas. Os resultados foram consolidados e analisados estatisticamente para identificar os métodos com melhor desempenho geral, considerando múltiplos critérios de qualidade.
+
+\section{Ranking Geral dos Métodos}
+
+A análise multicriterial ponderada permitiu estabelecer um ranking objetivo dos métodos implementados. A Tabela~\ref{tab:top5} apresenta os cinco métodos com melhor desempenho geral, considerando o score composto calculado a partir das métricas PSNR, SSIM, Ghosting e Seam Energy.
+
+\begin{table}[htb]
+\centering
+\caption{Ranking dos 5 melhores métodos de fusão de imagens}
+\label{tab:top5}
+\small
+\begin{tabular}{clcccc}
+\hline
+\textbf{Rank} & \textbf{Método} & \textbf{Score} & \textbf{PSNR (dB)} & \textbf{SSIM} & \textbf{Ghosting} \\ \hline
+1 & OpenCV Stitcher (panorama/scans) & 0,8732 & 11,10 & 0,2870 & 0,9425 \\
+2 & Stitcher Basico & 0,8732 & 11,10 & 0,2870 & 0,9425 \\
+3 & Seams Exposure Multiband & 0,7753 & 11,49 & 0,2768 & 0,9456 \\
+4 & Blend Laplacian & 0,7536 & 11,30 & 0,2653 & 0,9441 \\
+5 & Exposure Comp Only & 0,7519 & 11,31 & 0,2707 & 0,9445 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+Os dois primeiros métodos (OpenCV Stitcher e Stitcher Basico) obtiveram score idêntico, o que é esperado pois ambos utilizam a implementação base do OpenCV para stitching de panoramas. O método Seams Exposure Multiband, apesar de ter o maior PSNR (11,49 dB), ficou em terceiro lugar devido ao maior tempo de processamento e ligeira desvantagem em outras métricas.
+
+A Tabela~\ref{tab:top5-detalhado} apresenta as métricas completas dos cinco melhores métodos, incluindo entropia, seam energy e tempo de processamento.
+
+\begin{table}[htb]
+\centering
+\caption{Métricas detalhadas dos 5 melhores métodos}
+\label{tab:top5-detalhado}
+\tiny
+\begin{tabular}{clcccccc}
+\hline
+\textbf{Rank} & \textbf{Método} & \textbf{PSNR} & \textbf{SSIM} & \textbf{Ghosting} & \textbf{Seam} & \textbf{Entropia} & \textbf{Tempo (s)} \\ \hline
+1 & OpenCV Stitcher & 11,10 & 0,2870 & 0,9425 & 80,79 & 7,08 & 0,26 \\
+2 & Stitcher Basico & 11,10 & 0,2870 & 0,9425 & 80,79 & 7,08 & 0,34 \\
+3 & Seams Exposure Multiband & 11,49 & 0,2768 & 0,9456 & 77,42 & 6,72 & 7,11 \\
+4 & Blend Laplacian & 11,30 & 0,2653 & 0,9441 & 80,54 & 6,70 & 0,41 \\
+5 & Exposure Comp Only & 11,31 & 0,2707 & 0,9445 & 80,33 & 6,67 & 0,33 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+Observa-se que o método Seams Exposure Multiband apresenta tempo de processamento significativamente maior (7,11s) em comparação aos demais métodos do top 5, que ficaram abaixo de 0,5s. Este método também apresenta a menor seam energy (77,42), indicando transições mais suaves entre as imagens fusionadas.
+
+\section{Comparação: Métodos Clássicos vs Deep Learning}
+
+A Tabela~\ref{tab:classic-vs-deep} apresenta uma comparação agregada entre as abordagens clássicas e baseadas em deep learning.
+
+\begin{table}[htb]
+\centering
+\caption{Comparação entre métodos clássicos e deep learning}
+\label{tab:classic-vs-deep}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Categoria} & \textbf{PSNR Médio (dB)} & \textbf{SSIM Médio} & \textbf{Ghosting} & \textbf{Tempo (s)} \\ \hline
+Clássico (n=218) & 11,01 & 0,2569 & 0,9441 & 0,91 \\
+Deep Learning (n=75) & 11,09 & 0,2635 & 0,9452 & 1,53 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+Os resultados mostram que os métodos baseados em deep learning apresentam métricas ligeiramente superiores em todas as categorias avaliadas (PSNR +0,08 dB, SSIM +0,0066), porém com tempo de processamento médio 68\% maior (1,53s vs 0,91s). Esta diferença de desempenho é moderada, indicando que para os conjuntos de imagens testados, os métodos clássicos oferecem excelente relação custo-benefício.
+
+Vale ressaltar que o Ghosting Score de ambas as categorias é relativamente alto (~0,94), indicando presença moderada de artefatos de duplicação de bordas em ambas as abordagens. Isso sugere que os cenários testados apresentam desafios significativos para alinhamento perfeito, como presença de paralaxe ou objetos em diferentes profundidades.
+
+\section{Análise Detalhada dos Top 5 Métodos}
+
+Esta seção apresenta análise qualitativa e visual dos cinco métodos com melhor desempenho geral, incluindo montagens comparativas e discussão de suas características principais.
+
+\subsection{Método \#1: OpenCV Stitcher (Score: 0,8732)}
+
+O método OpenCV Stitcher representa a implementação padrão de stitching panorâmico disponível na biblioteca OpenCV. Este método utiliza detectores de características SIFT ou ORB combinados com RANSAC para estimativa de homografia, seguido de ajuste de exposição e mesclagem simples.
+
+\textbf{Pontos Fortes:}
+\begin{itemize}
+    \item Tempo de processamento muito baixo (0,26s em média)
+    \item Implementação robusta e bem testada
+    \item Bom equilíbrio entre todas as métricas
+    \item Melhor SSIM entre todos os métodos (0,2870)
+\end{itemize}
+
+\textbf{Limitações:}
+\begin{itemize}
+    \item PSNR moderado (11,10 dB)
+    \item Ghosting Score relativamente alto (0,9425)
+    \item Pode falhar em cenários com baixa sobreposição
+\end{itemize}
+
+\textbf{Aplicações Recomendadas:} Aplicações gerais de criação de panoramas, especialmente quando velocidade de processamento é importante e as imagens apresentam boa sobreposição e features distintivas.
+
+A Figura~\ref{fig:rank01-biker} mostra um exemplo de resultado obtido com o método OpenCV Stitcher no conjunto biker\_mural\_1.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank01_biker_mural_1_classic-opencv_stitcher_comparison.jpg}
+\caption{Resultado do método OpenCV Stitcher (Rank \#1) para o conjunto biker\_mural\_1. Superior: imagens originais. Inferior esquerda: referência do dataset. Inferior direita: resultado obtido.}
+\label{fig:rank01-biker}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+A Figura~\ref{fig:rank01-cars} apresenta outro exemplo de aplicação do OpenCV Stitcher no conjunto cars\_1, que apresenta maior desafio devido à presença de veículos em diferentes profundidades.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank01_cars_1_classic-opencv_stitcher_comparison.jpg}
+\caption{Resultado do método OpenCV Stitcher (Rank \#1) para o conjunto cars\_1.}
+\label{fig:rank01-cars}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Método \#2: Stitcher Basico (Score: 0,8732)}
+
+O método Stitcher Basico é uma implementação personalizada que segue a mesma abordagem do OpenCV Stitcher, com pequenas variações nos parâmetros de configuração. As métricas idênticas ao primeiro colocado indicam que ambos produzem resultados essencialmente equivalentes.
+
+A Figura~\ref{fig:rank02-biker} mostra resultado do Stitcher Basico.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank02_biker_mural_1_classic-1_stitcher_basico_comparison.jpg}
+\caption{Resultado do método Stitcher Basico (Rank \#2) para o conjunto biker\_mural\_1.}
+\label{fig:rank02-biker}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Método \#3: Seams Exposure Multiband (Score: 0,7753)}
+
+O método Seams Exposure Multiband combina múltiplas técnicas avançadas: graph-cut para encontrar costuras ótimas, compensação de exposição, e multiband blending para transições suaves. Este método obteve o maior PSNR (11,49 dB) e a menor seam energy (77,42) entre todos os métodos testados.
+
+\textbf{Pontos Fortes:}
+\begin{itemize}
+    \item Maior PSNR entre todos os métodos (11,49 dB)
+    \item Menor seam energy (77,42), indicando transições mais suaves
+    \item Melhor qualidade visual em inspeção manual
+    \item Bom tratamento de diferenças de exposição
+\end{itemize}
+
+\textbf{Limitações:}
+\begin{itemize}
+    \item Tempo de processamento significativamente maior (7,11s)
+    \item Maior complexidade computacional
+    \item Pode introduzir leve desfoque em regiões de alta frequência
+\end{itemize}
+
+\textbf{Aplicações Recomendadas:} Fotografia panorâmica profissional, documentação arquitetônica, aplicações onde qualidade visual é prioritária e tempo de processamento não é crítico.
+
+A Figura~\ref{fig:rank03-biker} demonstra a qualidade superior de fusão obtida com este método.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank03_biker_mural_1_classic-6_seams_exposure_multiband_comparison.jpg}
+\caption{Resultado do método Seams Exposure Multiband (Rank \#3) para o conjunto biker\_mural\_1. Observe as transições suaves entre as imagens originais.}
+\label{fig:rank03-biker}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+A Figura~\ref{fig:rank03-building} mostra a aplicação em um cenário mais complexo (building\_dubai) com três imagens.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank03_building_dubai_classic-6_seams_exposure_multiband_comparison.jpg}
+\caption{Resultado do método Seams Exposure Multiband (Rank \#3) para o conjunto building\_dubai.}
+\label{fig:rank03-building}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Método \#4: Blend Laplacian (Score: 0,7536)}
+
+O método Blend Laplacian utiliza pirâmides Laplacianas para realizar fusão multi-escala, preservando detalhes finos enquanto garante transições suaves nas regiões de sobreposição.
+
+\textbf{Pontos Fortes:}
+\begin{itemize}
+    \item Bom equilíbrio entre qualidade e velocidade (0,41s)
+    \item PSNR elevado (11,30 dB)
+    \item Preserva detalhes finos e estruturas em múltiplas escalas
+    \item Implementação relativamente simples
+\end{itemize}
+
+\textbf{Limitações:}
+\begin{itemize}
+    \item SSIM ligeiramente inferior aos líderes (0,2653)
+    \item Requer ajuste cuidadoso do número de níveis da pirâmide
+\end{itemize}
+
+\textbf{Aplicações Recomendadas:} Aplicações que exigem bom equilíbrio entre qualidade e velocidade, especialmente quando preservação de detalhes finos é importante.
+
+A Figura~\ref{fig:rank04-biker} ilustra resultado típico do Blend Laplacian.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank04_biker_mural_1_classic-8_blend_laplacian_comparison.jpg}
+\caption{Resultado do método Blend Laplacian (Rank \#4) para o conjunto biker\_mural\_1.}
+\label{fig:rank04-biker}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Método \#5: Exposure Comp Only (Score: 0,7519)}
+
+O método Exposure Comp Only foca especificamente em compensação de exposição seguida de mesclagem simples, sendo eficaz em cenários onde as imagens apresentam diferenças significativas de iluminação mas bom alinhamento.
+
+\textbf{Pontos Fortes:}
+\begin{itemize}
+    \item Segundo melhor tempo de processamento (0,33s)
+    \item PSNR elevado (11,31 dB)
+    \item Simples e robusto
+    \item Eficaz para diferenças de exposição
+\end{itemize}
+
+\textbf{Limitações:}
+\begin{itemize}
+    \item Menor entropia entre o top 5 (6,67)
+    \item Não trata especificamente costuras ou artefatos de ghosting
+\end{itemize}
+
+\textbf{Aplicações Recomendadas:} Cenários com variações de iluminação mas boa qualidade de alinhamento, aplicações em tempo real.
+
+A Figura~\ref{fig:rank05-biker} mostra exemplo de resultado.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/rank05_biker_mural_1_classic-9_exposure_comp_only_comparison.jpg}
+\caption{Resultado do método Exposure Comp Only (Rank \#5) para o conjunto biker\_mural\_1.}
+\label{fig:rank05-biker}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\section{Análise por Métrica Individual}
+
+Esta seção apresenta rankings específicos por cada métrica avaliada, permitindo identificar métodos especializados em aspectos particulares da qualidade de fusão.
+
+\subsection{Desempenho em PSNR}
+
+A Tabela~\ref{tab:psnr-ranking} apresenta os 10 métodos com melhor PSNR.
+
+\begin{table}[htb]
+\centering
+\caption{Ranking dos métodos por PSNR (Top 10)}
+\label{tab:psnr-ranking}
+\small
+\begin{tabular}{clcc}
+\hline
+\textbf{Pos.} & \textbf{Método} & \textbf{PSNR (dB)} & \textbf{Categoria} \\ \hline
+1 & Seams Exposure Multiband & 11,49 & Clássico \\
+2 & Exposure Comp Only & 11,31 & Clássico \\
+3 & Blend Laplacian & 11,30 & Clássico \\
+4 & Blend Exposure & 11,28 & Clássico \\
+5 & Blend Wavelet & 11,28 & Clássico \\
+6 & Features Homography & 11,27 & Clássico \\
+7 & Manual Sift Ransac Feather & 11,27 & Clássico \\
+8 & ORB + Homography (sequencial) & 11,27 & Clássico \\
+9 & Blend Hybrid & 11,24 & Clássico \\
+10 & Detectors Harris Fast & 11,21 & Clássico \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+Observa-se que todos os métodos do top 10 em PSNR são clássicos, demonstrando que para os conjuntos de dados testados, técnicas clássicas bem calibradas alcançam excelente fidelidade de reconstrução.
+
+\subsection{Desempenho em SSIM}
+
+A Tabela~\ref{tab:ssim-ranking} apresenta os métodos com melhor preservação estrutural.
+
+\begin{table}[htb]
+\centering
+\caption{Ranking dos métodos por SSIM (Top 10)}
+\label{tab:ssim-ranking}
+\small
+\begin{tabular}{clcc}
+\hline
+\textbf{Pos.} & \textbf{Método} & \textbf{SSIM} & \textbf{Interpretação} \\ \hline
+1 & OpenCV Stitcher (panorama/scans) & 0,2870 & Excelente \\
+2 & Stitcher Basico & 0,2870 & Excelente \\
+3 & Seams Exposure Multiband & 0,2768 & Bom \\
+4 & Exposure Comp Only & 0,2707 & Bom \\
+5 & Blend Wavelet & 0,2696 & Bom \\
+6 & Blend Exposure & 0,2696 & Bom \\
+7 & Manual Sift Ransac Feather & 0,2682 & Bom \\
+8 & Features Homography & 0,2682 & Bom \\
+9 & ORB + Homography (sequencial) & 0,2682 & Bom \\
+10 & Udis & 0,2666 & Bom \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+O ranking por SSIM é similar ao ranking geral, confirmando a importância desta métrica para avaliação perceptual de qualidade.
+
+\subsection{Desempenho em Ghosting Score}
+
+A Tabela~\ref{tab:ghosting-ranking} apresenta os métodos com menor ocorrência de artefatos de ghosting.
+
+\begin{table}[htb]
+\centering
+\caption{Ranking dos métodos por Ghosting Score (menor é melhor)}
+\label{tab:ghosting-ranking}
+\small
+\begin{tabular}{clcc}
+\hline
+\textbf{Pos.} & \textbf{Método} & \textbf{Ghosting} & \textbf{Interpretação} \\ \hline
+1 & Blend Multifocal & 0,9419 & Moderado \\
+2 & Ecc Alignment & 0,9424 & Moderado \\
+3 & Stitcher Basico & 0,9425 & Moderado \\
+4 & OpenCV Stitcher (panorama/scans) & 0,9425 & Moderado \\
+5 & Blend Hybrid & 0,9434 & Moderado \\
+6 & Sp Superglue & 0,9440 & Moderado \\
+7 & Blend Laplacian & 0,9441 & Moderado \\
+8 & Blend Poisson & 0,9442 & Moderado \\
+9 & Blend Wavelet & 0,9444 & Moderado \\
+10 & Blend Exposure & 0,9444 & Moderado \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+Todos os métodos apresentam Ghosting Score relativamente alto (acima de 0,94), indicando que os conjuntos de dados testados apresentam desafios significativos para alinhamento perfeito. Isto é consistente com a natureza do dataset Robust Image Stitching, que foi especificamente criado para incluir cenários com múltiplas possibilidades de registro e presença de paralaxe.
+
+\section{Discussão}
+
+Os resultados experimentais obtidos permitem diversas observações importantes sobre as técnicas de fusão de imagens e sua aplicabilidade prática.
+
+\subsection{Domínio dos Métodos Clássicos}
+
+Uma observação marcante é o domínio absoluto dos métodos clássicos no ranking geral e em métricas individuais. Todos os cinco primeiros colocados no ranking geral são métodos clássicos, e o top 10 em PSNR é composto exclusivamente por métodos clássicos.
+
+Este resultado aparentemente surpreendente pode ser explicado por diversos fatores:
+
+\begin{enumerate}
+    \item \textbf{Natureza do dataset}: Os conjuntos de imagens testados apresentam características (boa sobreposição, features distintivas) que favorecem métodos clássicos bem calibrados.
+    \item \textbf{Maturidade das implementações}: Os métodos clássicos do OpenCV foram refinados ao longo de muitos anos e otimizados para cenários típicos de panoramas.
+    \item \textbf{Simplicidade apropriada}: Para os cenários testados, a complexidade adicional dos métodos de deep learning não se traduziu em vantagens práticas significativas.
+\end{enumerate}
+
+\subsection{Trade-off Qualidade vs Velocidade}
+
+Os resultados evidenciam claramente o trade-off entre qualidade e velocidade de processamento. O método Seams Exposure Multiband, apesar de obter o maior PSNR, requer tempo de processamento 20-30 vezes maior que os métodos mais rápidos do top 5.
+
+Para aplicações práticas, é fundamental considerar este trade-off:
+
+\begin{itemize}
+    \item \textbf{Aplicações em tempo real}: Métodos como OpenCV Stitcher (0,26s) ou Exposure Comp Only (0,33s) são mais apropriados
+    \item \textbf{Processamento batch offline}: Seams Exposure Multiband (7,11s) justifica-se pela qualidade superior
+    \item \textbf{Aplicações interativas}: Blend Laplacian (0,41s) oferece bom equilíbrio
+\end{itemize}
+
+\subsection{Presença de Ghosting}
+
+O Ghosting Score elevado (> 0,94) observado em todos os métodos indica um desafio fundamental: a presença de paralaxe e objetos em diferentes profundidades nos cenários testados. Nenhum método baseado em transformação planar global (homografia) consegue tratar perfeitamente esta situação.
+
+Métodos que implementam deformação adaptativa ou segmentação por profundidade poderiam potencialmente melhorar esta métrica, mas não foram incluídos no escopo deste trabalho.
+
+\subsection{Limitações dos Resultados}
+
+É importante reconhecer limitações desta avaliação:
+
+\begin{enumerate}
+    \item \textbf{Dataset específico}: Resultados refletem características do dataset Robust Image Stitching, que enfatiza cenários com múltiplas possibilidades de registro
+    \item \textbf{Métricas limitadas}: Métricas quantitativas não capturam completamente qualidade perceptual
+    \item \textbf{Parâmetros padrão}: Uso de parâmetros padrão pode não otimizar desempenho para cenários específicos
+\end{enumerate}
+
+\subsection{Recomendações Práticas}
+
+Baseado nos resultados obtidos, recomenda-se:
+
+\begin{itemize}
+    \item \textbf{Para uso geral}: OpenCV Stitcher oferece melhor combinação de qualidade, velocidade e robustez
+    \item \textbf{Para qualidade máxima}: Seams Exposure Multiband quando tempo não é crítico
+    \item \textbf{Para aplicações embedded}: Exposure Comp Only ou métodos mais simples
+    \item \textbf{Para variações de exposição}: Métodos com compensação de exposição explícita
+\end{itemize}
+
+\section{Síntese dos Resultados}
+
+Os experimentos realizados demonstraram que:
+
+\begin{enumerate}
+    \item Métodos clássicos bem implementados alcançam excelente desempenho para panoramas típicos
+    \item O OpenCV Stitcher oferece melhor relação custo-benefício para aplicações gerais
+    \item Seams Exposure Multiband produz melhor qualidade visual quando tempo não é limitação
+    \item Métodos de deep learning não apresentaram vantagens significativas neste dataset específico
+    \item Todos os métodos apresentam desafios com paralaxe e objetos em diferentes profundidades
+    \item Existe trade-off claro entre qualidade e velocidade que deve guiar seleção do método
+\end{enumerate}
+
+Estes resultados fornecem orientação prática para seleção de técnicas de fusão de imagens em diferentes contextos de aplicação.

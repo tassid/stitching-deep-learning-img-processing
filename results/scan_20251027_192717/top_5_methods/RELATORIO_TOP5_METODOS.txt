@@ -1,0 +1,478 @@
+================================================================================
+RELATÓRIO: TOP 5 MÉTODOS DE IMAGE STITCHING
+================================================================================
+
+Data/Hora: 2025-10-27 19:34:12
+Pasta de origem: scan_20251027_192717
+Total de métodos avaliados: 20
+Total de execuções bem-sucedidas: 293
+
+================================================================================
+METODOLOGIA DE SELEÇÃO
+================================================================================
+
+1. CRITÉRIOS DE AVALIAÇÃO
+
+Os métodos foram avaliados com base em múltiplas métricas de qualidade:
+
+   • PSNR (Peak Signal-to-Noise Ratio): 30.0%
+     Mede a relação sinal/ruído. Valores maiores indicam menor ruído.
+     Interpretação: >30dB=aceitável, 30-40dB=bom, >40dB=excelente
+
+   • SSIM (Structural Similarity Index): 30.0%
+     Avalia similaridade estrutural baseada em percepção humana.
+     Interpretação: >0.90=excelente, 0.80-0.90=bom, <0.80=degradado
+
+   • Ghosting Score: 25.0%
+     Detecta artefatos de duplicação/sobreposição de bordas.
+     Interpretação: <0.3=aceitável, 0.3-0.6=moderado, >0.6=severo
+     (Valores menores são melhores)
+
+   • Seam Energy: 15.0%
+     Mede energia de gradiente na zona de costura.
+     (Valores menores indicam transições mais suaves)
+
+
+2. PROCESSO DE NORMALIZAÇÃO E SCORING
+
+Etapa 1: Todas as métricas foram normalizadas para escala 0-1
+   - PSNR e SSIM: valores maiores são melhores (escala direta)
+   - Ghosting e Seam: valores menores são melhores (escala invertida)
+
+Etapa 2: Score final calculado com média ponderada:
+   Score = 0.30×PSNR_norm + 0.30×SSIM_norm + 0.25×Ghosting_norm + 0.15×Seam_norm
+
+Etapa 3: Para cada método, calculada média de scores em todos os datasets
+
+Etapa 4: Métodos ordenados por score final (maior = melhor)
+
+
+================================================================================
+RANKING DOS TOP 5 MÉTODOS
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #1: Clássico • Seams Exposure Multiband
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4473 / 1.0000
+
+Métricas Médias:
+  • PSNR: 11.49 dB
+  • SSIM: 0.2768
+  • Ghosting: 0.9456
+  • Seam Energy: 77.42
+
+Desempenho:
+  • Tempo médio: 7.11 segundos
+  • Taxa de sucesso: 15 execuções bem-sucedidas
+
+Análise:
+  ⚠ PSNR baixo (<30dB) - ruído pode ser perceptível
+  ⚠ SSIM baixo (<0.80) - degradação estrutural perceptível
+  ✗ Ghosting alto (>0.6) - desalinhamento significativo
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #2: Clássico • Stitcher Basico
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4415 / 1.0000
+
+Métricas Médias:
+  • PSNR: 11.10 dB
+  • SSIM: 0.2870
+  • Ghosting: 0.9425
+  • Seam Energy: 80.79
+
+Desempenho:
+  • Tempo médio: 0.35 segundos
+  • Taxa de sucesso: 12 execuções bem-sucedidas
+
+Análise:
+  ⚠ PSNR baixo (<30dB) - ruído pode ser perceptível
+  ⚠ SSIM baixo (<0.80) - degradação estrutural perceptível
+  ✗ Ghosting alto (>0.6) - desalinhamento significativo
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #3: Clássico • OpenCV Stitcher (panorama/scans)
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4415 / 1.0000
+
+Métricas Médias:
+  • PSNR: 11.10 dB
+  • SSIM: 0.2870
+  • Ghosting: 0.9425
+  • Seam Energy: 80.79
+
+Desempenho:
+  • Tempo médio: 0.27 segundos
+  • Taxa de sucesso: 12 execuções bem-sucedidas
+
+Análise:
+  ⚠ PSNR baixo (<30dB) - ruído pode ser perceptível
+  ⚠ SSIM baixo (<0.80) - degradação estrutural perceptível
+  ✗ Ghosting alto (>0.6) - desalinhamento significativo
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #4: Clássico • Exposure Comp Only
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4388 / 1.0000
+
+Métricas Médias:
+  • PSNR: 11.31 dB
+  • SSIM: 0.2707
+  • Ghosting: 0.9445
+  • Seam Energy: 80.33
+
+Desempenho:
+  • Tempo médio: 0.33 segundos
+  • Taxa de sucesso: 15 execuções bem-sucedidas
+
+Análise:
+  ⚠ PSNR baixo (<30dB) - ruído pode ser perceptível
+  ⚠ SSIM baixo (<0.80) - degradação estrutural perceptível
+  ✗ Ghosting alto (>0.6) - desalinhamento significativo
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #5: Clássico • Blend Laplacian
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4373 / 1.0000
+
+Métricas Médias:
+  • PSNR: 11.30 dB
+  • SSIM: 0.2653
+  • Ghosting: 0.9441
+  • Seam Energy: 80.54
+
+Desempenho:
+  • Tempo médio: 0.41 segundos
+  • Taxa de sucesso: 15 execuções bem-sucedidas
+
+Análise:
+  ⚠ PSNR baixo (<30dB) - ruído pode ser perceptível
+  ⚠ SSIM baixo (<0.80) - degradação estrutural perceptível
+  ✗ Ghosting alto (>0.6) - desalinhamento significativo
+
+
+================================================================================
+RESUMO COMPARATIVO
+================================================================================
+
+Método com melhor PSNR: Clássico • Seams Exposure Multiband (11.49 dB)
+
+Método com melhor SSIM: Clássico • Stitcher Basico (0.2870)
+
+Método com menor Ghosting: Clássico • Blend Multifocal (0.9419)
+
+Método mais rápido: Deep • Flow Stitch (0.11s)
+
+
+================================================================================
+CONCLUSÕES E RECOMENDAÇÕES
+================================================================================
+
+O método 'Clássico • Seams Exposure Multiband' obteve o melhor score geral,
+com pontuação de 0.4473, demonstrando o melhor equilíbrio
+entre qualidade visual (PSNR/SSIM) e precisão de alinhamento (Ghosting/Seam).
+
+RECOMENDAÇÕES DE USO:
+
+1. Clássico • Seams Exposure Multiband:
+   → Recomendado para uso geral. Melhor equilíbrio qualidade/precisão.
+
+2. Clássico • Stitcher Basico:
+   → Boa alternativa quando qualidade é prioritária.
+
+3. Clássico • OpenCV Stitcher (panorama/scans):
+   → Alternativa rápida mantendo boa qualidade.
+
+4. Clássico • Exposure Comp Only:
+   → Alternativa rápida mantendo boa qualidade.
+
+5. Clássico • Blend Laplacian:
+   → Boa alternativa quando qualidade é prioritária.
+
+
+================================================================================
+RANKING COMPLETO - TODOS OS MÉTODOS
+================================================================================
+
+Lista completa dos 20 métodos avaliados, ordenados por score final.
+Esta seção fornece uma visão panorâmica de todos os métodos testados.
+
+Legenda:
+  • Score: pontuação multicriterial final (0-1, maior=melhor)
+  • PSNR: Peak Signal-to-Noise Ratio em dB (maior=melhor)
+  • SSIM: Structural Similarity Index 0-1 (maior=melhor)
+  • Ghost: Ghosting Score 0-1 (menor=melhor)
+  • Seam: Seam Energy (menor=melhor)
+  • Tempo: tempo médio de execução em segundos
+  • N: número de execuções bem-sucedidas
+
+--------------------------------------------------------------------------------
+#    Método                                        Score    PSNR    SSIM   
+--------------------------------------------------------------------------------
+1  🏆 Clássico • Seams Exposure Multiband           0.4473    11.49  0.2768
+2  🏆 Clássico • Stitcher Basico                    0.4415    11.10  0.2870
+3  🏆 Clássico • OpenCV Stitcher (panorama/scans)   0.4415    11.10  0.2870
+4  🏆 Clássico • Exposure Comp Only                 0.4388    11.31  0.2707
+5  🏆 Clássico • Blend Laplacian                    0.4373    11.30  0.2653
+6     Clássico • Blend Exposure                     0.4372    11.28  0.2696
+7     Clássico • Blend Wavelet                      0.4372    11.28  0.2696
+8     Clássico • Manual Sift Ransac Feather         0.4362    11.27  0.2682
+9     Clássico • Features Homography                0.4362    11.27  0.2682
+10    Clássico • ORB + Homography (sequencial)      0.4346    11.27  0.2682
+11    Clássico • Blend Hybrid                       0.4337    11.24  0.2615
+12    Clássico • Detectors Harris Fast              0.4310    11.21  0.2624
+13    Deep • Udis                                   0.4309    11.15  0.2666
+14    Deep • Deep Homography                        0.4309    11.15  0.2666
+15    Deep • Sp Superglue                           0.4291    10.99  0.2616
+16    Deep • Loftr                                  0.4276    11.13  0.2633
+17    Clássico • Blend Multifocal                   0.4240    11.10  0.2497
+18    Deep • Flow Stitch                            0.4234    11.02  0.2594
+19    Clássico • Ecc Alignment                      0.3727    10.38  0.1796
+20    Clássico • Blend Poisson                      0.3265     8.61  0.1772
+--------------------------------------------------------------------------------
+
+
+DETALHES COMPLETOS DE CADA MÉTODO:
+================================================================================
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 RANK #1 (TOP 5): Clássico • Seams Exposure Multiband
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Score Final: 0.4473
+PSNR: 11.49 dB | SSIM: 0.2768 | Ghosting: 0.9456 | Seam: 77.42
+Tempo médio: 7.11s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 RANK #2 (TOP 5): Clássico • Stitcher Basico
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Score Final: 0.4415
+PSNR: 11.10 dB | SSIM: 0.2870 | Ghosting: 0.9425 | Seam: 80.79
+Tempo médio: 0.35s | Sucessos: 12
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 RANK #3 (TOP 5): Clássico • OpenCV Stitcher (panorama/scans)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Score Final: 0.4415
+PSNR: 11.10 dB | SSIM: 0.2870 | Ghosting: 0.9425 | Seam: 80.79
+Tempo médio: 0.27s | Sucessos: 12
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 RANK #4 (TOP 5): Clássico • Exposure Comp Only
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Score Final: 0.4388
+PSNR: 11.31 dB | SSIM: 0.2707 | Ghosting: 0.9445 | Seam: 80.33
+Tempo médio: 0.33s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏆 RANK #5 (TOP 5): Clássico • Blend Laplacian
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Score Final: 0.4373
+PSNR: 11.30 dB | SSIM: 0.2653 | Ghosting: 0.9441 | Seam: 80.54
+Tempo médio: 0.41s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #6: Clássico • Blend Exposure
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4372
+PSNR: 11.28 dB | SSIM: 0.2696 | Ghosting: 0.9444 | Seam: 80.51
+Tempo médio: 0.23s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #7: Clássico • Blend Wavelet
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4372
+PSNR: 11.28 dB | SSIM: 0.2696 | Ghosting: 0.9444 | Seam: 80.51
+Tempo médio: 0.28s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #8: Clássico • Manual Sift Ransac Feather
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4362
+PSNR: 11.27 dB | SSIM: 0.2682 | Ghosting: 0.9445 | Seam: 80.78
+Tempo médio: 0.24s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #9: Clássico • Features Homography
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4362
+PSNR: 11.27 dB | SSIM: 0.2682 | Ghosting: 0.9445 | Seam: 80.78
+Tempo médio: 0.23s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #10: Clássico • ORB + Homography (sequencial)
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4346
+PSNR: 11.27 dB | SSIM: 0.2682 | Ghosting: 0.9458 | Seam: 79.81
+Tempo médio: 0.25s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #11: Clássico • Blend Hybrid
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4337
+PSNR: 11.24 dB | SSIM: 0.2615 | Ghosting: 0.9434 | Seam: 82.32
+Tempo médio: 0.25s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #12: Clássico • Detectors Harris Fast
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4310
+PSNR: 11.21 dB | SSIM: 0.2624 | Ghosting: 0.9454 | Seam: 80.50
+Tempo médio: 0.23s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #13: Deep • Udis
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4309
+PSNR: 11.15 dB | SSIM: 0.2666 | Ghosting: 0.9449 | Seam: 81.02
+Tempo médio: 0.25s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #14: Deep • Deep Homography
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4309
+PSNR: 11.15 dB | SSIM: 0.2666 | Ghosting: 0.9449 | Seam: 81.02
+Tempo médio: 0.36s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #15: Deep • Sp Superglue
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4291
+PSNR: 10.99 dB | SSIM: 0.2616 | Ghosting: 0.9440 | Seam: 79.79
+Tempo médio: 0.15s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #16: Deep • Loftr
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4276
+PSNR: 11.13 dB | SSIM: 0.2633 | Ghosting: 0.9456 | Seam: 81.22
+Tempo médio: 6.79s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #17: Clássico • Blend Multifocal
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4240
+PSNR: 11.10 dB | SSIM: 0.2497 | Ghosting: 0.9419 | Seam: 86.08
+Tempo médio: 0.22s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #18: Deep • Flow Stitch
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.4234
+PSNR: 11.02 dB | SSIM: 0.2594 | Ghosting: 0.9466 | Seam: 79.71
+Tempo médio: 0.11s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #19: Clássico • Ecc Alignment
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.3727
+PSNR: 10.38 dB | SSIM: 0.1796 | Ghosting: 0.9424 | Seam: 83.00
+Tempo médio: 2.79s | Sucessos: 14
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+────────────────────────────────────────────────────────────────────────────────
+RANK #20: Clássico • Blend Poisson
+────────────────────────────────────────────────────────────────────────────────
+
+Score Final: 0.3265
+PSNR: 8.61 dB | SSIM: 0.1772 | Ghosting: 0.9442 | Seam: 86.77
+Tempo médio: 0.40s | Sucessos: 15
+Qualidade: PSNR regular, SSIM regular, Ghosting alto
+
+
+================================================================================
+ESTATÍSTICAS GERAIS
+================================================================================
+
+Total de métodos avaliados: 20
+Total de execuções bem-sucedidas: 293
+
+Estatísticas de PSNR:
+  • Média geral: 11.03 dB
+  • Mediana: 11.18 dB
+  • Melhor: 11.49 dB
+  • Pior: 8.61 dB
+  • Desvio padrão: 0.61 dB
+
+Estatísticas de SSIM:
+  • Média geral: 0.2589
+  • Mediana: 0.2666
+  • Melhor: 0.2870
+  • Pior: 0.1772
+  • Desvio padrão: 0.0288
+
+Estatísticas de Ghosting:
+  • Média geral: 0.9443
+  • Mediana: 0.9444
+  • Melhor (menor): 0.9419
+  • Pior (maior): 0.9466
+  • Desvio padrão: 0.0013
+
+Estatísticas de Tempo de Execução:
+  • Média geral: 1.06 s
+  • Mediana: 0.26 s
+  • Mais rápido: 0.11 s
+  • Mais lento: 7.11 s
+
+Distribuição por Categoria:
+  • Métodos Clássicos: 15
+  • Métodos Deep Learning: 5
+
+Top 3 Métodos Clássicos:
+  1. Clássico • Seams Exposure Multiband (Score: 0.4473)
+  2. Clássico • Stitcher Basico (Score: 0.4415)
+  3. Clássico • OpenCV Stitcher (panorama/scans) (Score: 0.4415)
+
+Top 3 Métodos Deep Learning:
+  1. Deep • Udis (Score: 0.4309)
+  2. Deep • Deep Homography (Score: 0.4309)
+  3. Deep • Sp Superglue (Score: 0.4291)
+
+
+================================================================================
+FIM DO RELATÓRIO
+================================================================================

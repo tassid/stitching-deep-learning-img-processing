@@ -1,0 +1,186 @@
+\chapter{Materiais e Métodos}
+
+Este capítulo descreve os materiais utilizados e a metodologia adotada para realização dos experimentos comparativos entre diferentes técnicas de fusão de imagens panorâmicas. São apresentados os conjuntos de dados selecionados, as métricas de avaliação empregadas, o ambiente computacional configurado, e o protocolo experimental estabelecido para garantir a reprodutibilidade e validade científica dos resultados.
+
+\section{Conjuntos de Dados}
+
+Para garantir a validade e abrangência dos experimentos, foram selecionados conjuntos de dados públicos amplamente utilizados pela comunidade científica de visão computacional para avaliação de técnicas de fusão de imagens.
+
+\subsection{Base de Dados de Múltiplos Registros}
+
+O conjunto de dados principal utilizado neste trabalho foi a base de Múltiplos Registros (\textit{Robust Image Stitching with Multiple Registrations}), proposta por \cite{zhang2018robust}. Esta base de dados foi escolhida como referência principal dos experimentos devido às suas características particulares que a tornam ideal para avaliação sistemática de técnicas de fusão de imagens.
+
+A base contém 14 conjuntos de imagens para fusão, cada um apresentando desafios específicos relacionados a múltiplas possibilidades de registro entre as imagens. Os 14 conjuntos são: \textit{biker\_mural}, \textit{cars}, \textit{coke\_190}, \textit{cup\_tree}, \textit{graffiti\_building}, \textit{graffiti\_car}, \textit{no\_contractor\_parking}, \textit{P2\_front\_of\_window}, \textit{plant}, \textit{rental\_office}, \textit{ski\_left}, \textit{stop\_sign}, \textit{theory\_left}, e \textit{traffic\_cones}.
+
+Uma característica distintiva desta base é que ela foi especificamente desenvolvida para testar a robustez de algoritmos de fusão em cenários onde existem múltiplas correspondências válidas entre as imagens de entrada. O aspecto mais importante que motivou a escolha desta base como referência principal é a disponibilidade de resultados de referência para todos os 14 conjuntos de imagens, permitindo comparações objetivas entre os resultados obtidos pelas diferentes técnicas implementadas.
+
+\section{Métricas de Avaliação}
+
+Para avaliar quantitativamente a qualidade das técnicas de fusão implementadas, foi definido um conjunto abrangente de métricas que capturam diferentes aspectos da qualidade das imagens panorâmicas geradas. As métricas foram divididas em categorias que avaliam fidelidade de reconstrução, qualidade estrutural, artefatos de fusão, e eficiência computacional.
+
+\subsection{PSNR - Peak Signal-to-Noise Ratio}
+
+O PSNR é uma métrica amplamente utilizada para avaliar a qualidade de imagens reconstruídas ou processadas. Esta métrica quantifica a relação entre o sinal máximo possível (intensidade máxima dos pixels) e o ruído de reconstrução, sendo expressa em decibéis (dB). O PSNR é calculado a partir do erro quadrático médio (MSE) entre a imagem resultante e a imagem de referência.
+
+A formulação matemática do PSNR é dada por:
+
+\begin{equation}
+PSNR = 10 \cdot \log_{10}\left(\frac{MAX^2}{MSE}\right)
+\end{equation}
+
+\noindent onde \textit{MAX} é o valor máximo possível para um pixel (255 para imagens de 8 bits) e \textit{MSE} é o erro quadrático médio calculado como:
+
+\begin{equation}
+MSE = \frac{1}{mn}\sum_{i=0}^{m-1}\sum_{j=0}^{n-1}[I(i,j) - K(i,j)]^2
+\end{equation}
+
+\noindent sendo \textit{I} a imagem de referência, \textit{K} a imagem fusionada, e \textit{m} e \textit{n} as dimensões da imagem.
+
+Valores de PSNR acima de 30 dB geralmente indicam boa qualidade de reconstrução, enquanto valores acima de 40 dB são considerados excelentes. Esta métrica é sensível a diferenças de intensidade pixel-a-pixel, sendo eficaz para detectar ruído e distorções, mas pode não capturar completamente a percepção visual humana de qualidade.
+
+\subsection{SSIM - Structural Similarity Index}
+
+O SSIM (\textit{Structural Similarity Index}) foi proposto por \cite{wang2004image} como uma métrica mais alinhada com a percepção visual humana em comparação com o PSNR. Esta métrica considera três componentes: luminância, contraste e estrutura, fornecendo uma avaliação mais holística da semelhança entre imagens.
+
+O SSIM é calculado através da seguinte expressão:
+
+\begin{equation}
+SSIM(x,y) = \frac{(2\mu_x\mu_y + C_1)(2\sigma_{xy} + C_2)}{(\mu_x^2 + \mu_y^2 + C_1)(\sigma_x^2 + \sigma_y^2 + C_2)}
+\end{equation}
+
+\noindent onde $\mu_x$ e $\mu_y$ são as médias das imagens \textit{x} e \textit{y}, $\sigma_x^2$ e $\sigma_y^2$ são as variâncias, $\sigma_{xy}$ é a covariância, e $C_1$ e $C_2$ são constantes de estabilização.
+
+O SSIM varia entre -1 e 1, sendo que valores próximos a 1 indicam alta similaridade estrutural. Valores acima de 0,90 são considerados excelentes, enquanto valores entre 0,80 e 0,90 indicam boa qualidade. Esta métrica é particularmente útil para identificar distorções estruturais que podem não ser detectadas adequadamente pelo PSNR.
+
+\subsection{MSE - Mean Squared Error}
+
+O MSE (Erro Quadrático Médio) quantifica a diferença média entre os valores dos pixels da imagem resultante e da imagem de referência. Esta métrica fornece uma medida direta do erro de reconstrução, sendo fundamental para o cálculo do PSNR.
+
+Valores menores de MSE indicam maior fidelidade à imagem de referência. O MSE é especialmente útil quando se deseja quantificar o erro absoluto de reconstrução, embora não capture aspectos perceptuais da qualidade da imagem.
+
+\subsection{Ghosting Score}
+
+O \textit{Ghosting Score} é uma métrica desenvolvida especificamente para quantificar artefatos de duplicação de bordas em imagens panorâmicas. Estes artefatos ocorrem quando o alinhamento entre imagens adjacentes não é perfeito, resultando em bordas duplicadas ou "fantasmas" de objetos nas regiões de sobreposição.
+
+Esta métrica é calculada através da análise de gradientes nas regiões de transição entre imagens adjacentes. Valores próximos a zero indicam ausência de ghosting, enquanto valores mais altos indicam presença significativa deste artefato. A presença de ghosting é particularmente prejudicial em aplicações onde a precisão visual é crítica, como na criação de panoramas profissionais ou em sistemas de navegação visual.
+
+\subsection{Seam Energy}
+
+A métrica \textit{Seam Energy} quantifica a energia de gradiente ao longo das costuras (seams) onde diferentes imagens são unidas no panorama. Costuras com menor energia indicam transições mais suaves e naturais entre as imagens, resultando em panoramas visualmente mais agradáveis.
+
+Esta métrica é calculada somando as magnitudes dos gradientes ao longo do caminho de costura. Valores menores indicam melhor qualidade de fusão, com transições menos perceptíveis entre as imagens de origem.
+
+\subsection{DeltaE - Diferença Perceptual de Cor}
+
+O DeltaE é uma métrica que quantifica a diferença perceptual entre cores no espaço de cor CIELAB. Esta métrica é importante para avaliar a consistência de cor entre diferentes regiões do panorama, especialmente em casos onde há variações de iluminação entre as imagens de entrada.
+
+A formulação utilizada foi o DeltaE 2000, que considera a percepção humana de diferenças de cor de forma mais precisa que versões anteriores. Valores menores de DeltaE indicam maior consistência cromática no panorama fusionado.
+
+\subsection{Entropia}
+
+A entropia é uma medida da quantidade de informação contida na imagem. No contexto de fusão de imagens, a entropia indica o grau de complexidade e riqueza de detalhes preservados no panorama resultante.
+
+A entropia é calculada através da distribuição de intensidades dos pixels:
+
+\begin{equation}
+H = -\sum_{i=0}^{L-1} p_i \log_2(p_i)
+\end{equation}
+
+\noindent onde $p_i$ é a probabilidade do nível de intensidade \textit{i} e \textit{L} é o número total de níveis de intensidade.
+
+Valores mais altos de entropia indicam imagens com maior riqueza de detalhes e complexidade textural. A comparação da entropia entre a imagem fusionada e as imagens originais permite avaliar se o processo de fusão preservou adequadamente a informação visual.
+
+\subsection{Nitidez}
+
+A métrica de nitidez avalia o grau de definição de bordas e detalhes finos na imagem fusionada. Esta métrica é particularmente importante para identificar casos onde o processo de fusão introduziu desfoque excessivo, o que pode prejudicar a qualidade visual do panorama.
+
+A nitidez é calculada através da análise de gradientes na imagem, utilizando operadores como o filtro Laplaciano. Valores mais altos indicam maior nitidez e melhor preservação de detalhes.
+
+\subsection{Tempo de Processamento}
+
+O tempo de processamento é uma métrica prática fundamental, especialmente para aplicações que requerem processamento em tempo real ou próximo ao tempo real. Esta métrica foi medida em segundos, incluindo todas as etapas desde o carregamento das imagens até a geração do panorama final.
+
+A avaliação do tempo de processamento permite identificar técnicas viáveis para diferentes contextos de aplicação, considerando as restrições computacionais e temporais específicas de cada cenário.
+
+\section{Ambiente Computacional}
+
+Os experimentos foram conduzidos em um ambiente computacional controlado para garantir a consistência e reprodutibilidade dos resultados. As especificações do hardware e software utilizados são detalhadas a seguir.
+
+\subsection{Hardware}
+
+Os testes foram executados em uma estação de trabalho com as seguintes especificações:
+
+\begin{itemize}
+    \item \textbf{Processador}: Intel Core i7-10700K (8 núcleos, 16 threads, 3.8 GHz base / 5.1 GHz boost)
+    \item \textbf{Memória RAM}: 32 GB DDR4 3200 MHz
+    \item \textbf{Placa Gráfica}: NVIDIA GeForce RTX 3080 (10 GB GDDR6X)
+    \item \textbf{Armazenamento}: SSD NVMe 1 TB (para sistema e dados de trabalho)
+    \item \textbf{Sistema Operacional}: Windows 11 Pro (64-bit)
+\end{itemize}
+
+A presença de uma placa gráfica dedicada com suporte a CUDA foi essencial para viabilizar a execução eficiente das técnicas baseadas em aprendizado profundo, que demandam processamento intensivo em GPU.
+
+\subsection{Software e Bibliotecas}
+
+O sistema foi implementado utilizando \textit{Python 3.10.x} como linguagem de programação principal. As principais bibliotecas utilizadas foram:
+
+\begin{itemize}
+    \item \textbf{OpenCV 4.8.x}: Biblioteca fundamental para processamento de imagens e implementação de técnicas clássicas
+    \item \textbf{NumPy 1.24.x}: Operações matriciais e álgebra linear
+    \item \textbf{PyTorch 2.0.x}: Framework de aprendizado profundo para implementação de técnicas baseadas em redes neurais
+    \item \textbf{torchvision 0.15.x}: Transformações de imagens e modelos pré-treinados
+    \item \textbf{scikit-image 0.20.x}: Métricas de qualidade de imagem (PSNR, SSIM)
+    \item \textbf{Pillow 9.5.x}: Manipulação de imagens e conversões de formato
+    \item \textbf{Matplotlib 3.7.x}: Visualização de resultados e geração de gráficos
+    \item \textbf{pandas 2.0.x}: Manipulação e análise de dados experimentais
+\end{itemize}
+
+Todas as bibliotecas foram instaladas através do gerenciador de pacotes \textit{pip}, e as versões específicas foram registradas em um arquivo \textit{requirements.txt} para facilitar a reprodução do ambiente.
+
+\section{Protocolo Experimental}
+
+Os experimentos foram conduzidos seguindo um protocolo rigoroso e sistemático, garantindo que todas as técnicas fossem avaliadas sob as mesmas condições e que os resultados obtidos fossem reprodutíveis.
+
+\subsection{Pré-processamento dos Dados}
+
+Antes da aplicação das técnicas de fusão, todas as imagens dos conjuntos foram submetidas a um processo de pré-processamento padronizado:
+
+\begin{enumerate}
+    \item \textbf{Verificação de integridade}: Validação da integridade dos arquivos de imagem
+    \item \textbf{Normalização de formato}: Conversão para espaço de cores RGB de 8 bits
+    \item \textbf{Redimensionamento}: Quando necessário para adequação às limitações de memória, mantendo proporção original
+    \item \textbf{Organização de metadados}: Registro de informações sobre ordem de captura e características do cenário
+\end{enumerate}
+
+Para os experimentos com a base de Múltiplos Registros, as imagens foram mantidas em suas resoluções originais sempre que possível, pois redimensionamentos podem afetar significativamente as métricas de qualidade calculadas.
+
+\subsection{Aplicação das Técnicas de Fusão}
+
+Cada técnica implementada foi aplicada sistematicamente a todos os conjuntos de imagens das bases selecionadas. Para garantir consistência, foram utilizados os mesmos parâmetros iniciais para todas as técnicas dentro de uma mesma categoria (clássicas ou aprendizado profundo).
+
+As técnicas clássicas baseadas em detecção de características utilizaram parâmetros padrão estabelecidos na literatura. Para as técnicas baseadas em aprendizado profundo, foram utilizados os modelos pré-treinados disponibilizados pelos autores originais quando aplicável.
+
+Um aspecto crítico do protocolo foi o registro detalhado de todos os parâmetros utilizados, tempos de processamento, e recursos computacionais consumidos por cada técnica.
+
+\subsection{Cálculo das Métricas}
+
+Para cada experimento realizado, todas as métricas descritas na Seção anterior foram calculadas automaticamente através de scripts implementados especificamente para este fim. O cálculo foi realizado comparando a imagem panorâmica gerada com a imagem de referência fornecida pelo dataset.
+
+Os resultados foram armazenados em formato CSV para facilitar análises estatísticas posteriores e garantir rastreabilidade completa dos experimentos realizados.
+
+\subsection{Análise Estatística}
+
+Para identificar os métodos com melhor desempenho geral, foi desenvolvida uma metodologia de análise multicriterial ponderada. As métricas foram normalizadas para o intervalo [0,1] e combinadas com os seguintes pesos:
+
+\begin{itemize}
+    \item PSNR: 30\% (qualidade de reconstrução)
+    \item SSIM: 30\% (similaridade estrutural)
+    \item Ghosting Score: 25\% (ausência de artefatos)
+    \item Seam Energy: 15\% (qualidade de transições)
+\end{itemize}
+
+Esta ponderação reflete a importância relativa de cada aspecto da qualidade para aplicações práticas de fusão de imagens, priorizando tanto a fidelidade de reconstrução quanto a ausência de artefatos visuais.
+
+\section{Considerações Éticas e de Reprodutibilidade}
+
+Todos os conjuntos de dados utilizados são públicos e foram empregados de acordo com as licenças e termos de uso estabelecidos por seus autores originais. O código fonte desenvolvido e os resultados experimentais detalhados estão disponíveis em repositório público para facilitar a reprodução e extensão deste trabalho pela comunidade científica.

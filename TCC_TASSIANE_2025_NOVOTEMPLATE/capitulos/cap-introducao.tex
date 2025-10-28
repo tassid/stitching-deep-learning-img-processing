@@ -1,0 +1,91 @@
+%%%% CAPÍTULO 1 - INTRODUÇÃO
+%%
+%% Deve apresentar uma visão global da pesquisa, incluindo: breve histórico, importância e justificativa da escolha do tema,
+%% delimitações do assunto, formulação de hipóteses e objetivos da pesquisa e estrutura do trabalho.
+
+%% Título e rótulo de capítulo (rótulos não devem conter caracteres especiais, acentuados ou cedilha)
+\chapter{Introdução}\label{cap:introducao}
+
+
+
+A fusão de imagens é uma técnica fundamental na área da visão computacional, que visa integrar informações de múltiplas fontes de imagens para produzir uma representação mais completa e informativa de uma cena ou objeto \cite{barnard2020}. Essa técnica tem sido amplamente utilizada em uma variedade de aplicações, incluindo sensoriamento remoto, vigilância, medicina e robótica, devido à sua capacidade de fornecer \textit{insights} valiosos a partir de dados visuais complexos \cite{xue2021}. Com o avanço da tecnologia de aquisição de imagens, como câmeras de alta resolução e sensores remotos, a quantidade e a diversidade de dados visuais disponíveis aumentaram significativamente, tornando a fusão de imagens uma ferramenta essencial para análise e interpretação de informações visuais \cite{bhattacharya2022}.
+
+A detecção de objetos é uma das aplicações-chave da fusão de imagens, onde a combinação de informações de várias fontes de imagem pode melhorar significativamente a precisão e eficiência do processo de detecção \cite{zhu2020}. Além disso, a fusão de imagens desempenha um papel crucial na detecção de objetos em tempo real e em condições adversas, como baixa luminosidade ou visibilidade reduzida \cite{zhang2021}. 
+
+Métodos avançados de fusão de imagens, como a fusão de multi-resolução e a fusão baseada em características, têm sido desenvolvidos para melhorar a detecção de objetos em situações desafiadoras, fornecendo uma representação mais discriminativa e confiável da cena \cite{jiang2020}. Essas técnicas permitem uma detecção mais precisa e robusta de objetos, contribuindo para o avanço de aplicações práticas, como sistemas de segurança e veículos autônomos \cite{zhu2020}.
+
+No entanto, apesar dos avanços na área, a fusão de imagens ainda enfrenta alguns desafios e limitações, como a integração eficaz de informações de diferentes fontes e a preservação da qualidade da imagem \cite{barnard2020}. Novas abordagens e algoritmos estão sendo constantemente desenvolvidos para lidar com esses desafios e melhorar o desempenho da fusão de imagens em uma variedade de aplicações \cite{xue2021}. Com a rápida evolução da tecnologia e o aumento da disponibilidade de dados visuais, a fusão de imagens continuará desempenhando um papel central na análise e interpretação de informações visuais em diversos domínios \cite{bhattacharya2022}.
+
+Portanto, este trabalho propõe investigar e analisar os avanços recentes na fusão de imagens e sua aplicação na detecção de objetos. Serão abordadas técnicas e algoritmos de fusão de imagens, bem como suas aplicações e desafios associados. O objetivo é fornecer uma visão abrangente e atualizada sobre o estado da arte da fusão de imagens e seu impacto na detecção de objetos, contribuindo para o avanço da área e o desenvolvimento de soluções mais eficazes e robustas.
+
+%% A detecção precisa de objetos em imagens é uma tarefa fundamental em diversas aplicações, abrangendo desde segurança até reconhecimento de padrões, contribuindo para avanços notáveis na área de ciência da computação e visão computacional \cite{russakovsky2015imagenet}. A complexidade inerente a essa tarefa é atribuída à diversidade de condições ambientais e características dos objetos presentes nas imagens. 
+
+%Sem o emprego de técnicas avançadas de fusão de imagens, é comum a ocorrência de desafios como detecções duplicadas ou mesmo a ausência de detecção, decorrente de variações na iluminação, perspectiva ou oclusões \cite{ren2018faster}.
+
+%% Um dos principais obstáculos enfrentados na detecção de objetos é a presença de objetos parcialmente visíveis ou ocultos em uma cena. Em tais circunstâncias, um único algoritmo de detecção pode não ser suficiente para capturar todas as informações relevantes, resultando em múltiplas detecções fragmentadas do mesmo objeto ou falhas na detecção do mesmo \cite{ren2018faster}. A fusão de imagens surge como uma solução para esse problema, integrando informações provenientes de múltiplas fontes de imagem, tais como câmeras com diferentes perspectivas ou modalidades sensoriais, a fim de reconstruir uma representação mais completa e coerente da cena, mitigando assim a ocorrência de detecções duplicadas e melhorando a precisão global \cite{senthilnath2012fusion}.
+
+%% Além disso, em ambientes complexos onde a detecção de objetos é desafiadora devido à presença de muitos objetos pequenos ou sobrepostos, a fusão de imagens pode desempenhar um papel crucial na correta distinção entre objetos individuais e na redução de falsos positivos  \cite{senthilnath2012fusion}. Ao combinar informações de diferentes fontes, como imagens de alta resolução com imagens térmicas ou de profundidade, os sistemas de detecção podem extrair características complementares dos objetos, aprimorando assim a capacidade de discriminação e diminuindo a probabilidade de erros de detecção \cite{ren2018faster}.
+
+%% Portanto, evidencia-se a importância crítica da fusão de imagens na detecção precisa de objetos, oferecendo uma abordagem robusta e adaptável para lidar com as complexidades das cenas do mundo real. Uma análise abrangente dessas técnicas é essencial para compreender sua eficácia, identificar desafios remanescentes e explorar oportunidades para melhorias futuras, contribuindo, dessa forma, para avanços significativos na área de visão computacional e suas aplicações práticas.
+
+\section{Objetivo geral e específicos}\label{sec:objetivos}
+
+O objetivo geral deste trabalho é investigar e aplicar técnicas de fusão de imagens para construção de mosaicos panorâmicos e avaliar seu impacto na detecção de objetos, comparando métodos clássicos e baseados em aprendizado profundo quanto à qualidade, eficiência e adequação para aplicações práticas. Este objetivo principal desdobra-se nos seguintes objetivos específicos:
+
+\begin{itemize}
+    \item \textbf{Implementar e avaliar técnicas de fusão de imagens}: Identificar e implementar um conjunto abrangente de técnicas de fusão de imagens, incluindo métodos clássicos baseados em detecção de características (SIFT, ORB) e abordagens de aprendizado profundo (LoFTR, SuperGlue, UDIS). Testar essas técnicas utilizando conjuntos de dados públicos para assegurar representatividade e reprodutibilidade dos experimentos;
+
+    \item \textbf{Comparar desempenho de métodos de fusão}: Avaliar quantitativa e qualitativamente o desempenho dos modelos implementados através de múltiplas métricas de qualidade (PSNR, SSIM, Ghosting Score, Seam Energy) e eficiência (tempo de processamento), identificando os métodos mais eficazes para diferentes contextos de aplicação;
+
+    \item \textbf{Investigar impacto na detecção de objetos}: Aplicar técnicas de detecção de objetos baseadas em YOLO sobre os mosaicos panorâmicos gerados pelas diferentes técnicas de fusão, comparando a precisão e eficácia da detecção entre imagens individuais e panoramas fusionados. Analisar como a qualidade da fusão (presença de ghosting, distorções geométricas) afeta o desempenho dos detectores de objetos.
+\end{itemize}
+
+
+%%O objetivo geral deste trabalho é realizar uma análise abrangente das técnicas de fusão de imagem aplicadas à detecção de objetos, visando compreender sua eficácia, limitações e tendências atuais. Este objetivo principal desdobra-se nos seguintes objetivos específicos:
+
+%\begin{itemize}
+   % \item Investigar e comparar criticamente as abordagens e metodologias empregadas na fusão de imagens para detecção de objetos, destacando suas características, pontos fortes e limitações, com o objetivo de identificar as mais promissoras para investigação adicional.
+    %\item Realizar uma avaliação empírica rigorosa do desempenho e da eficácia das técnicas de fusão de imagens em contextos específicos de detecção de objetos, abrangendo uma variedade de tipos de objetos, ambientes e condições de iluminação, a fim de identificar as abordagens mais adequadas para diferentes cenários.
+    %\item Explorar as tendências recentes na pesquisa e desenvolvimento de técnicas de fusão de imagens para detecção de objetos, com foco especial no uso de abordagens baseadas em deep learning, aprendizado por transferência e combinações híbridas de técnicas, com o objetivo de identificar lacunas de conhecimento e áreas de potencial investigação futura.
+%\end{itemize}
+
+
+\section{Justificativa}\label{sec:justificativa}
+
+A fusão de imagens, especialmente em cenários que envolvem imagens panorâmicas e a detecção de múltiplos objetos, apresenta desafios e oportunidades significativas na área da ciência da computação. A crescente disponibilidade de tecnologias de captura de imagens, como câmeras de alta resolução e sensores remotos, tem levado a um aumento na complexidade e no volume de dados visuais que precisam ser processados e analisados \cite{smith2023}. Em ambientes panorâmicos, onde a captura de uma cena abrange um amplo campo de visão, a detecção e reconhecimento de objetos torna-se particularmente desafiadora devido à variação de escala, perspectiva e iluminação \cite{gupta2022}.
+
+A importância da fusão de imagens para a detecção de objetos em cenários complexos vai além da simples integração de informações visuais.  Além disso, a fusão de imagens baseada em características, que utiliza informações semânticas ou contextuais para integrar imagens, tem demonstrado ser eficaz na melhoria da detecção de objetos em ambientes urbanos e florestais \cite{guan2023}. 
+
+No entanto, apesar dos avanços na área, ainda existem desafios significativos a serem superados na fusão de imagens para a detecção de objetos em ambientes complexos e dinâmicos. Um dos principais desafios é a integração eficaz de informações de diferentes fontes de imagem, garantindo a consistência e a qualidade da fusão \cite{zhang2020}. 
+
+Outra questão importante é a adaptação e generalização dos modelos de fusão de imagens para diferentes cenários e condições de captura de imagem, levando em consideração as variações na iluminação, clima e paisagem \cite{wu2022}. Diante desses desafios, a fusão de imagens surge como uma abordagem promissora para integrar informações de múltiplas fontes de imagem e melhorar a precisão e eficiência da detecção de objetos em ambientes panorâmicos e com múltiplos objetos \cite{liu2020}, sendo fundamental realizar pesquisas aprofundadas e utilizar de abordagens inovadoras na fusão de imagens para a detecção de objetos, visando melhorar a precisão e eficiência dos sistemas de visão computacional em cenários complexos. 
+
+
+
+% A importância da detecção precisa de objetos em imagens é amplamente reconhecida em diversas áreas, incluindo segurança pública, monitoramento ambiental e automação industrial \cite{girshick2014rich, lin2014microsoft}. A capacidade de identificar e localizar objetos em imagens é crucial para sistemas de vigilância, controle de tráfego, sistemas de assistência ao condutor e muitas outras aplicações críticas.
+
+%A fusão de imagem, que envolve a integração de informações de diferentes fontes visuais, emergiu como uma abordagem promissora para melhorar a precisão e a confiabilidade da detecção de objetos \cite{ma2018instance, chen2019semantic}. Ao combinar dados de múltiplas fontes, como câmeras de diferentes perspectivas ou modalidades sensoriais, as técnicas de fusão de imagem podem fornecer uma representação mais completa e contextualizada da cena, superando as limitações individuais de cada fonte de informação.
+
+%A justificativa para este estudo é motivada pela necessidade de compreender e analisar criticamente as técnicas de fusão de imagem aplicadas à detecção de objetos, especialmente em um contexto onde o uso de métodos avançados, como aprendizado profundo e processamento de imagens, está se tornando cada vez mais prevalente \cite{he2017mask, li2020dual}. Essa análise é crucial para identificar tendências atuais, desafios e oportunidades de pesquisa, contribuindo assim para o avanço do conhecimento e o desenvolvimento de técnicas mais eficazes para a detecção de objetos em imagens.
+
+%Além disso, a revisão crítica de estudos anteriores relacionados à construção de mosaicos de imagens e detecção de objetos em visão computacional fornecerá uma base sólida para a análise das técnicas de fusão de imagem \cite{everingham2015pascal, krizhevsky2012imagenet}. Compreender o estado atual da arte e as lacunas de conhecimento existentes é fundamental para orientar pesquisas futuras e promover avanços significativos nessa área.
+
+
+\section{Estrutura do trabalho}\label{sec:estruturaTrabalho}
+
+Este documento está organizado em sete capítulos que abordam de maneira sistemática o tema da fusão de imagens e seu impacto na detecção de objetos:
+
+O \textbf{Capítulo 1} apresenta uma introdução ao conceito de fusão de imagens e sua importância em aplicações de visão computacional, seguida dos objetivos gerais e específicos que delineiam o escopo e as metas do trabalho. A justificativa e a estrutura do documento também são apresentadas.
+
+O \textbf{Capítulo 2} fornece uma fundamentação teórica detalhada, abrangendo desde os conceitos básicos de fusão de imagens até as técnicas mais avançadas, incluindo métodos clássicos baseados em detecção de características e abordagens modernas de aprendizado profundo. São também discutidas as principais aplicações da fusão de imagens e revisados os trabalhos relacionados, identificando lacunas de conhecimento que este estudo pretende preencher.
+
+O \textbf{Capítulo 3} descreve os materiais e métodos utilizados, incluindo os conjuntos de dados selecionados, as métricas de avaliação (PSNR, SSIM, Ghosting Score, Seam Energy, entre outras), o ambiente computacional configurado, e o protocolo experimental estabelecido para garantir reprodutibilidade e validade científica dos resultados.
+
+O \textbf{Capítulo 4} apresenta os detalhes de implementação das 20 técnicas de fusão de imagens testadas, abrangendo tanto métodos clássicos quanto baseados em aprendizado profundo, com descrição das adaptações e configurações específicas utilizadas.
+
+O \textbf{Capítulo 5} apresenta os resultados experimentais da avaliação comparativa das técnicas de fusão, incluindo análise quantitativa através das métricas definidas, análise qualitativa com exemplos visuais, e discussão sobre os trade-offs identificados entre qualidade, eficiência e presença de artefatos.
+
+O \textbf{Capítulo 6} investiga o impacto das diferentes técnicas de fusão na detecção de objetos, aplicando modelos YOLO (YOLOv5, YOLOv8 e YOLO-NAS) sobre os panoramas gerados e comparando com detecções em imagens individuais. São analisadas as correlações entre qualidade de fusão e desempenho de detecção, fornecendo diretrizes práticas para escolha de métodos adequados.
+
+O \textbf{Capítulo 7} sintetiza as conclusões do trabalho, retomando os objetivos e discutindo o cumprimento de cada um deles, apresentando as contribuições principais, reconhecendo as limitações do estudo, e propondo direções para trabalhos futuros na área de fusão de imagens e detecção de objetos.
+

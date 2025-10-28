@@ -1,0 +1,188 @@
+%%%% CAPÍTULO 7 - CONCLUSÕES E PERSPECTIVAS
+%%
+\chapter{Conclusões}\label{cap:conclusoeseperspectivas}
+
+Este trabalho apresentou um estudo comparativo abrangente sobre técnicas de fusão de imagens para construção de mosaicos panorâmicos, seguido da investigação do impacto dessas técnicas na detecção de objetos. Esta seção sintetiza os principais resultados obtidos, discute as contribuições do trabalho, identifica suas limitações e propõe direções para trabalhos futuros.
+
+\section{Retomada dos Objetivos}
+
+O objetivo geral deste trabalho foi investigar e aplicar técnicas de fusão de imagens para construção de mosaicos panorâmicos e avaliar seu impacto na detecção de objetos em diferentes cenários. Este objetivo desdobrou-se em três objetivos específicos, cujo cumprimento é discutido a seguir.
+
+\subsection{Objetivo Específico 1: Implementação de Técnicas de Fusão}
+
+O primeiro objetivo específico consistiu em identificar e implementar modelos de fusão de imagens, incluindo técnicas clássicas e abordagens de aprendizado profundo, testando-os em conjuntos de dados públicos.
+
+Este objetivo foi \textbf{plenamente alcançado}. Foram implementadas e testadas 20 técnicas diferentes de fusão de imagens, sendo 15 baseadas em métodos clássicos de visão computacional e 5 baseadas em técnicas de aprendizado profundo. Todas as técnicas foram aplicadas sistematicamente ao dataset Robust Image Stitching with Multiple Registrations, resultando em 295 execuções bem-sucedidas sobre 15 conjuntos de imagens distintos.
+
+As implementações incluíram desde métodos básicos como OpenCV Stitcher até técnicas avançadas como LoFTR e SuperGlue, garantindo uma cobertura representativa do estado da arte em fusão de imagens panorâmicas.
+
+\subsection{Objetivo Específico 2: Avaliação de Desempenho em Fusão}
+
+O segundo objetivo específico focou em avaliar o desempenho dos modelos de fusão e comparar seus resultados para identificar as abordagens mais eficazes.
+
+Este objetivo foi \textbf{plenamente alcançado}. Foi estabelecido um protocolo experimental rigoroso com múltiplas métricas de qualidade (PSNR, SSIM, MSE, Ghosting Score, Seam Energy, DeltaE, Entropia e Nitidez), além do tempo de processamento. A análise multicriterial ponderada permitiu identificar objetivamente os cinco métodos com melhor desempenho geral.
+
+Os principais resultados desta avaliação foram:
+
+\begin{itemize}
+    \item \textbf{Melhor desempenho geral}: OpenCV Stitcher e Stitcher Básico alcançaram score de 0,8732, representando o melhor equilíbrio entre qualidade visual, ausência de artefatos e eficiência computacional
+
+    \item \textbf{Maior qualidade visual}: O método Seams Exposure Multiband obteve o maior PSNR (11,49 dB) e a menor energia de seam (77,42), indicando melhor reconstrução e transições mais suaves, porém com custo computacional significativamente maior (7,11s vs 0,26s)
+
+    \item \textbf{Comparação clássico vs deep learning}: Os métodos baseados em aprendizado profundo apresentaram métricas ligeiramente superiores (+0,08 dB em PSNR, +0,0066 em SSIM), mas com tempo de processamento médio 68\% maior que os métodos clássicos
+
+    \item \textbf{Presença de artefatos}: Ambas as categorias apresentaram Ghosting Score alto (~0,94), indicando que o dataset escolhido apresenta desafios significativos para alinhamento perfeito devido a paralaxe e variações de perspectiva
+\end{itemize}
+
+\subsection{Objetivo Específico 3: Avaliação de Impacto na Detecção de Objetos}
+
+O terceiro objetivo específico consistiu em avaliar o impacto das diferentes técnicas de fusão na detecção de objetos, investigando como artefatos de fusão e variações de qualidade afetam o desempenho de detectores do estado da arte.
+
+\textcolor{red}{[Este objetivo está em fase de implementação. As conclusões correspondentes serão adicionadas após conclusão dos experimentos de detecção de objetos descritos no Capítulo~\ref{cap:deteccao-objetos}]}
+
+\textcolor{blue}{Resultados preliminares esperados:}
+\begin{itemize}
+    \item \textcolor{blue}{Correlação entre métricas de qualidade de fusão (PSNR, SSIM) e precisão de detecção}
+    \item \textcolor{blue}{Identificação de trade-offs entre custo de fusão e benefício para detecção}
+    \item \textcolor{blue}{Recomendações de métodos de fusão adequados para aplicações com detecção}
+\end{itemize}
+
+\section{Contribuições do Trabalho}
+
+Este trabalho apresenta contribuições significativas para a área de fusão de imagens e visão computacional:
+
+\subsection{Comparação Sistemática e Abrangente}
+
+Diferentemente de trabalhos anteriores que focam em subconjuntos específicos de técnicas, este estudo fornece uma comparação sistemática de 20 métodos distintos sob as mesmas condições experimentais. Esta abrangência permite identificar não apenas o método com melhor desempenho absoluto, mas também compreender os trade-offs entre diferentes abordagens.
+
+A utilização de análise multicriterial ponderada fornece uma visão holística do desempenho, considerando simultaneamente qualidade visual, presença de artefatos e eficiência computacional, aspectos cruciais para aplicações práticas.
+
+\subsection{Identificação de Trade-offs Práticos}
+
+O trabalho identificou claramente o trade-off fundamental entre qualidade e velocidade:
+
+\begin{itemize}
+    \item Métodos clássicos como OpenCV Stitcher oferecem excelente relação custo-benefício, sendo adequados para aplicações que requerem processamento rápido com qualidade aceitável
+
+    \item Métodos como Seams Exposure Multiband são indicados quando qualidade visual é prioridade absoluta e tempo de processamento não é restritivo
+
+    \item Técnicas de aprendizado profundo mostram-se promissoras mas ainda carecem de otimização para competir em eficiência com métodos clássicos bem estabelecidos
+\end{itemize}
+
+\subsection{Base para Estudos de Detecção em Panoramas}
+
+\textcolor{blue}{[A ser expandido após conclusão dos experimentos de detecção]}
+
+A metodologia estabelecida neste trabalho fornece uma base sólida para investigações futuras sobre o impacto da fusão de imagens em tarefas de visão computacional de alto nível, particularmente detecção e reconhecimento de objetos.
+
+\section{Limitações do Estudo}
+
+Embora o trabalho tenha alcançado seus objetivos principais, algumas limitações devem ser reconhecidas:
+
+\subsection{Especificidade do Dataset}
+
+Os experimentos foram conduzidos primordialmente sobre o dataset Robust Image Stitching with Multiple Registrations, que apresenta características específicas:
+
+\begin{itemize}
+    \item Presença significativa de paralaxe e variações de perspectiva
+    \item Cenários predominantemente urbanos e arquitetônicos
+    \item Imagens capturadas em condições controladas de iluminação
+\end{itemize}
+
+Esta especificidade pode limitar a generalização dos resultados para outros contextos, como ambientes naturais, condições de iluminação adversas ou cenários com alta dinâmica temporal.
+
+\subsection{Valores Absolutos de PSNR}
+
+Os valores de PSNR obtidos (~11 dB em média) são relativamente baixos quando comparados a outras aplicações de processamento de imagens. Isto se deve principalmente às características desafiadoras do dataset utilizado e não representa necessariamente uma limitação dos métodos implementados. Trabalhos futuros devem investigar o desempenho em datasets com menor complexidade para estabelecer melhor o alcance de cada técnica.
+
+\subsection{Presença Generalizada de Ghosting}
+
+Todos os métodos apresentaram Ghosting Score alto (~0,94), indicando presença moderada de artefatos de duplicação de bordas. Embora isto seja esperado para o dataset escolhido, limita a capacidade de distinguir claramente o desempenho dos métodos neste aspecto específico. Datasets adicionais com menor paralaxe são necessários para avaliação mais discriminativa.
+
+\subsection{Ausência de Ground Truth Perfeito}
+
+\textcolor{blue}{[Limitação específica dos experimentos de detecção - a ser expandido]}
+
+Para os experimentos de detecção de objetos, a ausência de ground truth perfeitamente anotado para os panoramas gerados constitui um desafio metodológico. As comparações baseiam-se em detecções nas imagens originais, que podem não capturar completamente o contexto ampliado disponível nos panoramas.
+
+\section{Trabalhos Futuros}
+
+Os resultados obtidos abrem diversas direções promissoras para trabalhos futuros:
+
+\subsection{Expansão para Outros Datasets}
+
+Replicar os experimentos em outros datasets públicos de image stitching:
+
+\begin{itemize}
+    \item UDIS-D (Unsupervised Deep Image Stitching): para avaliar desempenho em cenários diversos
+    \item NISwGSP Dataset: para testar robustez em presença de paralaxe extrema
+    \item Datasets de diferentes domínios: médico, sensoriamento remoto, robótica
+\end{itemize}
+
+Esta expansão permitirá estabelecer a robustez e generalização de cada método, identificando para quais contextos cada técnica é mais adequada.
+
+\subsection{Técnicas Híbridas}
+
+Investigar abordagens híbridas que combinem pontos fortes de métodos clássicos e de aprendizado profundo:
+
+\begin{itemize}
+    \item Utilização de deep learning para detecção de características, seguido de métodos clássicos para fusão
+    \item Refinamento de resultados de métodos clássicos usando redes neurais
+    \item Ensembles de múltiplos métodos com seleção adaptativa baseada em características da cena
+\end{itemize}
+
+\subsection{Otimização de Eficiência}
+
+Trabalhos futuros devem focar na otimização dos métodos de aprendizado profundo:
+
+\begin{itemize}
+    \item Quantização e pruning de modelos para redução de custo computacional
+    \item Implementações em hardware dedicado (GPUs, TPUs)
+    \item Desenvolvimento de arquiteturas mais leves específicas para fusão de imagens
+    \item Técnicas de fusão em tempo real para aplicações críticas
+\end{itemize}
+
+\subsection{Desenvolvimento de Métricas Específicas}
+
+Propor novas métricas específicas para avaliação de panoramas considerando aplicações posteriores:
+
+\begin{itemize}
+    \item Métricas que correlacionem diretamente qualidade de fusão com desempenho de detecção
+    \item Métricas perceptuais baseadas em redes neurais
+    \item Avaliação de consistência semântica em regiões de junção
+\end{itemize}
+
+\subsection{Aplicações em Cenários Reais}
+
+\textcolor{blue}{[A ser expandido após conclusão dos experimentos de detecção]}
+
+Validar os métodos em aplicações práticas reais:
+
+\begin{itemize}
+    \item Sistemas de vigilância com múltiplas câmeras
+    \item Navegação autônoma de veículos e drones
+    \item Monitoramento ambiental e agrícola
+    \item Aplicações médicas (endoscopia, microscopia)
+\end{itemize}
+
+\subsection{Fusão Temporal em Vídeos}
+
+Estender os métodos para fusão temporal, construindo panoramas a partir de sequências de vídeo, considerando:
+
+\begin{itemize}
+    \item Consistência temporal entre frames
+    \item Detecção e tratamento de objetos em movimento
+    \item Otimização para processamento em tempo real
+\end{itemize}
+
+\section{Considerações Finais}
+
+Este trabalho apresentou uma análise comparativa sistemática de técnicas de fusão de imagens para construção de mosaicos panorâmicos, estabelecendo uma base metodológica sólida e identificando claramente os trade-offs entre diferentes abordagens.
+
+Os resultados demonstram que, apesar dos avanços recentes em aprendizado profundo, técnicas clássicas bem estabelecidas como OpenCV Stitcher continuam oferecendo excelente desempenho com custo computacional significativamente menor. Isto reforça a importância de escolher técnicas adequadas ao contexto de aplicação, considerando não apenas qualidade absoluta mas também eficiência e praticidade de implementação.
+
+\textcolor{blue}{[Parágrafo final a ser adicionado após conclusão dos experimentos de detecção:]}
+
+\textcolor{blue}{A investigação do impacto da fusão de imagens na detecção de objetos fornecerá insights valiosos sobre como artefatos de fusão afetam tarefas de visão computacional de alto nível, contribuindo para o desenvolvimento de pipelines mais robustos e eficientes que integrem múltiplas etapas de processamento visual.}
+
+Os resultados, códigos e dados deste trabalho estão disponíveis publicamente, contribuindo para a reprodutibilidade científica e permitindo que pesquisadores e desenvolvedores se beneficiem das metodologias e descobertas aqui apresentadas.

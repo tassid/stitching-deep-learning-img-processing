@@ -13,7 +13,9 @@
       "Bash(else echo \"✗ FALTANDO: $img\")",
       "Bash(fi)",
       "Bash(done)",
-      "Bash(cut:*)"
+      "Bash(cut:*)",
+      "Bash(rm:*)",
+      "Bash(powershell -Command \"Remove-Item -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE\\figuras\\resultados\\nul'' -Force -ErrorAction SilentlyContinue ; Remove-Item -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE\\nul'' -Force -ErrorAction SilentlyContinue ; Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue ; Write-Host ''Arquivos removidos''\")"
     ],
     "deny": [],
     "ask": []

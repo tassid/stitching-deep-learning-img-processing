@@ -1,0 +1,137 @@
+% ===== TABELA 1: TOP 5 MÉTODOS =====
+\begin{table}[htb]
+\centering
+\caption{Ranking dos 5 melhores métodos de fusão de imagens}
+\label{tab:top5}
+\small
+\begin{tabular}{clcccc}
+\hline
+\textbf{Rank} & \textbf{Método} & \textbf{Score} & \textbf{PSNR (dB)} & \textbf{SSIM} & \textbf{Ghosting} \\ \hline
+1 & OpenCV Stitcher (panorama/scans) & 0.8732 & 11.10 & 0.2870 & 0.9425 \\
+2 & Stitcher Basico & 0.8732 & 11.10 & 0.2870 & 0.9425 \\
+3 & Seams Exposure Multiband & 0.7753 & 11.49 & 0.2768 & 0.9456 \\
+4 & Blend Laplacian & 0.7536 & 11.30 & 0.2653 & 0.9441 \\
+5 & Exposure Comp Only & 0.7519 & 11.31 & 0.2707 & 0.9445 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+
+
+% ===== TABELA 2: CLÁSSICOS VS DEEP LEARNING =====
+\begin{table}[htb]
+\centering
+\caption{Comparação entre métodos clássicos e deep learning}
+\label{tab:classic-vs-deep}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Categoria} & \textbf{PSNR Médio (dB)} & \textbf{SSIM Médio} & \textbf{Ghosting} & \textbf{Tempo (s)} \\ \hline
+Clássico (n=218) & 11.01 & 0.2569 & 0.9441 & 0.91 \\
+Deep Learning (n=75) & 11.09 & 0.2635 & 0.9452 & 1.53 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+
+
+% ===== TABELA 3: RANKING POR PSNR (TOP 10) =====
+\begin{table}[htb]
+\centering
+\caption{Ranking dos métodos por PSNR (Top 10)}
+\label{tab:psnr-ranking}
+\small
+\begin{tabular}{clcc}
+\hline
+\textbf{Pos.} & \textbf{Método} & \textbf{PSNR (dB)} & \textbf{Categoria} \\ \hline
+1 & Seams Exposure Multiband & 11.49 & Clássico \\
+2 & Exposure Comp Only & 11.31 & Clássico \\
+3 & Blend Laplacian & 11.30 & Clássico \\
+4 & Blend Exposure & 11.28 & Clássico \\
+5 & Blend Wavelet & 11.28 & Clássico \\
+6 & Features Homography & 11.27 & Clássico \\
+7 & Manual Sift Ransac Feather & 11.27 & Clássico \\
+8 & ORB + Homography (sequencial) & 11.27 & Clássico \\
+9 & Blend Hybrid & 11.24 & Clássico \\
+10 & Detectors Harris Fast & 11.21 & Clássico \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+
+
+% ===== TABELA 4: RANKING POR SSIM (TOP 10) =====
+\begin{table}[htb]
+\centering
+\caption{Ranking dos métodos por SSIM (Top 10)}
+\label{tab:ssim-ranking}
+\small
+\begin{tabular}{clcc}
+\hline
+\textbf{Pos.} & \textbf{Método} & \textbf{SSIM} & \textbf{Interpretação} \\ \hline
+1 & OpenCV Stitcher (panorama/scans) & 0.2870 & Excelente \\
+2 & Stitcher Basico & 0.2870 & Excelente \\
+3 & Seams Exposure Multiband & 0.2768 & Bom \\
+4 & Exposure Comp Only & 0.2707 & Bom \\
+5 & Blend Wavelet & 0.2696 & Bom \\
+6 & Blend Exposure & 0.2696 & Bom \\
+7 & Manual Sift Ransac Feather & 0.2682 & Bom \\
+8 & Features Homography & 0.2682 & Bom \\
+9 & ORB + Homography (sequencial) & 0.2682 & Bom \\
+10 & Udis & 0.2666 & Bom \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+
+
+% ===== TABELA 5: RANKING POR GHOSTING - MENOR É MELHOR (TOP 10) =====
+\begin{table}[htb]
+\centering
+\caption{Ranking dos métodos por Ghosting Score (menor é melhor)}
+\label{tab:ghosting-ranking}
+\small
+\begin{tabular}{clcc}
+\hline
+\textbf{Pos.} & \textbf{Método} & \textbf{Ghosting} & \textbf{Interpretação} \\ \hline
+1 & Blend Multifocal & 0.9419 & Moderado \\
+2 & Ecc Alignment & 0.9424 & Moderado \\
+3 & Stitcher Basico & 0.9425 & Moderado \\
+4 & OpenCV Stitcher (panorama/scans) & 0.9425 & Moderado \\
+5 & Blend Hybrid & 0.9434 & Moderado \\
+6 & Sp Superglue & 0.9440 & Moderado \\
+7 & Blend Laplacian & 0.9441 & Moderado \\
+8 & Blend Poisson & 0.9442 & Moderado \\
+9 & Blend Wavelet & 0.9444 & Moderado \\
+10 & Blend Exposure & 0.9444 & Moderado \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+
+
+% ===== TABELA 6: DETALHES COMPLETOS DOS TOP 5 =====
+\begin{table}[htb]
+\centering
+\caption{Métricas detalhadas dos 5 melhores métodos}
+\label{tab:top5-detalhado}
+\tiny
+\begin{tabular}{clcccccc}
+\hline
+\textbf{Rank} & \textbf{Método} & \textbf{PSNR} & \textbf{SSIM} & \textbf{Ghosting} & \textbf{Seam} & \textbf{Entropia} & \textbf{Tempo (s)} \\ \hline
+1 & OpenCV Stitcher (panorama/scan & 11.10 & 0.2870 & 0.9425 & 80.79 & 7.08 & 0.26 \\
+2 & Stitcher Basico & 11.10 & 0.2870 & 0.9425 & 80.79 & 7.08 & 0.34 \\
+3 & Seams Exposure Multiband & 11.49 & 0.2768 & 0.9456 & 77.42 & 6.72 & 7.11 \\
+4 & Blend Laplacian & 11.30 & 0.2653 & 0.9441 & 80.54 & 6.70 & 0.41 \\
+5 & Exposure Comp Only & 11.31 & 0.2707 & 0.9445 & 80.33 & 6.67 & 0.33 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+
+=== Tabelas LaTeX geradas com sucesso! ===

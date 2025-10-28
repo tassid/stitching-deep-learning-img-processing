@@ -1,6 +1,0 @@
-timestamp: 20250930_093157
-method: classic/orb_homography
-output: pano_classic-orb_homography_20250930_093157.jpg
-reference: C:/datasets/Dataset for Stitching with Multiple Registrations (2018)/robust_image_stitching_with_multiple_registrations_results/robust_image_stitching_with_multiple_registrations_results/theory_left/ours.png
-psnr_db: 12.280
-ssim: 0.5105

@@ -1,6 +1,0 @@
-timestamp: 20251005_171530
-method: classic/11_blend_multifocal
-output: pano_classic-11_blend_multifocal_20251005_171530.jpg
-reference: (sem referência)
-psnr_db: nan
-ssim: nan

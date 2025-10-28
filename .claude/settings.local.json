@@ -5,7 +5,15 @@
       "Bash(python:*)",
       "Bash(move sp_superglue.py sp.superglue.py)",
       "Bash(dir \"C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\" /s /b)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(dir:*)",
+      "Bash(for img in \"figuras/fusao.png\" \"figuras/referencialteorico/stitching1.png\" \"figuras/referencialteorico/blending1.png\")",
+      "Bash(do if [ -f \"$img\" ])",
+      "Bash(then echo \"✓ $img\")",
+      "Bash(else echo \"✗ FALTANDO: $img\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(cut:*)"
     ],
     "deny": [],
     "ask": []

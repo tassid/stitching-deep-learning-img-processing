@@ -1,6 +1,0 @@
-timestamp: 20251005_190949
-method: classic/opencv_stitcher
-output: pano_classic-opencv_stitcher_20251005_190949.jpg
-reference: (sem referência)
-psnr_db: nan
-ssim: nan

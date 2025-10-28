@@ -1,6 +1,0 @@
-timestamp: 20250930_091757
-method: classic/opencv_stitcher
-output: pano_classic-opencv_stitcher_20250930_091757.jpg
-reference: C:/Users/TASSI/Documents/GitHub/stitching-deep-learning-img-processing/results/pano_classic-opencv_stitcher_20250929_230145.jpg
-psnr_db: 11.069
-ssim: 0.4711

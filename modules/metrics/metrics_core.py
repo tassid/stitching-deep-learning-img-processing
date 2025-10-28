@@ -69,22 +69,55 @@ def crop_to_overlap(a: np.ndarray, b: np.ndarray) -> Tuple[np.ndarray, np.ndarra
     return a[y0:y1, x0:x1], b[y0:y1, x0:x1], m[y0:y1, x0:x1]
 
 # ---------- métricas básicas ----------
-def mse(a: np.ndarray, b: np.ndarray) -> float:
-    d = a.astype(np.float64) - b.astype(np.float64)
+def mse(a: np.ndarray, b: np.ndarray, mask: np.ndarray = None) -> float:
+    """Calcula MSE, opcionalmente usando máscara para ignorar bordas pretas."""
+    a_f = a.astype(np.float64)
+    b_f = b.astype(np.float64)
+    d = a_f - b_f
+
+    if mask is not None:
+        # Aplicar máscara: considerar apenas pixels válidos
+        mask_bool = mask.astype(bool)
+        if mask_bool.ndim == 2:
+            # Expandir máscara para 3 canais se necessário
+            mask_bool = np.stack([mask_bool] * 3, axis=2)
+
+        valid_pixels = mask_bool.sum()
+        if valid_pixels == 0:
+            return float('nan')
+
+        return float(np.sum((d * mask_bool)**2) / valid_pixels)
+
     return float(np.mean(d*d))
 
-def psnr(a: np.ndarray, b: np.ndarray) -> float:
-    m = mse(a,b)
-    if m <= 1e-12:
+def psnr(a: np.ndarray, b: np.ndarray, mask: np.ndarray = None) -> float:
+    """Calcula PSNR, opcionalmente usando máscara para ignorar bordas pretas."""
+    m = mse(a, b, mask)
+    if np.isnan(m) or m <= 1e-12:
         return float('inf')
     return 20.0 * math.log10(255.0) - 10.0 * math.log10(m)
 
-def ssim_gray(a: np.ndarray, b: np.ndarray) -> float:
+def ssim_gray(a: np.ndarray, b: np.ndarray, mask: np.ndarray = None) -> float:
+    """Calcula SSIM em grayscale, opcionalmente usando máscara para ignorar bordas pretas."""
     ag = cv2.cvtColor(a, cv2.COLOR_BGR2GRAY)
     bg = cv2.cvtColor(b, cv2.COLOR_BGR2GRAY)
+
+    # Se há máscara, cropar para região válida
+    if mask is not None:
+        mask_2d = mask if mask.ndim == 2 else mask[:,:,0]
+        if np.any(mask_2d > 0):
+            ys, xs = np.where(mask_2d > 0)
+            y0, y1 = ys.min(), ys.max()+1
+            x0, x1 = xs.min(), xs.max()+1
+            ag = ag[y0:y1, x0:x1]
+            bg = bg[y0:y1, x0:x1]
+        else:
+            return float('nan')
+
     if _HAS_SKIMAGE:
         s, _ = ssim_sk(ag, bg, full=True, data_range=255)
         return float(s)
+
     # Fallback simples
     C1 = (0.01*255)**2; C2 = (0.03*255)**2
     agf = ag.astype(np.float32); bgf = bg.astype(np.float32)
@@ -141,14 +174,45 @@ def ghosting_score(a: np.ndarray, b: np.ndarray, low: int = 100, high: int = 200
     return 1.0 - iou  # maior = pior
 
 # ---------- pacote completo ----------
-def compute_all(a: np.ndarray, b: np.ndarray) -> dict:
+def compute_all(a: np.ndarray, b: np.ndarray, use_mask: bool = True) -> dict:
+    """
+    Calcula todas as métricas entre duas imagens.
+
+    Args:
+        a: Imagem de referência (BGR)
+        b: Imagem a ser comparada (BGR)
+        use_mask: Se True, ignora bordas pretas (áreas com todos pixels = 0)
+
+    Returns:
+        Dict com todas as métricas calculadas
+    """
+    # Criar máscara de overlap se necessário
+    mask = None
+    if use_mask:
+        mask = overlap_mask(a, b)
+        # Verificar se há região válida
+        if not np.any(mask):
+            # Se não há overlap, retornar NaN para todas as métricas
+            return {
+                "SSIM": float('nan'),
+                "MSE": float('nan'),
+                "PSNR": float('nan'),
+                "overlap_ratio": 0.0,
+                "seam_energy": float('nan'),
+                "ghosting": float('nan'),
+                "deltaE_mean": float('nan'),
+                "deltaL_mean": float('nan'),
+                "L_ref": float('nan'),
+                "L_cmp": float('nan'),
+            }
+
     return {
-        "SSIM": ssim_gray(a,b),
-        "MSE": mse(a,b),
-        "PSNR": psnr(a,b),
-        "overlap_ratio": overlap_ratio(a,b),
-        "seam_energy": seam_energy(a,b),
-        "ghosting": ghosting_score(a,b),
-        "deltaE_mean": deltaE_cie76_mean(a,b),
-        **exposure_stats(a,b),
+        "SSIM": ssim_gray(a, b, mask),
+        "MSE": mse(a, b, mask),
+        "PSNR": psnr(a, b, mask),
+        "overlap_ratio": overlap_ratio(a, b),
+        "seam_energy": seam_energy(a, b),
+        "ghosting": ghosting_score(a, b),
+        "deltaE_mean": deltaE_cie76_mean(a, b),
+        **exposure_stats(a, b),
     }

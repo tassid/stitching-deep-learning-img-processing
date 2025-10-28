@@ -1,6 +1,0 @@
-timestamp: 20251005_215533
-method: classic/5_blend_wavelet
-output: pano_classic-5_blend_wavelet_20251005_215533.jpg
-reference: (sem referência)
-psnr_db: nan
-ssim: nan

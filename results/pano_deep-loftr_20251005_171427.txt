@@ -1,6 +1,0 @@
-timestamp: 20251005_171427
-method: deep/loftr
-output: pano_deep-loftr_20251005_171427.jpg
-reference: (sem referência)
-psnr_db: nan
-ssim: nan

@@ -18,9 +18,10 @@
 
 
 % Luiz - pdfa: inclusão do pdfa
-\PassOptionsToPackage{
-	pdfa
-}{hyperref}
+% COMENTADO: causa problemas no sumário
+%\PassOptionsToPackage{
+%	pdfa
+%}{hyperref}
 
 
 
@@ -62,7 +63,8 @@
 \usepackage{abntex2cite}
 
 % Luiz: pdfa: necessário para criar pdfa
-\usepackage[a-3b,mathxmp]{pdfx}[2018/12/22] % você pode escolher entre a-1b, a-2b, a-3b - o template ainda não suporta o a-Xa de 
+% COMENTADO: causa problemas no sumário com LinkbordercolorLinkcolor
+%\usepackage[a-3b,mathxmp]{pdfx}[2018/12/22] % você pode escolher entre a-1b, a-2b, a-3b - o template ainda não suporta o a-Xa de
 \input{configuracoes}
 
 %% Arquivo de dados do modelo de documento LaTeX para produção de trabalhos acadêmicos da UTFPR
@@ -165,7 +167,7 @@
 \incluirlistadeacronimos{glossaries}%% Opções: "glossaries" (pacote) ou "file" (arquivo) ou "none" (desabilita)
 
 %% Lista de símbolos
-\incluirlistadesimbolos{file}%% Opções: "nomencl" (pacote) ou "file" (arquivo) ou "none" (desabilita)
+%\incluirlistadesimbolos{file}%% Opções: "nomencl" (pacote) ou "file" (arquivo) ou "none" (desabilita)
 
 %% Sumário
 \incluirsumario%% Comente para remover este item
@@ -246,9 +248,9 @@
 %  \partapendices%% Página de início dos apêndices - adiciona uma página com o título Apêndices
 %   %% Capítulo de exemplo
 %\begin{apendicesenv}
-   \include{./PosTexto/apendicea}%% Apêndice - Comente para remover este item
-   \include{./PosTexto/apendiceb}%% Apêndice - Comente para remover este item
-   \include{./PosTexto/apendicec}%% Apêndice - Comente para remover este item
+   %\include{./PosTexto/apendicea}%% Apêndice - Comente para remover este item
+   %\include{./PosTexto/apendiceb}%% Apêndice - Comente para remover este item
+   %\include{./PosTexto/apendicec}%% Apêndice - Comente para remover este item
 %\end{apendicesenv}
 \end{arquivosdeapendices}%% Não comente esta linha
 

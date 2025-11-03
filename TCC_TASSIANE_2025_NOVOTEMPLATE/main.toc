@@ -1,0 +1,202 @@
+\changetocdepth {4}
+\changetocdepth {50}
+\babel@toc {brazil}{}\relax
+\setlength {\cftchapterindent }{\cftlastnumwidth } \setlength {\cftchapternumwidth }{2em}
+\setlength {\cftchapterindent }{\cftlastnumwidth } \setlength {\cftchapternumwidth }{2em}
+\setlength {\cftchapterindent }{\cftlastnumwidth } \setlength {\cftchapternumwidth }{2em}
+\setlength {\cftchapterindent }{\cftlastnumwidth } \setlength {\cftchapternumwidth }{2em}
+\setlength {\cftchapterindent }{\cftlastnumwidth } \setlength {\cftchapternumwidth }{2em}
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {1}\MakeTextUppercase []{Introdução}}{15}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Objetivo geral e específicos}{15}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Justificativa}{16}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Estrutura do trabalho}{17}{section.1.3}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {2}\MakeTextUppercase []{Referencial te\'orico}}{19}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Processamento Digital de Imagens}{19}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Fusão de Imagens}{19}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Costura de Imagens (\textit {Image Stitching})}{20}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Mesclagem de Imagens (\textit {Image Blending})}{22}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Fusão Multi-Exposição}{23}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Fusão Multi-Focal}{23}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Fusão \textit {Wavelet}}{24}{subsection.2.2.5}%
+\contentsline {section}{\numberline {2.3}Mosaico de Imagens}{25}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Algoritmos de Mosaico de Imagens}{26}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Mosaico Panorâmico de Visão Completa}{26}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Algoritmo de Cantos de \textit {Harris}}{26}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Algoritmo \gls {sift}}{27}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Fusão Híbrida de Imagens}{29}{subsection.2.3.5}%
+\contentsline {section}{\numberline {2.4}Métricas de Avaliação}{30}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Métricas para Fusão de Imagens}{30}{subsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.1.1}Peak Signal-to-Noise Ratio (PSNR)}{30}{subsubsection.2.4.1.1}%
+\contentsline {subsubsection}{\numberline {2.4.1.2}Structural Similarity Index (SSIM)}{31}{subsubsection.2.4.1.2}%
+\contentsline {subsubsection}{\numberline {2.4.1.3}Entropia}{32}{subsubsection.2.4.1.3}%
+\contentsline {subsubsection}{\numberline {2.4.1.4}Tempo de Processamento}{32}{subsubsection.2.4.1.4}%
+\contentsline {subsubsection}{\numberline {2.4.1.5}Número de Pontos-Chave e Taxa de Correspondências}{32}{subsubsection.2.4.1.5}%
+\contentsline {subsubsection}{\numberline {2.4.1.6}Ghosting Score}{33}{subsubsection.2.4.1.6}%
+\contentsline {subsection}{\numberline {2.4.2}Métricas para Detecção de Objetos}{33}{subsection.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.4.2.1}Intersection over Union (IoU)}{33}{subsubsection.2.4.2.1}%
+\contentsline {subsubsection}{\numberline {2.4.2.2}Precision, Recall e F1-Score}{34}{subsubsection.2.4.2.2}%
+\contentsline {subsubsection}{\numberline {2.4.2.3}Mean Average Precision (mAP)}{34}{subsubsection.2.4.2.3}%
+\contentsline {subsubsection}{\numberline {2.4.2.4}Frames Per Second (FPS)}{35}{subsubsection.2.4.2.4}%
+\contentsline {subsection}{\numberline {2.4.3}Métricas Comparativas para Fusão e Detecção}{35}{subsection.2.4.3}%
+\contentsline {subsubsection}{\numberline {2.4.3.1}Taxa de Melhoria na Detecção}{35}{subsubsection.2.4.3.1}%
+\contentsline {subsubsection}{\numberline {2.4.3.2}Cobertura de Área Ampliada}{35}{subsubsection.2.4.3.2}%
+\contentsline {subsubsection}{\numberline {2.4.3.3}Redução de Contagem Duplicada}{35}{subsubsection.2.4.3.3}%
+\contentsline {section}{\numberline {2.5}Detecção de Objetos}{36}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Redes Neurais Convolucionais}{36}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}Regiões com Redes Neurais Convolucionais}{37}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.5.3}Detecção de Objetos com \gls {yolo}}{37}{subsection.2.5.3}%
+\contentsline {section}{\numberline {2.6}Vantagens de Mosaicos e Fusão de Imagem para Detecção de Objetos}{38}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Trabalhos Relacionados}{39}{section.2.7}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {3}\MakeTextUppercase []{Materiais e Métodos}}{42}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Conjuntos de Dados}{42}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Base de Dados de Múltiplos Registros}{42}{subsection.3.1.1}%
+\contentsline {section}{\numberline {3.2}Métricas de Avaliação}{42}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}PSNR - Peak Signal-to-Noise Ratio}{43}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}SSIM - Structural Similarity Index}{43}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}MSE - Mean Squared Error}{44}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Ghosting Score}{44}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Seam Energy}{44}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.6}DeltaE - Diferença Perceptual de Cor}{44}{subsection.3.2.6}%
+\contentsline {subsection}{\numberline {3.2.7}Entropia}{45}{subsection.3.2.7}%
+\contentsline {subsection}{\numberline {3.2.8}Nitidez}{45}{subsection.3.2.8}%
+\contentsline {subsection}{\numberline {3.2.9}Tempo de Processamento}{45}{subsection.3.2.9}%
+\contentsline {section}{\numberline {3.3}Ambiente Computacional}{46}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Hardware}{46}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Software e Bibliotecas}{46}{subsection.3.3.2}%
+\contentsline {section}{\numberline {3.4}Protocolo Experimental}{47}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Pré-processamento dos Dados}{47}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Aplicação das Técnicas de Fusão}{47}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Cálculo das Métricas}{48}{subsection.3.4.3}%
+\contentsline {subsection}{\numberline {3.4.4}Análise Estatística}{48}{subsection.3.4.4}%
+\contentsline {section}{\numberline {3.5}Considerações Éticas e de Reprodutibilidade}{48}{section.3.5}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {4}\MakeTextUppercase []{Desenvolvimento}}{49}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Metodologia de Desenvolvimento}{49}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Arquitetura do Sistema}{49}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Implementação das Técnicas de Fusão}{50}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Sistema de Detecção de Objetos}{51}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Interface Gráfica de Usuário}{52}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Ambiente Computacional e Dependências}{53}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Procedimentos Experimentais}{54}{section.4.7}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {5}\MakeTextUppercase []{Testes Iniciais}}{56}{chapter.5}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {6}\MakeTextUppercase []{EXPERIMENTOS E RESULTADOS}}{58}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Conjuntos de Dados Utilizados}{58}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}Base de Dados de Múltiplos Registros}{58}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}Bases de Dados Complementares}{60}{subsection.6.1.2}%
+\contentsline {section}{\numberline {6.2}Protocolo Experimental}{60}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}Pré-processamento dos Dados}{60}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}Aplicação das Técnicas de Fusão}{61}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}Detecção de Objetos}{62}{subsection.6.2.3}%
+\contentsline {section}{\numberline {6.3}Métricas de Avaliação Aplicadas}{62}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Métricas de Qualidade da Fusão}{63}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Métricas de Detecção de Objetos}{63}{subsection.6.3.2}%
+\contentsline {section}{\numberline {6.4}Resultados Experimentais}{64}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}Desempenho das Técnicas de Fusão}{64}{subsection.6.4.1}%
+\contentsline {subsection}{\numberline {6.4.2}Análise Comparativa com Resultados de Referência}{65}{subsection.6.4.2}%
+\contentsline {subsection}{\numberline {6.4.3}Impacto na Detecção de Objetos}{65}{subsection.6.4.3}%
+\contentsline {subsection}{\numberline {6.4.4}Análise de Casos Específicos}{66}{subsection.6.4.4}%
+\contentsline {section}{\numberline {6.5}Discussão dos Resultados}{67}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Limitações do Estudo}{68}{section.6.6}%
+\contentsline {section}{\numberline {6.7}Validação e Avaliação do Sistema}{69}{section.6.7}%
+\contentsline {subsection}{\numberline {6.7.1}Protocolo de Validação}{69}{subsection.6.7.1}%
+\contentsline {subsection}{\numberline {6.7.2}Características dos Conjuntos Avaliados}{70}{subsection.6.7.2}%
+\contentsline {subsection}{\numberline {6.7.3}Síntese dos Resultados}{70}{subsection.6.7.3}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {7}\MakeTextUppercase []{Resultados e Discussão}}{72}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Visão Geral dos Experimentos}{72}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Ranking Geral dos Métodos}{72}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}Ranking Visual: Gráfico de Pareto}{73}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}Desempenho por Dataset: Mapa de Calor}{74}{subsection.7.2.2}%
+\contentsline {section}{\numberline {7.3}Análise Estatística}{74}{section.7.3}%
+\contentsline {subsection}{\numberline {7.3.1}Testes de Normalidade e Homogeneidade de Variâncias}{75}{subsection.7.3.1}%
+\contentsline {subsection}{\numberline {7.3.2}Testes Comparativos: Clássico vs Deep Learning}{75}{subsection.7.3.2}%
+\contentsline {subsection}{\numberline {7.3.3}Intervalos de Confiança}{76}{subsection.7.3.3}%
+\contentsline {subsection}{\numberline {7.3.4}Análise de Correlações}{76}{subsection.7.3.4}%
+\contentsline {subsection}{\numberline {7.3.5}Visualização Comparativa}{77}{subsection.7.3.5}%
+\contentsline {subsection}{\numberline {7.3.6}Distribuições das Métricas}{78}{subsection.7.3.6}%
+\contentsline {section}{\numberline {7.4}Análise Estratificada por Tipo de Cenário}{78}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}Categorização dos Cenários}{79}{subsection.7.4.1}%
+\contentsline {subsection}{\numberline {7.4.2}Resultados Comparativos por Categoria}{79}{subsection.7.4.2}%
+\contentsline {subsection}{\numberline {7.4.3}Discussão dos Resultados Estratificados}{79}{subsection.7.4.3}%
+\contentsline {subsection}{\numberline {7.4.4}Tamanho do Efeito por Cenário}{80}{subsection.7.4.4}%
+\contentsline {subsection}{\numberline {7.4.5}Comparação Visual por Cenário}{81}{subsection.7.4.5}%
+\contentsline {subsection}{\numberline {7.4.6}Trade-off Qualidade vs Velocidade por Cenário}{81}{subsection.7.4.6}%
+\contentsline {section}{\numberline {7.5}Análise de Casos Extremos}{81}{section.7.5}%
+\contentsline {subsection}{\numberline {7.5.1}Datasets Mais Desafiadores}{82}{subsection.7.5.1}%
+\contentsline {subsection}{\numberline {7.5.2}Padrões de Sucesso e Falha}{83}{subsection.7.5.2}%
+\contentsline {subsection}{\numberline {7.5.3}Distribuição de Sucesso e Falha}{84}{subsection.7.5.3}%
+\contentsline {subsection}{\numberline {7.5.4}Variabilidade de Desempenho por Método}{84}{subsection.7.5.4}%
+\contentsline {subsection}{\numberline {7.5.5}Melhores Métodos por Dataset}{85}{subsection.7.5.5}%
+\contentsline {subsection}{\numberline {7.5.6}Ausência de Superioridade Absoluta}{86}{subsection.7.5.6}%
+\contentsline {section}{\numberline {7.6}Análise Detalhada dos Top 5 Métodos}{86}{section.7.6}%
+\contentsline {subsection}{\numberline {7.6.1}Método \#1: OpenCV Stitcher (Score: 0,8732)}{86}{subsection.7.6.1}%
+\contentsline {subsection}{\numberline {7.6.2}Método \#2: Stitcher Basico (Score: 0,8732)}{88}{subsection.7.6.2}%
+\contentsline {subsection}{\numberline {7.6.3}Método \#3: Seams Exposure Multiband (Score: 0,7753)}{88}{subsection.7.6.3}%
+\contentsline {subsection}{\numberline {7.6.4}Método \#4: Blend Laplacian (Score: 0,7536)}{90}{subsection.7.6.4}%
+\contentsline {subsection}{\numberline {7.6.5}Método \#5: Exposure Comp Only (Score: 0,7519)}{91}{subsection.7.6.5}%
+\contentsline {section}{\numberline {7.7}Análise por Métrica Individual}{92}{section.7.7}%
+\contentsline {subsection}{\numberline {7.7.1}Desempenho em PSNR}{92}{subsection.7.7.1}%
+\contentsline {subsection}{\numberline {7.7.2}Desempenho em SSIM}{93}{subsection.7.7.2}%
+\contentsline {subsection}{\numberline {7.7.3}Desempenho em Ghosting Score}{93}{subsection.7.7.3}%
+\contentsline {section}{\numberline {7.8}Discussão}{94}{section.7.8}%
+\contentsline {subsection}{\numberline {7.8.1}Equivalência Estatística entre Clássico e Deep Learning}{94}{subsection.7.8.1}%
+\contentsline {subsection}{\numberline {7.8.2}Exceção: Cenários de Baixa Textura}{95}{subsection.7.8.2}%
+\contentsline {subsection}{\numberline {7.8.3}Trade-off Qualidade vs Velocidade}{95}{subsection.7.8.3}%
+\contentsline {subsection}{\numberline {7.8.4}Presença de Ghosting}{97}{subsection.7.8.4}%
+\contentsline {subsection}{\numberline {7.8.5}Limitações dos Resultados}{97}{subsection.7.8.5}%
+\contentsline {subsection}{\numberline {7.8.6}Recomendações Práticas Estratificadas}{97}{subsection.7.8.6}%
+\contentsline {section}{\numberline {7.9}Síntese dos Resultados}{98}{section.7.9}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {8}\MakeTextUppercase []{Detecção de Objetos em Imagens Panorâmicas}}{100}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Motivação e Contexto}{100}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Metodologia de Detecção}{100}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}Modelos de Detecção Utilizados}{100}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Protocolo Experimental}{100}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Métricas de Avaliação}{101}{subsection.8.2.3}%
+\contentsline {section}{\numberline {8.3}Resultados e Análise}{102}{section.8.3}%
+\contentsline {subsection}{\numberline {8.3.1}Desempenho por Modelo de Detecção}{102}{subsection.8.3.1}%
+\contentsline {subsection}{\numberline {8.3.2}Impacto da Qualidade de Fusão na Detecção}{102}{subsection.8.3.2}%
+\contentsline {subsection}{\numberline {8.3.3}Análise de Casos Específicos}{102}{subsection.8.3.3}%
+\contentsline {subsection}{\numberline {8.3.4}Análise por Classe de Objeto}{102}{subsection.8.3.4}%
+\contentsline {section}{\numberline {8.4}Discussão}{103}{section.8.4}%
+\contentsline {subsection}{\numberline {8.4.1}Trade-offs Entre Fusão e Detecção}{103}{subsection.8.4.1}%
+\contentsline {subsection}{\numberline {8.4.2}Limitações e Desafios Identificados}{103}{subsection.8.4.2}%
+\contentsline {subsection}{\numberline {8.4.3}Recomendações Práticas}{103}{subsection.8.4.3}%
+\contentsline {section}{\numberline {8.5}Síntese do Capítulo}{103}{section.8.5}%
+\setlength {\cftchapterindent }{0em} \setlength {\cftchapternumwidth }{\cftlastnumwidth }
+\contentsline {chapter}{\chapternumberline {9}\MakeTextUppercase []{Conclusões}}{104}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Retomada dos Objetivos}{104}{section.9.1}%
+\contentsline {subsection}{\numberline {9.1.1}Objetivo Específico 1: Implementação de Técnicas de Fusão}{104}{subsection.9.1.1}%
+\contentsline {subsection}{\numberline {9.1.2}Objetivo Específico 2: Avaliação de Desempenho em Fusão}{104}{subsection.9.1.2}%
+\contentsline {subsection}{\numberline {9.1.3}Objetivo Específico 3: Avaliação de Impacto na Detecção de Objetos}{105}{subsection.9.1.3}%
+\contentsline {section}{\numberline {9.2}Contribuições do Trabalho}{105}{section.9.2}%
+\contentsline {subsection}{\numberline {9.2.1}Comparação Sistemática e Abrangente}{105}{subsection.9.2.1}%
+\contentsline {subsection}{\numberline {9.2.2}Identificação de Trade-offs Práticos}{106}{subsection.9.2.2}%
+\contentsline {subsection}{\numberline {9.2.3}Base para Estudos de Detecção em Panoramas}{106}{subsection.9.2.3}%
+\contentsline {section}{\numberline {9.3}Limitações do Estudo}{106}{section.9.3}%
+\contentsline {subsection}{\numberline {9.3.1}Especificidade do Dataset}{106}{subsection.9.3.1}%
+\contentsline {subsection}{\numberline {9.3.2}Valores Absolutos de PSNR}{107}{subsection.9.3.2}%
+\contentsline {subsection}{\numberline {9.3.3}Presença Generalizada de Ghosting}{107}{subsection.9.3.3}%
+\contentsline {subsection}{\numberline {9.3.4}Ausência de Ground Truth Perfeito}{107}{subsection.9.3.4}%
+\contentsline {section}{\numberline {9.4}Trabalhos Futuros}{107}{section.9.4}%
+\contentsline {subsection}{\numberline {9.4.1}Expansão para Outros Datasets}{107}{subsection.9.4.1}%
+\contentsline {subsection}{\numberline {9.4.2}Técnicas Híbridas}{108}{subsection.9.4.2}%
+\contentsline {subsection}{\numberline {9.4.3}Otimização de Eficiência}{108}{subsection.9.4.3}%
+\contentsline {subsection}{\numberline {9.4.4}Desenvolvimento de Métricas Específicas}{108}{subsection.9.4.4}%
+\contentsline {subsection}{\numberline {9.4.5}Aplicações em Cenários Reais}{109}{subsection.9.4.5}%
+\contentsline {subsection}{\numberline {9.4.6}Fusão Temporal em Vídeos}{109}{subsection.9.4.6}%
+\contentsline {section}{\numberline {9.5}Considerações Finais}{109}{section.9.5}%
+\vspace {\cftbeforechapterskip }
+\setlength {\cftchapterindent }{\cftlastnumwidth } \setlength {\cftchapternumwidth }{2em}
+\contentsline {chapter}{\uppercase {Refer\^encias}}{110}{section*.54}%
+\renewcommand *{\cftappendixname }{AP\^ENDICE \space }
+\cftinsert {AAA}
+\renewcommand *{\cftappendixname }{ANEXO \space }
+\cftinsert {AAA}
+\renewcommand *{\cftappendixname }{ANEXO \space }
+\contentsline {chapter}{ANEXO~A{ -- }Lei N.\textsuperscript {o} 9.610, de 19 de Fevereiro de 1998}{115}{anexo.anexochapback.1}%

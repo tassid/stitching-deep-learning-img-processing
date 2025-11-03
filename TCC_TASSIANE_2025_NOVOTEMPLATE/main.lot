@@ -1,0 +1,13 @@
+\babel@toc {brazil}{}\relax
+\contentsline {table}{\numberline {1}{\ignorespaces Conjuntos de imagens da base de Múltiplos Registros}}{59}{table.caption.18}%
+\contentsline {table}{\numberline {2}{\ignorespaces Comparação de métricas médias entre técnicas de fusão na base de Múltiplos Registros (14 conjuntos)}}{65}{table.caption.19}%
+\contentsline {table}{\numberline {3}{\ignorespaces Comparação de métricas de detecção: imagens individuais versus panorama}}{66}{table.caption.20}%
+\contentsline {table}{\numberline {4}{\ignorespaces Ranking dos 5 melhores métodos de fusão de imagens}}{72}{table.caption.21}%
+\contentsline {table}{\numberline {5}{\ignorespaces Métricas detalhadas dos 5 melhores métodos}}{73}{table.caption.22}%
+\contentsline {table}{\numberline {6}{\ignorespaces Testes de normalidade (Shapiro-Wilk) por categoria}}{75}{table.caption.25}%
+\contentsline {table}{\numberline {7}{\ignorespaces Testes estatísticos comparativos entre métodos clássicos e deep learning}}{75}{table.caption.26}%
+\contentsline {table}{\numberline {8}{\ignorespaces Intervalos de confiança (95\%) por categoria}}{76}{table.caption.27}%
+\contentsline {table}{\numberline {9}{\ignorespaces Análise estratificada: Clássico vs Deep Learning por tipo de cenário}}{79}{table.caption.31}%
+\contentsline {table}{\numberline {10}{\ignorespaces Ranking dos métodos por PSNR (Top 10)}}{93}{table.caption.48}%
+\contentsline {table}{\numberline {11}{\ignorespaces Ranking dos métodos por SSIM (Top 10)}}{94}{table.caption.49}%
+\contentsline {table}{\numberline {12}{\ignorespaces Ranking dos métodos por Ghosting Score (menor é melhor)}}{94}{table.caption.50}%

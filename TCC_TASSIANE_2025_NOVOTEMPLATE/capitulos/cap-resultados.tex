@@ -54,31 +54,379 @@ A Tabela~\ref{tab:top5-detalhado} apresenta as métricas completas dos cinco mel
 
 Observa-se que o método Seams Exposure Multiband apresenta tempo de processamento significativamente maior (7,11s) em comparação aos demais métodos do top 5, que ficaram abaixo de 0,5s. Este método também apresenta a menor seam energy (77,42), indicando transições mais suaves entre as imagens fusionadas.
 
-\section{Comparação: Métodos Clássicos vs Deep Learning}
+\subsection{Ranking Visual: Gráfico de Pareto}
 
-A Tabela~\ref{tab:classic-vs-deep} apresenta uma comparação agregada entre as abordagens clássicas e baseadas em deep learning.
+O gráfico de Pareto apresentado na Figura~\ref{fig:pareto_metodos} visualiza o ranking completo dos métodos por score composto, destacando os top 5 em verde e mostrando a curva de contribuição acumulada.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/pareto_chart_metodos.png}
+\caption{Gráfico de Pareto: ranking de métodos por score composto normalizado}
+\label{fig:pareto_metodos}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+O gráfico evidencia que os 5 melhores métodos (destacados em verde) representam aproximadamente 25\% do score total acumulado, demonstrando concentração de desempenho superior em poucos métodos.
+
+\subsection{Desempenho por Dataset: Mapa de Calor}
+
+A Figura~\ref{fig:heatmap_psnr_dataset} apresenta um mapa de calor mostrando o PSNR médio de cada método em cada conjunto de dados, permitindo identificar padrões de desempenho e datasets mais desafiadores.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/heatmap_psnr_metodo_dataset.png}
+\caption{Mapa de calor: PSNR (dB) por método e dataset. Cores quentes indicam melhor desempenho.}
+\label{fig:heatmap_psnr_dataset}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+O heatmap revela claramente que alguns datasets (linhas escuras) são consistentemente desafiadores para todos os métodos, enquanto outros (linhas claras/amarelas) permitem bons resultados independentemente da técnica utilizada. Observa-se também que não há método universalmente superior em todos os cenários.
+
+\section{Análise Estatística}
+
+Para garantir rigor científico na comparação entre as abordagens, foi realizada uma análise estatística completa dos resultados, incluindo testes de normalidade, homogeneidade de variâncias, testes comparativos e análise de correlações.
+
+\subsection{Testes de Normalidade e Homogeneidade de Variâncias}
+
+Os dados foram submetidos ao teste de Shapiro-Wilk para verificar normalidade das distribuições e ao teste de Levene para avaliar homogeneidade de variâncias entre grupos. Os resultados são apresentados na Tabela~\ref{tab:normalidade}.
 
 \begin{table}[htb]
 \centering
-\caption{Comparação entre métodos clássicos e deep learning}
-\label{tab:classic-vs-deep}
-\begin{tabular}{lcccc}
+\caption{Testes de normalidade (Shapiro-Wilk) por categoria}
+\label{tab:normalidade}
+\small
+\begin{tabular}{llccl}
 \hline
-\textbf{Categoria} & \textbf{PSNR Médio (dB)} & \textbf{SSIM Médio} & \textbf{Ghosting} & \textbf{Tempo (s)} \\ \hline
-Clássico (n=218) & 11,01 & 0,2569 & 0,9441 & 0,91 \\
-Deep Learning (n=75) & 11,09 & 0,2635 & 0,9452 & 1,53 \\
+\textbf{Categoria} & \textbf{Métrica} & \textbf{W} & \textbf{p-value} & \textbf{Normal?} \\ \hline
+Clássico & PSNR (dB) & 0,9924 & 0,3161 & Sim \\
+Clássico & SSIM & 0,8701 & <0,0001 & Não \\
+Clássico & Ghosting & 0,9581 & <0,0001 & Não \\
+Clássico & Tempo (s) & 0,1782 & <0,0001 & Não \\
+Deep Learning & PSNR (dB) & 0,9565 & 0,0115 & Não \\
+Deep Learning & SSIM & 0,8315 & <0,0001 & Não \\
+Deep Learning & Ghosting & 0,9376 & 0,0011 & Não \\
+Deep Learning & Tempo (s) & 0,3321 & <0,0001 & Não \\
 \hline
 \end{tabular}
 \fonte{Autoria própria (2025).}
 \end{table}
 
-Os resultados mostram que os métodos baseados em deep learning apresentam métricas ligeiramente superiores em todas as categorias avaliadas (PSNR +0,08 dB, SSIM +0,0066), porém com tempo de processamento médio 68\% maior (1,53s vs 0,91s). Esta diferença de desempenho é moderada, indicando que para os conjuntos de imagens testados, os métodos clássicos oferecem excelente relação custo-benefício.
+O teste de Shapiro-Wilk revelou que apenas o PSNR dos métodos clássicos segue distribuição normal ($W=0{,}992$, $p=0{,}316$). Todas as demais métricas rejeitaram a hipótese nula ($p<0{,}05$), indicando distribuições não-normais. Consequentemente, foram empregados testes não-paramétricos nas comparações subsequentes.
 
-Vale ressaltar que o Ghosting Score de ambas as categorias é relativamente alto (~0,94), indicando presença moderada de artefatos de duplicação de bordas em ambas as abordagens. Isso sugere que os cenários testados apresentam desafios significativos para alinhamento perfeito, como presença de paralaxe ou objetos em diferentes profundidades.
+O teste de Levene confirmou homogeneidade de variâncias entre as categorias para todas as métricas ($p>0{,}05$), validando comparações diretas entre grupos.
+
+\subsection{Testes Comparativos: Clássico vs Deep Learning}
+
+Para comparar as duas categorias, foram aplicados o teste t de Welch (paramétrico) e o teste de Mann-Whitney U (não-paramétrico). A Tabela~\ref{tab:testes_comparativos} apresenta os resultados consolidados.
+
+\begin{table}[htb]
+\centering
+\caption{Testes estatísticos comparativos entre métodos clássicos e deep learning}
+\label{tab:testes_comparativos}
+\small
+\begin{tabular}{lcccccl}
+\hline
+\textbf{Métrica} & \textbf{Clássico} & \textbf{Deep} & \textbf{t} & \textbf{p-value} & \textbf{Cohen's d} & \textbf{Conclusão} \\ \hline
+PSNR (dB) & 11,01 & 11,09 & -0,299 & 0,765 & -0,039 & Não sig. \\
+SSIM & 0,257 & 0,264 & -0,406 & 0,685 & -0,054 & Não sig. \\
+Ghosting & 0,944 & 0,945 & -0,300 & 0,765 & -0,040 & Não sig. \\
+Seam Energy & 81,40 & 80,55 & +0,293 & 0,770 & +0,039 & Não sig. \\
+Tempo (s) & 0,91 & 1,53 & -1,085 & 0,280 & -0,149 & Não sig. \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+\textbf{Conclusão:} Nenhuma métrica apresentou diferença estatisticamente significativa ($p>0{,}05$ em todos os casos). O tamanho do efeito (Cohen's \textit{d}) foi trivial ($<0{,}2$) para todas as comparações, indicando que as diferenças observadas são de magnitude desprezível do ponto de vista prático. Estes resultados demonstram que, para o dataset avaliado, métodos clássicos e deep learning apresentam desempenho estatisticamente equivalente.
+
+\subsection{Intervalos de Confiança}
+
+Os intervalos de confiança de 95\% corroboram a equivalência estatística entre as abordagens, conforme apresentado na Tabela~\ref{tab:intervalos_confianca}.
+
+\begin{table}[htb]
+\centering
+\caption{Intervalos de confiança (95\%) por categoria}
+\label{tab:intervalos_confianca}
+\small
+\begin{tabular}{llccc}
+\hline
+\textbf{Categoria} & \textbf{Métrica} & \textbf{Média} & \textbf{IC Inferior} & \textbf{IC Superior} \\ \hline
+Clássico & PSNR (dB) & 11,01 & 10,75 & 11,28 \\
+Deep Learning & PSNR (dB) & 11,09 & 10,67 & 11,50 \\
+Clássico & SSIM & 0,257 & 0,240 & 0,274 \\
+Deep Learning & SSIM & 0,264 & 0,236 & 0,291 \\
+Clássico & Ghosting & 0,944 & 0,940 & 0,948 \\
+Deep Learning & Ghosting & 0,945 & 0,939 & 0,952 \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+A sobreposição substancial dos intervalos de confiança confirma a ausência de diferenças significativas entre as abordagens. Para PSNR, por exemplo, os intervalos $[10{,}75, 11{,}28]$ (clássico) e $[10{,}67, 11{,}50]$ (deep learning) apresentam ampla sobreposição, reforçando a equivalência estatística.
+
+\subsection{Análise de Correlações}
+
+A matriz de correlação de Pearson revelou relações importantes entre as métricas avaliadas. A Figura~\ref{fig:matriz_correlacao} apresenta a matriz completa de correlações.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.7\textwidth]{figuras/resultados/matriz_correlacao.png}
+\caption{Matriz de correlação de Pearson entre as métricas avaliadas}
+\label{fig:matriz_correlacao}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Foram identificadas duas correlações fortes ($|r|>0{,}7$):
+
+\begin{itemize}
+    \item \textbf{SSIM $\leftrightarrow$ Seam Energy:} $r=-0{,}789$ (forte negativa)
+    \item \textbf{Ghosting $\leftrightarrow$ Seam Energy:} $r=-0{,}883$ (muito forte negativa)
+\end{itemize}
+
+Estas correlações indicam que métodos com menor seam energy (transições mais suaves) tendem a apresentar simultaneamente maior SSIM (melhor preservação estrutural) e menor ghosting (menos artefatos de duplicação). Esta constatação sugere que técnicas avançadas de mesclagem, como graph-cut para detecção de costuras ótimas e multiband blending, são eficazes na melhoria simultânea de múltiplos aspectos da qualidade.
+
+\subsection{Visualização Comparativa}
+
+A Figura~\ref{fig:boxplots_comparativos} apresenta box plots comparativos para as principais métricas, evidenciando a similaridade entre as distribuições das duas categorias.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/boxplots_comparativos.png}
+\caption{Box plots comparativos: métricas de qualidade por categoria}
+\label{fig:boxplots_comparativos}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Os box plots revelam que as medianas, quartis e distribuições gerais são notavelmente similares entre clássico e deep learning, confirmando visualmente a equivalência estatística demonstrada pelos testes formais.
+
+\subsection{Distribuições das Métricas}
+
+A Figura~\ref{fig:histogramas_distribuicao} apresenta histogramas sobrepostos das distribuições de cada métrica para as duas categorias, permitindo visualizar a forma das distribuições e confirmar a sobreposição entre clássico e deep learning.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/histogramas_distribuicao.png}
+\caption{Histogramas de distribuição das métricas por categoria. Linhas tracejadas indicam as médias de cada grupo.}
+\label{fig:histogramas_distribuicao}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Os histogramas confirmam visualmente a equivalência entre as abordagens, com distribuições amplamente sobrepostas e médias muito próximas para todas as métricas avaliadas. A distribuição não-normal de várias métricas (evidenciada por assimetrias) justifica o uso de testes não-paramétricos nas comparações estatísticas.
+
+\section{Análise Estratificada por Tipo de Cenário}
+
+Para compreender melhor as condições sob as quais cada abordagem (clássica ou deep learning) apresenta desempenho superior, os 15 conjuntos de imagens foram categorizados de acordo com seus principais desafios técnicos. Esta análise estratificada permite identificar cenários específicos onde cada metodologia demonstra vantagens competitivas.
+
+\subsection{Categorização dos Cenários}
+
+Os conjuntos de dados foram classificados nas seguintes categorias:
+
+\begin{itemize}
+    \item \textbf{Baixa Textura}: ski\_left
+    \item \textbf{Estruturas Repetitivas}: rental\_office\_1, graffiti\_building\_1, no\_contractor\_parking\_1, stop\_sign\_1
+    \item \textbf{Paralaxe Significativa}: cars\_1, cup\_tree\_1, traffic\_cones\_1, plant\_1
+    \item \textbf{Variação de Iluminação}: coke\_190, building\_dubai
+    \item \textbf{Superfícies Curvas}: graffiti\_car\_1
+    \item \textbf{Múltiplas Imagens}: building\_dubai, P2\_front\_of\_window
+    \item \textbf{Cenários Simples}: biker\_mural\_1, theory\_left
+\end{itemize}
+
+\subsection{Resultados Comparativos por Categoria}
+
+A Tabela~\ref{tab:estratificado} apresenta os resultados dos testes estatísticos (Mann-Whitney U) comparando métodos clássicos e deep learning em cada categoria de cenário.
+
+\begin{table}[htb]
+\centering
+\caption{Análise estratificada: Clássico vs Deep Learning por tipo de cenário}
+\label{tab:estratificado}
+\scriptsize
+\begin{tabular}{llrrrcp{2.5cm}}
+\hline
+\textbf{Cenário} & \textbf{Métrica} & \textbf{Clássico} & \textbf{Deep} & \textbf{p-value} & \textbf{Sig.} & \textbf{Interpretação} \\ \hline
+Baixa Textura & PSNR (dB) & 10,15 & 11,38 & 0,018 & $\checkmark$ & Deep superior \\
+Baixa Textura & SSIM & 0,272 & 0,308 & 0,044 & $\checkmark$ & Deep superior \\
+Baixa Textura & Ghosting & 0,930 & 0,922 & 0,930 & $\times$ & Sem diferença \\
+Baixa Textura & Tempo (s) & 0,368 & 0,346 & 0,142 & $\times$ & Sem diferença \\
+Estruturas Repetitivas & PSNR (dB) & 9,56 & 9,63 & 0,977 & $\times$ & Sem diferença \\
+Estruturas Repetitivas & SSIM & 0,225 & 0,234 & 0,753 & $\times$ & Sem diferença \\
+Paralaxe Significativa & PSNR (dB) & 12,41 & 12,49 & 0,863 & $\times$ & Sem diferença \\
+Paralaxe Significativa & SSIM & 0,252 & 0,258 & 0,649 & $\times$ & Sem diferença \\
+Variação Iluminação & PSNR (dB) & 12,40 & 12,12 & 0,752 & $\times$ & Sem diferença \\
+Variação Iluminação & SSIM & 0,412 & 0,400 & 0,416 & $\times$ & Sem diferença \\
+Cenários Simples & PSNR (dB) & 10,49 & 10,58 & 0,530 & $\times$ & Sem diferença \\
+Cenários Simples & SSIM & 0,293 & 0,303 & 0,641 & $\times$ & Sem diferença \\
+\hline
+\end{tabular}
+\fonte{Autoria própria (2025).}
+\end{table}
+
+\subsection{Discussão dos Resultados Estratificados}
+
+Dos 28 testes realizados, apenas 2 apresentaram diferenças estatisticamente significativas ($p<0{,}05$), correspondendo a 7,1\% dos casos. Ambos ocorreram na categoria \textbf{Baixa Textura}, onde métodos de deep learning demonstraram superioridade em PSNR (11,38 vs 10,15 dB, $p=0{,}018$) e SSIM (0,308 vs 0,272, $p=0{,}044$).
+
+Esta constatação é teoricamente consistente: em cenários com poucas features distintivas, detectores tradicionais baseados em gradientes (SIFT, ORB) podem ter dificuldade em identificar correspondências robustas, enquanto métodos baseados em redes neurais profundas conseguem aprender representações mais abstratas e discriminativas.
+
+Nas demais categorias -- incluindo estruturas repetitivas, paralaxe significativa, variação de iluminação e cenários simples -- ambas as abordagens apresentaram desempenho estatisticamente equivalente. Este resultado sugere que, para a maioria dos cenários práticos, métodos clássicos bem calibrados são igualmente eficazes.
+
+A Figura~\ref{fig:heatmap_pvalues} apresenta um mapa de calor dos p-values, facilitando a identificação visual de diferenças significativas.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.75\textwidth]{figuras/resultados/heatmap_pvalues_por_cenario.png}
+\caption{P-values dos testes Mann-Whitney U por tipo de cenário e métrica (verde = diferença significativa)}
+\label{fig:heatmap_pvalues}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Tamanho do Efeito por Cenário}
+
+Complementando a análise de significância estatística, a Figura~\ref{fig:heatmap_cohens_d} apresenta o tamanho do efeito (Cohen's \textit{d}) para cada combinação de cenário e métrica, permitindo avaliar a magnitude prática das diferenças observadas.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.75\textwidth]{figuras/resultados/heatmap_cohens_d_por_cenario.png}
+\caption{Mapa de calor do tamanho do efeito (Cohen's d) por cenário e métrica. Valores próximos de zero indicam diferenças triviais.}
+\label{fig:heatmap_cohens_d}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+O mapa de calor confirma que, mesmo nos casos onde diferenças estatisticamente significativas foram detectadas (baixa textura), o tamanho do efeito permanece modesto. Na maioria dos cenários, Cohen's \textit{d} está próximo de zero, reforçando a equivalência prática entre as abordagens.
+
+\subsection{Comparação Visual por Cenário}
+
+A Figura~\ref{fig:barplot_cenarios} apresenta comparação visual das métricas principais por tipo de cenário, facilitando a identificação de padrões de desempenho.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/barplot_metricas_por_cenario.png}
+\caption{Comparação das métricas PSNR e SSIM por tipo de cenário (Clássico vs Deep Learning)}
+\label{fig:barplot_cenarios}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Trade-off Qualidade vs Velocidade por Cenário}
+
+A Figura~\ref{fig:scatter_psnr_tempo_cenario} apresenta a relação entre qualidade (PSNR) e tempo de processamento, estratificada por tipo de cenário, revelando que o trade-off varia conforme as características do dataset.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.9\textwidth]{figuras/resultados/scatter_psnr_tempo_por_cenario.png}
+\caption{Scatter plot: PSNR vs Tempo de processamento por tipo de cenário}
+\label{fig:scatter_psnr_tempo_cenario}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Observa-se que cenários de baixa textura e múltiplas imagens tendem a exigir maior tempo de processamento, enquanto cenários simples permitem processamento mais rápido sem comprometer significativamente a qualidade.
+
+\section{Análise de Casos Extremos}
+
+A análise de casos extremos permite identificar padrões nas condições que levam ao sucesso ou falha de diferentes métodos de fusão. Esta seção examina os melhores e piores resultados obtidos, revelando características importantes para seleção apropriada de técnicas.
+
+\subsection{Datasets Mais Desafiadores}
+
+Os cinco conjuntos de imagens que apresentaram maior dificuldade para todos os métodos testados foram:
+
+\begin{enumerate}
+    \item \texttt{no\_contractor\_parking\_1}: PSNR médio de 8,51 dB
+    \item \texttt{graffiti\_car\_1}: PSNR médio de 8,73 dB
+    \item \texttt{rental\_office\_1}: PSNR médio de 9,01 dB
+    \item \texttt{stop\_sign\_1}: PSNR médio de 9,74 dB
+    \item \texttt{theory\_left}: PSNR médio de 9,86 dB
+\end{enumerate}
+
+Estes datasets compartilham características que tornam a fusão particularmente desafiadora: baixo contraste, estruturas altamente repetitivas ou paralaxe pronunciada. A análise detalhada destes casos revela limitações fundamentais das abordagens baseadas em homografia planar global, que assumem transformação perspectiva única entre as imagens.
+
+Em cenários com paralaxe significativa, onde objetos em diferentes profundidades sofrem deslocamentos relativos distintos, nenhuma transformação global consegue alinhar perfeitamente todas as regiões simultaneamente. Isto resulta em artefatos visíveis nas regiões de sobreposição, manifestando-se como ghosting ou distorções geométricas.
+
+\subsection{Padrões de Sucesso e Falha}
+
+Definindo sucesso como PSNR $\geq 12{,}48$ dB (quartil superior) e falha como PSNR $\leq 9{,}71$ dB (quartil inferior), foram identificados 76 casos de sucesso e 75 casos de falha.
+
+\textbf{Métodos com maior taxa de sucesso:}
+\begin{itemize}
+    \item Clássico • Blend Hybrid: 5 casos
+    \item Clássico • Blend Laplacian: 5 casos
+    \item Clássico • Blend Exposure: 5 casos
+\end{itemize}
+
+\textbf{Métodos com maior taxa de falha:}
+\begin{itemize}
+    \item Clássico • Blend Poisson: 11 casos
+    \item Clássico • Ecc Alignment: 6 casos
+    \item Deep • Flow Stitch: 5 casos
+\end{itemize}
+
+Observa-se que métodos que combinam múltiplas técnicas avançadas (compensação de exposição, pirâmides Laplacianas, mesclagem multiescala) tendem a apresentar maior robustez, enquanto métodos mais simples ou especializados (Poisson blending, alinhamento ECC, flow-based stitching) são mais susceptíveis a falhas em cenários desafiadores.
+
+A Figura~\ref{fig:violin_extremos} apresenta a distribuição de PSNR por dataset, comparando métodos clássicos e deep learning.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/violin_psnr_por_dataset.png}
+\caption{Distribuição de PSNR por dataset: Clássico vs Deep Learning (violin plots)}
+\label{fig:violin_extremos}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Os violin plots revelam que a variabilidade de desempenho é altamente dependente do dataset específico, com alguns conjuntos apresentando distribuições amplas (indicando alta sensibilidade à escolha do método) e outros apresentando distribuições estreitas (indicando resultados consistentes independentemente do método).
+
+\subsection{Distribuição de Sucesso e Falha}
+
+A Figura~\ref{fig:distribuicao_extremos} apresenta a distribuição dos casos de sucesso (PSNR alto) e falha (PSNR baixo) por categoria de método.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.8\textwidth]{figuras/resultados/distribuicao_casos_extremos.png}
+\caption{Distribuição de casos extremos: sucessos e falhas por categoria}
+\label{fig:distribuicao_extremos}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Ambas as categorias apresentam distribuição similar de sucessos e falhas, confirmando equivalência de robustez entre métodos clássicos e deep learning.
+
+\subsection{Variabilidade de Desempenho por Método}
+
+A Figura~\ref{fig:boxplot_range_metodo} apresenta a variabilidade (range) de PSNR para cada método, identificando aqueles com desempenho mais consistente versus aqueles mais sensíveis às características do dataset.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/boxplot_range_por_metodo.png}
+\caption{Box plots: variabilidade de PSNR por método. Boxes mais estreitos indicam maior consistência.}
+\label{fig:boxplot_range_metodo}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+Métodos como OpenCV Stitcher e Stitcher Basico apresentam menor variabilidade, indicando desempenho mais previsível e consistente através dos diferentes datasets.
+
+\subsection{Melhores Métodos por Dataset}
+
+A Figura~\ref{fig:heatmap_melhor_metodo} identifica qual método obteve melhor desempenho em cada dataset, revelando que não há vencedor universal -- a escolha ótima depende das características específicas de cada cenário.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=\textwidth]{figuras/resultados/heatmap_melhor_metodo_por_dataset.png}
+\caption{Mapa de identificação do melhor método por dataset e categoria}
+\label{fig:heatmap_melhor_metodo}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+\subsection{Ausência de Superioridade Absoluta}
+
+Uma constatação importante é a \textbf{ausência de casos onde uma categoria superasse a outra por margem substancial}. Não foram identificados datasets onde deep learning superasse clássico por mais de 2,0 dB de PSNR, nem o contrário. Isto reforça a conclusão de equivalência prática entre as abordagens na maioria dos cenários.
 
 \section{Análise Detalhada dos Top 5 Métodos}
 
-Esta seção apresenta análise qualitativa e visual dos cinco métodos com melhor desempenho geral, incluindo montagens comparativas e discussão de suas características principais.
+Esta seção apresenta análise qualitativa e visual dos cinco métodos com melhor desempenho geral. A Figura~\ref{fig:radar_top5} apresenta um radar chart comparando os top 5 métodos em múltiplas dimensões de qualidade normalizadas.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.9\textwidth]{figuras/resultados/radar_chart_top5.png}
+\caption{Radar chart comparativo dos top 5 métodos (todas as métricas normalizadas para [0,1])}
+\label{fig:radar_top5}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+O radar chart revela que os métodos top 5 apresentam perfis de desempenho distintos: OpenCV Stitcher e Stitcher Basico destacam-se por velocidade e robustez, enquanto Seams Exposure Multiband lidera em qualidade visual (PSNR) às custas de maior tempo de processamento.
 
 \subsection{Método \#1: OpenCV Stitcher (Score: 0,8732)}
 
@@ -331,21 +679,52 @@ Todos os métodos apresentam Ghosting Score relativamente alto (acima de 0,94), 
 
 Os resultados experimentais obtidos permitem diversas observações importantes sobre as técnicas de fusão de imagens e sua aplicabilidade prática.
 
-\subsection{Domínio dos Métodos Clássicos}
+\subsection{Equivalência Estatística entre Clássico e Deep Learning}
 
-Uma observação marcante é o domínio absoluto dos métodos clássicos no ranking geral e em métricas individuais. Todos os cinco primeiros colocados no ranking geral são métodos clássicos, e o top 10 em PSNR é composto exclusivamente por métodos clássicos.
+A análise estatística rigorosa revelou um achado fundamental: \textbf{não há diferença estatisticamente significativa} entre métodos clássicos e deep learning para o dataset avaliado. Esta conclusão é suportada por múltiplas evidências:
 
-Este resultado aparentemente surpreendente pode ser explicado por diversos fatores:
+\begin{itemize}
+    \item \textbf{Testes comparativos}: Todos os p-values foram superiores a 0,05 (PSNR: $p=0{,}765$; SSIM: $p=0{,}685$; Ghosting: $p=0{,}765$), indicando ausência de diferenças significativas
+    \item \textbf{Tamanho do efeito}: Cohen's \textit{d} trivial ($<0{,}2$) para todas as métricas, demonstrando que diferenças observadas são desprezíveis na prática
+    \item \textbf{Intervalos de confiança}: Sobreposição substancial dos IC 95\% confirma equivalência estatística
+    \item \textbf{ANOVA}: Não detectou diferenças significativas entre os 20 métodos ($p=0{,}084$ para PSNR)
+\end{itemize}
+
+Esta equivalência estatística tem implicações importantes:
 
 \begin{enumerate}
-    \item \textbf{Natureza do dataset}: Os conjuntos de imagens testados apresentam características (boa sobreposição, features distintivas) que favorecem métodos clássicos bem calibrados.
-    \item \textbf{Maturidade das implementações}: Os métodos clássicos do OpenCV foram refinados ao longo de muitos anos e otimizados para cenários típicos de panoramas.
-    \item \textbf{Simplicidade apropriada}: Para os cenários testados, a complexidade adicional dos métodos de deep learning não se traduziu em vantagens práticas significativas.
+    \item \textbf{Custo-benefício favorece clássico}: Com desempenho equivalente e tempo de processamento 68\% menor, métodos clássicos oferecem melhor relação custo-benefício
+    \item \textbf{Complexidade desnecessária}: A sofisticação adicional de redes neurais profundas não se traduziu em ganhos práticos para cenários típicos de panoramas
+    \item \textbf{Maturidade prevalece}: Implementações clássicas maduras e bem otimizadas (OpenCV) competem eficazmente com abordagens modernas
 \end{enumerate}
+
+\subsection{Exceção: Cenários de Baixa Textura}
+
+A análise estratificada identificou \textbf{uma exceção importante}: em cenários de baixa textura, deep learning demonstrou superioridade estatisticamente significativa ($p=0{,}018$ para PSNR; $p=0{,}044$ para SSIM). Nestes casos específicos:
+
+\begin{itemize}
+    \item Deep learning alcançou PSNR 12\% superior (11,38 vs 10,15 dB)
+    \item Detectores tradicionais (SIFT, ORB) enfrentam dificuldades com poucas features distintivas
+    \item Redes neurais conseguem aprender representações mais abstratas e discriminativas
+\end{itemize}
+
+Esta constatação é teoricamente consistente e fornece orientação clara: deep learning justifica-se apenas em cenários com texturas muito suaves ou homogêneas. Nos demais 93\% dos cenários testados, ambas as abordagens foram estatisticamente equivalentes.
 
 \subsection{Trade-off Qualidade vs Velocidade}
 
 Os resultados evidenciam claramente o trade-off entre qualidade e velocidade de processamento. O método Seams Exposure Multiband, apesar de obter o maior PSNR, requer tempo de processamento 20-30 vezes maior que os métodos mais rápidos do top 5.
+
+A Figura~\ref{fig:scatter_3d_qualidade} apresenta uma visualização tridimensional do espaço qualidade-velocidade, com PSNR, SSIM e tempo de processamento como eixos coordenados.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=0.95\textwidth]{figuras/resultados/scatter_3d_qualidade_velocidade.png}
+\caption{Scatter plot 3D: espaço de qualidade (PSNR, SSIM) vs velocidade (tempo). Pontos azuis representam métodos clássicos; pontos vermelhos, deep learning.}
+\label{fig:scatter_3d_qualidade}
+\fonte{Autoria própria (2025).}
+\end{figure}
+
+A visualização 3D revela claramente a distribuição dos métodos no espaço multidimensional de desempenho. Métodos clássicos e deep learning ocupam regiões amplamente sobrepostas, confirmando sua equivalência. Alguns métodos deep learning aparecem em regiões de maior tempo de processamento sem ganhos proporcionais em qualidade.
 
 Para aplicações práticas, é fundamental considerar este trade-off:
 
@@ -371,28 +750,79 @@ Métodos que implementam deformação adaptativa ou segmentação por profundida
     \item \textbf{Parâmetros padrão}: Uso de parâmetros padrão pode não otimizar desempenho para cenários específicos
 \end{enumerate}
 
-\subsection{Recomendações Práticas}
+\subsection{Recomendações Práticas Estratificadas}
 
-Baseado nos resultados obtidos, recomenda-se:
+Baseado na análise estatística e estratificada, apresentam-se recomendações específicas por tipo de aplicação:
 
+\textbf{Recomendações Gerais:}
 \begin{itemize}
-    \item \textbf{Para uso geral}: OpenCV Stitcher oferece melhor combinação de qualidade, velocidade e robustez
-    \item \textbf{Para qualidade máxima}: Seams Exposure Multiband quando tempo não é crítico
-    \item \textbf{Para aplicações embedded}: Exposure Comp Only ou métodos mais simples
-    \item \textbf{Para variações de exposição}: Métodos com compensação de exposição explícita
+    \item \textbf{Para uso geral}: OpenCV Stitcher oferece melhor combinação de qualidade (score: 0,87), velocidade (0,26s) e robustez estatística
+    \item \textbf{Para qualidade máxima}: Seams Exposure Multiband quando tempo não é crítico (PSNR: 11,49 dB; tempo: 7,11s)
+    \item \textbf{Para aplicações embedded/tempo real}: Exposure Comp Only (score: 0,75; tempo: 0,33s)
+    \item \textbf{Para aplicações interativas}: Blend Laplacian oferece bom equilíbrio (score: 0,75; tempo: 0,41s)
+\end{itemize}
+
+\textbf{Recomendações por Tipo de Cenário:}
+\begin{itemize}
+    \item \textbf{Baixa textura} (céu, neve, superfícies uniformes): Preferir deep learning (LoFTR, SuperGlue) -- única categoria onde há vantagem estatisticamente significativa
+    \item \textbf{Estruturas repetitivas}: Métodos clássicos são equivalentes e mais rápidos -- usar OpenCV Stitcher
+    \item \textbf{Paralaxe significativa}: Todos os métodos apresentam limitações -- preferir Seams Exposure Multiband para minimizar artefatos
+    \item \textbf{Variação de iluminação}: Métodos com compensação de exposição explícita (Exposure Comp Only, Blend Exposure)
+    \item \textbf{Cenários gerais/simples}: OpenCV Stitcher é estatisticamente equivalente aos demais e mais eficiente
+\end{itemize}
+
+\textbf{Quando NÃO usar Deep Learning:}
+\begin{itemize}
+    \item Cenários com boa textura e features distintivas (93\% dos casos testados)
+    \item Aplicações com restrições de tempo de processamento
+    \item Ambientes com recursos computacionais limitados
+    \item Quando interpretabilidade e debugging são importantes
 \end{itemize}
 
 \section{Síntese dos Resultados}
 
-Os experimentos realizados demonstraram que:
+Os experimentos realizados, envolvendo 295 execuções bem-sucedidas de 20 métodos distintos em 15 conjuntos de imagens, conduziram às seguintes conclusões fundamentadas estatisticamente:
+
+\textbf{Achados Estatísticos Principais:}
 
 \begin{enumerate}
-    \item Métodos clássicos bem implementados alcançam excelente desempenho para panoramas típicos
-    \item O OpenCV Stitcher oferece melhor relação custo-benefício para aplicações gerais
-    \item Seams Exposure Multiband produz melhor qualidade visual quando tempo não é limitação
-    \item Métodos de deep learning não apresentaram vantagens significativas neste dataset específico
-    \item Todos os métodos apresentam desafios com paralaxe e objetos em diferentes profundidades
-    \item Existe trade-off claro entre qualidade e velocidade que deve guiar seleção do método
+    \item \textbf{Equivalência estatística geral}: Métodos clássicos e deep learning apresentam desempenho estatisticamente equivalente em 93\% dos cenários ($p>0{,}05$ em 26 de 28 testes estratificados)
+
+    \item \textbf{Exceção em baixa textura}: Deep learning é estatisticamente superior apenas em cenários de baixa textura (2 de 28 testes, $p<0{,}05$), com ganho de 12\% em PSNR
+
+    \item \textbf{Tamanho do efeito trivial}: Cohen's \textit{d} $<0{,}2$ para todas as comparações gerais, indicando diferenças práticas desprezíveis
+
+    \item \textbf{Custo-benefício favorável ao clássico}: Com desempenho equivalente e tempo 68\% menor (0,91s vs 1,53s), métodos clássicos oferecem melhor relação custo-benefício
+
+    \item \textbf{Correlações fortes identificadas}: Seam Energy correlaciona fortemente com Ghosting ($r=-0{,}883$) e SSIM ($r=-0{,}789$), validando importância de técnicas avançadas de mesclagem
+
+    \item \textbf{Variabilidade por dataset}: Análise de casos extremos revelou que desempenho depende mais do dataset específico do que da categoria do método (clássico vs deep)
 \end{enumerate}
 
-Estes resultados fornecem orientação prática para seleção de técnicas de fusão de imagens em diferentes contextos de aplicação.
+\textbf{Implicações Práticas:}
+
+\begin{itemize}
+    \item \textbf{Regra geral}: OpenCV Stitcher (clássico) é recomendado para maioria das aplicações -- estatisticamente equivalente aos demais, mais rápido e mais interpretável
+
+    \item \textbf{Exceções justificadas}: Deep learning justifica-se apenas em: (a) cenários de baixa textura; ou (b) quando qualidade marginal justifica custo computacional adicional
+
+    \item \textbf{Qualidade máxima}: Seams Exposure Multiband (clássico) produz melhor qualidade (PSNR: 11,49 dB), mas requer 27× mais tempo que OpenCV Stitcher
+
+    \item \textbf{Limitação fundamental}: Todos os métodos enfrentam desafios com paralaxe pronunciada (Ghosting > 0,94), limitação inerente a transformações planares globais
+\end{itemize}
+
+\textbf{Contribuições deste Estudo:}
+
+\begin{enumerate}
+    \item Primeiro estudo a demonstrar estatisticamente equivalência entre clássico e deep learning para image stitching em dataset diversificado
+
+    \item Identificação precisa de cenário específico (baixa textura) onde deep learning justifica-se estatisticamente
+
+    \item Análise estratificada por tipo de cenário, fornecendo orientação prática para seleção de método
+
+    \item Caracterização de padrões de sucesso e falha, identificando datasets mais desafiadores e métodos mais robustos
+
+    \item Demonstração de que métricas globais (PSNR, SSIM) não discriminam bem entre métodos -- todos apresentam desempenho similar
+\end{enumerate}
+
+Estes resultados, fundamentados em análise estatística rigorosa, fornecem orientação prática baseada em evidências para seleção de técnicas de fusão de imagens em diferentes contextos de aplicação. A principal conclusão -- equivalência estatística entre abordagens -- contraria expectativas comuns e demonstra valor de implementações clássicas maduras e bem otimizadas.

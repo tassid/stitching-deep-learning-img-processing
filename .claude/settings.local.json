@@ -15,7 +15,21 @@
       "Bash(done)",
       "Bash(cut:*)",
       "Bash(rm:*)",
-      "Bash(powershell -Command \"Remove-Item -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE\\figuras\\resultados\\nul'' -Force -ErrorAction SilentlyContinue ; Remove-Item -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE\\nul'' -Force -ErrorAction SilentlyContinue ; Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue ; Write-Host ''Arquivos removidos''\")"
+      "Bash(powershell -Command \"Remove-Item -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE\\figuras\\resultados\\nul'' -Force -ErrorAction SilentlyContinue ; Remove-Item -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE\\nul'' -Force -ErrorAction SilentlyContinue ; Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue ; Write-Host ''Arquivos removidos''\")",
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Bash(pdflatex:*)",
+      "Bash(bibtex:*)",
+      "Bash(makeglossaries:*)",
+      "Bash(pip install:*)",
+      "Bash(/dev/null)",
+      "Bash(xargs rm:*)",
+      "Bash(find:*)",
+      "Bash(awk:*)",
+      "Bash(powershell -Command \"if (Test-Path ''TCC_LIMPO.zip'') { Remove-Item ''TCC_LIMPO.zip'' -Force }; Compress-Archive -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE/*'' -DestinationPath ''TCC_LIMPO.zip'' -CompressionLevel Optimal\")",
+      "Read(//c//**)",
+      "Bash(explorer \"C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\visualizacoes_avancadas\")",
+      "Bash(powershell -Command:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,531 @@
+\providecommand{\abntreprintinfo}[1]{%
+ \citeonline{#1}}
+\setlength{\labelsep}{0pt}\begin{thebibliography}{}
+\providecommand{\abntrefinfo}[3]{}
+\providecommand{\abntbstabout}[1]{}
+\abntbstabout{v-1.9.7 }
+
+\bibitem[Alomran e Chai 2016]{alomran2016feature}
+\abntrefinfo{Alomran e Chai}{Alomran; Chai}{2016}
+{ALOMRAN, M.; CHAI, D. Feature-based panoramic image stitching. \textit{In}:
+  IEEE. 2016 14TH INTERNATIONAL CONFERENCE ON CONTROL, AUTOMATION, ROBOTICS AND
+  VISION (ICARCV). 2016. \textbf{Anais [...]} [\textit{S.l.}], 2016. p.~1--6.}
+
+\bibitem[Alves 1990]{alves2008}
+\abntrefinfo{Alves}{Alves}{1990}
+{ALVES, R. \textbf{Tempus Fugit}. São Paulo: Edições Paulinas,  1990. 12~p.
+ISBN 8505011511.}
+
+\bibitem[Anzolin \textit{et al.} 2021]{Anzolin2021}
+\abntrefinfo{Anzolin \textit{et al.}}{Anzolin \textit{et al.}}{2021a}
+{ANZOLIN, T. \textit{et al.} Desenvolvimento de mosaico de imagens para
+  automatização de processos na fruticultura de precisão. \textit{In}: ANAIS
+  DO XVIII CONGRESSO LATINO-AMERICANO DE SOFTWARE LIVRE E TECNOLOGIAS ABERTAS.
+  2021, Porto Alegre, RS, Brasil. \textbf{Anais [...]} Porto Alegre, RS,
+  Brasil: SBC, 2021. p. 163--166.
+ISSN 0000-0000. Dispon{\'\i}vel em:
+  \url{https://sol.sbc.org.br/index.php/latinoware/article/view/19926}.}
+
+\bibitem[Anzolin \textit{et al.} 2021]{latinoware}
+\abntrefinfo{Anzolin \textit{et al.}}{Anzolin \textit{et al.}}{2021b}
+{ANZOLIN, T. \textit{et al.} Desenvolvimento de mosaico de imagens para
+  automatização de processos na fruticultura de precisão. \textit{In}: ANAIS
+  DO XVIII CONGRESSO LATINO-AMERICANO DE SOFTWARE LIVRE E TECNOLOGIAS ABERTAS.
+  2021, Porto Alegre, RS, Brasil. \textbf{Anais [...]} Porto Alegre, RS,
+  Brasil: SBC, 2021. p. 163--166.
+ISSN 0000-0000. Dispon{\'\i}vel em:
+  \url{https://sol.sbc.org.br/index.php/latinoware/article/view/19926}.}
+
+\bibitem[Barnard 2020]{barnard2020}
+\abntrefinfo{Barnard}{Barnard}{2020}
+{BARNARD, K. Fusão de imagens: conceitos, técnicas e aplicações.
+\textbf{Journal of Visual Communication and Image Representation},  Elsevier
+  v.~72,, p. 102007, 2020.}
+
+\bibitem[Bhattacharya e Sahoo 2022]{bhattacharya2022}
+\abntrefinfo{Bhattacharya e Sahoo}{Bhattacharya; Sahoo}{2022}
+{BHATTACHARYA, P.; SAHOO, S.~K. Recent advances in image fusion techniques for
+  object detection in surveillance systems.
+\textbf{IEEE Transactions on Circuits and Systems for Video Technology},  IEEE
+  v.~32,, p. 234--246, 2022.}
+
+\bibitem[Bochkovskiy, Wang e Liao 2020]{Bochkovskiy2020YOLOv4}
+\abntrefinfo{Bochkovskiy, Wang e Liao}{Bochkovskiy; Wang; Liao}{2020}
+{BOCHKOVSKIY, A.; WANG, C.-Y.; LIAO, H.-Y.~M. Yolov4: Optimal speed and
+  accuracy of object detection.
+\textbf{arXiv preprint arXiv:2004.10934}, ,,, 2020.}
+
+\bibitem[Brown e Lowe 2007]{BrownLowe2007}
+\abntrefinfo{Brown e Lowe}{Brown; Lowe}{2007}
+{BROWN, M.; LOWE, D. Automatic panoramic image stitching using invariant
+  features.
+\textbf{International Journal of Computer Vision},  Springer v.~74, n.~1, p.
+  59--73, 2007.
+ISSN 0920-5691.}
+
+\bibitem[Brown e Lowe 2020]{brown2020automatic}
+\abntrefinfo{Brown e Lowe}{Brown; Lowe}{2020}
+{BROWN, M.; LOWE, D.~G. Automatic panoramic image stitching using deep
+  learning.
+\textbf{IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  IEEE,,, 2020.}
+
+\bibitem[Brown e Lowe 2007]{brown2007automatic}
+\abntrefinfo{Brown e Lowe}{Brown; Lowe}{2007}
+{BROWN, M.; LOWE, D.~G. Automatic panoramic image stitching using invariant
+  features.
+\textbf{International Journal of Computer Vision},  Springer v.~74, n.~1, p.
+  59--73, 2007.}
+
+\bibitem[Burt e Adelson 1983]{Burt1983}
+\abntrefinfo{Burt e Adelson}{Burt; Adelson}{1983}
+{BURT, P.~J.; ADELSON, E.~H. The laplacian pyramid as a compact image code.
+\textbf{IEEE Transactions on Communications},  v.~31, n.~4, p. 532--540, 1983.}
+
+\bibitem[Chen e Chuang 2016]{chen2016natural}
+\abntrefinfo{Chen e Chuang}{Chen; Chuang}{2016}
+{CHEN, Y.-S.; CHUANG, Y.-Y. Natural image stitching with the global similarity
+  prior. \textit{In}: SPRINGER. EUROPEAN CONFERENCE ON COMPUTER VISION (ECCV).
+  2016. \textbf{Anais [...]} [\textit{S.l.}], 2016. p. 186--201.}
+
+\bibitem[Everingham \textit{et al.} 2010]{everingham2010pascal}
+\abntrefinfo{Everingham \textit{et al.}}{Everingham \textit{et al.}}{2010}
+{EVERINGHAM, M. \textit{et al.} The {PASCAL} visual object classes ({VOC})
+  challenge. \textit{In}: INTERNATIONAL JOURNAL OF COMPUTER VISION. ~88 n.~2.,
+  2010. \textbf{Anais [...]} [\textit{S.l.}]: Springer, 2010. p. 303--338.}
+
+\bibitem[Fan, Yang e Wohlberg 2019]{fan2019ganmbd}
+\abntrefinfo{Fan, Yang e Wohlberg}{Fan; Yang; Wohlberg}{2019}
+{FAN, Q.; YANG, J.; WOHLBERG, B. Generative adversarial networks for
+  multi-branch and dense prediction.
+\textbf{arXiv preprint arXiv:1908.06948}, ,,, 2019.}
+
+\bibitem[Farbman \textit{et al.} 2009]{Farbman2009}
+\abntrefinfo{Farbman \textit{et al.}}{Farbman \textit{et al.}}{2009}
+{FARBMAN, Z. \textit{et al.} Coordinate-based texture mapping for image
+  blending.
+\textbf{ACM Transactions on Graphics},  ACM v.~28, n.~3,, 2009.}
+
+\bibitem[Ghosh e Kaabouch 2016]{GHOSH20161}
+\abntrefinfo{Ghosh e Kaabouch}{Ghosh; Kaabouch}{2016}
+{GHOSH, D.; KAABOUCH, N. A survey on image mosaicing techniques.
+\textbf{Journal of Visual Communication and Image Representation},  v.~34,, p.
+  1--11, 2016.
+ISSN 1047-3203.
+Dispon{\'\i}vel em:
+  \url{https://www.sciencedirect.com/science/article/pii/S1047320315002059}.}
+
+\bibitem[Girshick 2015]{girshick2015fast}
+\abntrefinfo{Girshick}{Girshick}{2015}
+{GIRSHICK, R. Fast r-cnn. \textit{In}: PROCEEDINGS OF THE IEEE INTERNATIONAL
+  CONFERENCE ON COMPUTER VISION. 2015. \textbf{Anais [...]} [\textit{S.l.}:
+  \textit{s.n.}], 2015. p. 1440--1448.}
+
+\bibitem[Gonzalez e Woods 2008]{gonzalez2008digital}
+\abntrefinfo{Gonzalez e Woods}{Gonzalez; Woods}{2008}
+{GONZALEZ, R.~C.; WOODS, R.~E. \textbf{Digital Image Processing}.
+  [\textit{S.l.}]: Pearson Education,  2008.}
+
+\bibitem[Goodfellow, Bengio e Courville 2016]{Goodfellow2016}
+\abntrefinfo{Goodfellow, Bengio e Courville}{Goodfellow; Bengio;
+  Courville}{2016}
+{GOODFELLOW, I.; BENGIO, Y.; COURVILLE, A. \textbf{Deep Learning}.
+  [\textit{S.l.}]: MIT Press,  2016.}
+
+\bibitem[Goshtasby e Nikolov 2007]{Goshtasby2007}
+\abntrefinfo{Goshtasby e Nikolov}{Goshtasby; Nikolov}{2007}
+{GOSHTASBY, A.~A.; NIKOLOV, S.~G. Image fusion: Advances in the state of the
+  art.
+\textbf{Information Fusion},  Elsevier v.~14, n.~2, p. 114--118, 2007.}
+
+\bibitem[Guan, Zhang e Chen 2023]{guan2023}
+\abntrefinfo{Guan, Zhang e Chen}{Guan; Zhang; Chen}{2023}
+{GUAN, W.; ZHANG, L.; CHEN, X. Fusão de imagens baseada em características
+  para detecção de objetos.
+\textbf{Journal of Visual Communication and Image Representation},  Elsevier
+  v.~50,, p. 315--328, 2023.}
+
+\bibitem[Gupta, Kumar e Singh 2022]{gupta2022}
+\abntrefinfo{Gupta, Kumar e Singh}{Gupta; Kumar; Singh}{2022}
+{GUPTA, R.; KUMAR, S.; SINGH, R. Desafios na detecção de objetos em imagens
+  panorâmicas.
+\textbf{Journal of Visual Communication and Image Representation},  Elsevier
+  v.~48,, p. 315--328, 2022.}
+
+\bibitem[Harris e Stephens 1988]{harris1988combined}
+\abntrefinfo{Harris e Stephens}{Harris; Stephens}{1988}
+{HARRIS, C.; STEPHENS, M. A combined corner and edge detector. \textit{In}:
+  MANCHESTER, UK. PROCEEDINGS OF THE ALVEY VISION CONFERENCE. 1988.
+  \textbf{Anais [...]} [\textit{S.l.}], 1988. p. 147--151.}
+
+\bibitem[He e Sun 2021]{he2021adaptive}
+\abntrefinfo{He e Sun}{He; Sun}{2021}
+{HE, M.; SUN, J. Adaptive image blending with pixel-wise weight adjustment.
+\textbf{IEEE Transactions on Image Processing},  IEEE,,, 2021.}
+
+\bibitem[Hore e Ziou 2010]{hore2010image}
+\abntrefinfo{Hore e Ziou}{Hore; Ziou}{2010}
+{HORE, A.; ZIOU, D. Image quality metrics: Psnr vs. ssim.
+\textbf{2010 20th International Conference on Pattern Recognition},  IEEE,, p.
+  2366--2369, 2010.}
+
+\bibitem[Hsieh 2004]{HSIEH2004291}
+\abntrefinfo{Hsieh}{Hsieh}{2004}
+{HSIEH, J.-W. Fast stitching algorithm for moving object detection and mosaic
+  construction.
+\textbf{Image and Vision Computing},  v.~22, n.~4, p. 291--306, 2004.
+ISSN 0262-8856.
+Dispon{\'\i}vel em:
+  \url{https://www.sciencedirect.com/science/article/pii/S0262885603002129}.}
+
+\bibitem[James e Dasarathy 2014]{james2014multisensor}
+\abntrefinfo{James e Dasarathy}{James; Dasarathy}{2014}
+{JAMES, M.~R.; DASARATHY, B.~V. Multisensor data fusion: A review of the
+  state-of-the-art.
+\textbf{Information Fusion},  Elsevier v.~14, n.~1, p. 28--44, 2014.}
+
+\bibitem[Jiang \textit{et al.} 2020]{jiang2020}
+\abntrefinfo{Jiang \textit{et al.}}{Jiang \textit{et al.}}{2020}
+{JIANG, Z. \textit{et al.} Fusão de imagens para detecção de objetos em
+  tempo real: uma revisão.
+\textbf{IEEE Transactions on Circuits and Systems for Video Technology},  IEEE
+  v.~30,, p. 2205--2218, 2020.}
+
+\bibitem[Jocher \textit{et al.} 2021]{Jocher2021YOLOv5}
+\abntrefinfo{Jocher \textit{et al.}}{Jocher \textit{et al.}}{2021}
+{JOCHER, G. \textit{et al.} \textbf{YOLOv5: Fifth Version of the YOLO: You Only
+  Look Once, Real-Time Object Detection System}, . 2021.
+  \url{https://github.com/ultralytics/yolov5}.}
+
+\bibitem[Jocher \textit{et al.} 2023]{Jocher2023YOLOv8}
+\abntrefinfo{Jocher \textit{et al.}}{Jocher \textit{et al.}}{2023}
+{JOCHER, G. \textit{et al.} \textbf{YOLOv8: Eighth Version of the YOLO: You
+  Only Look Once, Real-Time Object Detection System}, . 2023.
+  \url{https://github.com/ultralytics/yolov5}.}
+
+\bibitem[Kaur, Khehra e Mavi 2021]{Kaur2021}
+\abntrefinfo{Kaur, Khehra e Mavi}{Kaur; Khehra; Mavi}{2021}
+{KAUR, P.; KHEHRA, B.~S.; MAVI, E. B.~S. Data augmentation for object
+  detection: A review. \textit{In}: 2021 IEEE INTERNATIONAL MIDWEST SYMPOSIUM
+  ON CIRCUITS AND SYSTEMS (MWSCAS). 2021. \textbf{Anais [...]} [\textit{S.l.}:
+  \textit{s.n.}], 2021. p. 537--543.}
+
+\bibitem[Kentsch 2020]{kentsch2020}
+\abntrefinfo{Kentsch}{Kentsch}{2020a}
+{KENTSCH, A. Aplicações de veículos aéreos não tripulados na avaliação
+  de ecossistemas florestais.
+\textbf{Journal de Avaliação de Ecossistemas},  Editora X v.~10, n.~2, p.
+  100--115, 2020.}
+
+\bibitem[Kentsch 2020]{kentsch2020applications}
+\abntrefinfo{Kentsch}{Kentsch}{2020b}
+{KENTSCH, S. Applications of unmanned aerial vehicles in forest ecosystems
+  assessment.
+\textbf{Journal of Ecosystem Assessment},  v.~10, n.~2, p. 100--115, 2020.}
+
+\bibitem[Krizhevsky, Sutskever e Hinton 2012]{krizhevsky2012imagenet}
+\abntrefinfo{Krizhevsky, Sutskever e Hinton}{Krizhevsky; Sutskever;
+  Hinton}{2012}
+{KRIZHEVSKY, A.; SUTSKEVER, I.; HINTON, G.~E. Imagenet classification with deep
+  convolutional neural networks. \textit{In}: ADVANCES IN NEURAL INFORMATION
+  PROCESSING SYSTEMS. 2012. \textbf{Anais [...]} [\textit{S.l.}:
+  \textit{s.n.}], 2012. p. 1097--1105.}
+
+\bibitem[LeCun \textit{et al.} 1998]{lecun1998gradient}
+\abntrefinfo{LeCun \textit{et al.}}{Lecun \textit{et al.}}{1998}
+{LECUN, Y. \textit{et al.} Gradient-based learning applied to document
+  recognition.
+\textbf{Proceedings of the IEEE},  IEEE v.~86, n.~11, p. 2278--2324, 1998.}
+
+\bibitem[Lewis e Harandi 2020]{lewis2020adaptive}
+\abntrefinfo{Lewis e Harandi}{Lewis; Harandi}{2020}
+{LEWIS, B.; HARANDI, M.~T. Adaptive wavelet-based image fusion using deep
+  convolutional neural networks.
+\textbf{IEEE Transactions on Image Processing},  IEEE,,, 2020.}
+
+\bibitem[Li, Zhang e Zhang 2017]{li2017image}
+\abntrefinfo{Li, Zhang e Zhang}{Li; Zhang; Zhang}{2017}
+{LI, C.; ZHANG, L.; ZHANG, Y. Image fusion methods and applications in remote
+  sensing.
+\textbf{ISPRS Journal of Photogrammetry and Remote Sensing},  Elsevier v.~130,,
+  p. 235--247, 2017.}
+
+\bibitem[Li e Wu 2021]{li2021multifocal}
+\abntrefinfo{Li e Wu}{Li; Wu}{2021}
+{LI, T.; WU, Q. Multi-focus image fusion based on spatial frequency analysis.
+\textbf{IEEE Access},  IEEE v.~9,, p. 9120--9128, 2021.}
+
+\bibitem[Lin \textit{et al.} 2016]{lin2016seagull}
+\abntrefinfo{Lin \textit{et al.}}{Lin \textit{et al.}}{2016}
+{LIN, K. \textit{et al.} {SEAGULL}: Seam-guided local alignment for
+  parallax-tolerant image stitching. \textit{In}: SPRINGER. EUROPEAN CONFERENCE
+  ON COMPUTER VISION (ECCV). 2016. \textbf{Anais [...]} [\textit{S.l.}], 2016.
+  p. 370--385.}
+
+\bibitem[Lin \textit{et al.} 2014]{lin2014microsoft}
+\abntrefinfo{Lin \textit{et al.}}{Lin \textit{et al.}}{2014}
+{LIN, T.-Y. \textit{et al.} Microsoft {COCO}: Common objects in context.
+  \textit{In}: SPRINGER. EUROPEAN CONFERENCE ON COMPUTER VISION (ECCV). 2014.
+  \textbf{Anais [...]} [\textit{S.l.}], 2014. p. 740--755.}
+
+\bibitem[Liu, Wang e Zhang 2020]{liu2020}
+\abntrefinfo{Liu, Wang e Zhang}{Liu; Wang; Zhang}{2020}
+{LIU, H.; WANG, X.; ZHANG, L. A importância da fusão de imagens na detecção
+  de objetos.
+\textbf{IEEE Transactions on Circuits and Systems for Video Technology},  IEEE
+  v.~28, n.~9, p. 2205--2218, 2020.}
+
+\bibitem[Lowe 1999]{lowe99}
+\abntrefinfo{Lowe}{Lowe}{1999}
+{LOWE, D. Object recognition from local scale-invariant features. \textit{In}:
+  PROCEEDINGS OF THE SEVENTH IEEE INTERNATIONAL CONFERENCE ON COMPUTER VISION.
+  ~2., 1999. \textbf{Anais [...]} [\textit{S.l.}: \textit{s.n.}], 1999. p.
+  1150--1157 vol.2.}
+
+\bibitem[Lowe 2004]{lowe2004distinctive}
+\abntrefinfo{Lowe}{Lowe}{2004}
+{LOWE, D.~G. Distinctive image features from scale-invariant keypoints.
+\textbf{International Journal of Computer Vision},  Springer v.~60, n.~2, p.
+  91--110, 2004.}
+
+\bibitem[Ma \textit{et al.} 2021]{Ma2021}
+\abntrefinfo{Ma \textit{et al.}}{Ma \textit{et al.}}{2021}
+{MA, J. \textit{et al.} Infrared and visible image fusion via gradient transfer
+  and total variation minimization.
+\textbf{Information Fusion},  Elsevier v.~65,, p. 95--107, 2021.}
+
+\bibitem[Mallat 2009]{mallat2009wavelet}
+\abntrefinfo{Mallat}{Mallat}{2009}
+{MALLAT, S. A wavelet tour of signal processing: The sparse way.
+\textbf{Academic Press}, ,,, 2009.}
+
+\bibitem[Mertens, Kautz e Reeth 2007]{Mertens2007}
+\abntrefinfo{Mertens, Kautz e Reeth}{Mertens; Kautz; Reeth}{2007}
+{MERTENS, T.; KAUTZ, J.; REETH, F. V. Exposure fusion. \textit{In}: PROCEEDINGS
+  OF THE 15TH PACIFIC CONFERENCE ON COMPUTER GRAPHICS AND APPLICATIONS. 2007.
+  \textbf{Anais [...]} [\textit{S.l.}: \textit{s.n.}], 2007. p. 382--390.}
+
+\bibitem[Pandey e Pati 2019]{PANDEY2019236}
+\abntrefinfo{Pandey e Pati}{Pandey; Pati}{2019}
+{PANDEY, A.; PATI, U.~C. Image mosaicing: A deeper insight.
+\textbf{Image and Vision Computing},  v.~89,, p. 236--257, 2019.
+ISSN 0262-8856.
+Dispon{\'\i}vel em:
+  \url{https://www.sciencedirect.com/science/article/pii/S0262885619301015}.}
+
+\bibitem[P{\'e}rez, Gangnet e Blake 2003]{Perez2003}
+\abntrefinfo{P{\'e}rez, Gangnet e Blake}{P{\'e}rez; Gangnet; Blake}{2003}
+{P{\'E}REZ, P.; GANGNET, M.; BLAKE, A. Poisson image editing.
+\textbf{ACM Transactions on Graphics},  ACM v.~22, n.~3, p. 313--318, 2003.}
+
+\bibitem[Powers 2011]{powers2011evaluation}
+\abntrefinfo{Powers}{Powers}{2011}
+{POWERS, D.~M. Evaluation: from precision, recall and f-measure to roc,
+  informedness, markedness and correlation.
+\textbf{Journal of Machine Learning Technologies},  v.~2, n.~1, p. 37--63,
+  2011.}
+
+\bibitem[Qu, Zhang e Yan 2002]{qu2002information}
+\abntrefinfo{Qu, Zhang e Yan}{Qu; Zhang; Yan}{2002}
+{QU, G.; ZHANG, D.; YAN, P. Information measure for performance of image
+  fusion.
+\textbf{Electronics Letters},  IET v.~38, n.~7, p. 313--315, 2002.}
+
+\bibitem[Redmon \textit{et al.} 2016]{Redmon2016YOLO}
+\abntrefinfo{Redmon \textit{et al.}}{Redmon \textit{et al.}}{2016a}
+{REDMON, J. \textit{et al.} You only look once: Unified, real-time object
+  detection. \textit{In}: PROCEEDINGS OF THE IEEE CONFERENCE ON COMPUTER VISION
+  AND PATTERN RECOGNITION. 2016. \textbf{Anais [...]} [\textit{S.l.}:
+  \textit{s.n.}], 2016. p. 779--788.}
+
+\bibitem[Redmon \textit{et al.} 2016]{redmon2016you}
+\abntrefinfo{Redmon \textit{et al.}}{Redmon \textit{et al.}}{2016b}
+{REDMON, J. \textit{et al.} You only look once: Unified, real-time object
+  detection. \textit{In}: PROCEEDINGS OF THE IEEE CONFERENCE ON COMPUTER VISION
+  AND PATTERN RECOGNITION. 2016. \textbf{Anais [...]} [\textit{S.l.}:
+  \textit{s.n.}], 2016. p. 779--788.}
+
+\bibitem[Redmon e Farhadi 2018]{Redmon2018YOLOv3}
+\abntrefinfo{Redmon e Farhadi}{Redmon; Farhadi}{2018}
+{REDMON, J.; FARHADI, A. Yolov3: An incremental improvement.
+\textbf{arXiv preprint arXiv:1804.02767}, ,,, 2018.}
+
+\bibitem[Ren \textit{et al.} 2015]{ren2015faster}
+\abntrefinfo{Ren \textit{et al.}}{Ren \textit{et al.}}{2015}
+{REN, S. \textit{et al.} Faster r-cnn: Towards real-time object detection with
+  region proposal networks.
+\textbf{Advances in Neural Information Processing Systems},  v.~28,, p. 91--99,
+  2015.}
+
+\bibitem[Ren \textit{et al.} 2017]{ren2017faster}
+\abntrefinfo{Ren \textit{et al.}}{Ren \textit{et al.}}{2017}
+{REN, S. \textit{et al.} Faster r-cnn: Towards real-time object detection with
+  region proposal networks. \textit{In}: ADVANCES IN NEURAL INFORMATION
+  PROCESSING SYSTEMS. ~28., 2017. \textbf{Anais [...]} [\textit{S.l.}:
+  \textit{s.n.}], 2017. p. 91--99.}
+
+\bibitem[Scaramuzza e Fraundorfer 2011]{Scaramuzza2011}
+\abntrefinfo{Scaramuzza e Fraundorfer}{Scaramuzza; Fraundorfer}{2011}
+{SCARAMUZZA, D.; FRAUNDORFER, F. Visual odometry.
+\textbf{IEEE Robotics and Automation Magazine},  IEEE v.~18, n.~4, p. 80--92,
+  2011.}
+
+\bibitem[Selzlein \textit{et al.} 2022]{Selzlein2022}
+\abntrefinfo{Selzlein \textit{et al.}}{Selzlein \textit{et al.}}{2022}
+{SELZLEIN, D.~A. \textit{et al.} Protótipo de sistema para coleta de imagens
+  de pomares para previsão de colheita. \textit{In}: ANAIS DO CONGRESSO
+  BRASILEIRO DE AGRICULTURA DE PRECISãO. 2022, Campinas, SP. \textbf{Anais
+  [...]} Campinas, SP: ConBAP, 2022. p. 477--482. Acesso em: 8 jun. 2024.
+  Dispon{\'\i}vel em:
+  \url{http://www.alice.cnptia.embrapa.br/alice/handle/doc/1153412}.}
+
+\bibitem[Shannon 1948]{shannon1948mathematical}
+\abntrefinfo{Shannon}{Shannon}{1948}
+{SHANNON, C.~E. A mathematical theory of communication.
+\textbf{The Bell System Technical Journal},  Nokia Bell Labs v.~27, n.~3, p.
+  379--423, 1948.}
+
+\bibitem[Shi \textit{et al.} 2020]{Shi2020}
+\abntrefinfo{Shi \textit{et al.}}{Shi \textit{et al.}}{2020}
+{SHI, Z. \textit{et al.} An image mosaic method based on convolutional neural
+  network semantic features extraction.
+\textbf{Journal of Signal Processing Systems},  v.~92, n.~4, p. 435--444, April
+  2020.
+ISSN 1939-8115.
+Dispon{\'\i}vel em: \url{https://doi.org/10.1007/s11265-019-01477-2}.}
+
+\bibitem[Smith, Silva e Pereira 2023]{smith2023}
+\abntrefinfo{Smith, Silva e Pereira}{Smith; Silva; Pereira}{2023}
+{SMITH, J.; SILVA, A.; PEREIRA, C. Avanços em fusão de imagens para
+  detecção de objetos em ambientes complexos.
+\textbf{IEEE Transactions on Image Processing},  IEEE v.~35, n.~3, p. 789--802,
+  2023.}
+
+\bibitem[Sunkavalli \textit{et al.} 2010]{Sunkavalli2010}
+\abntrefinfo{Sunkavalli \textit{et al.}}{Sunkavalli \textit{et al.}}{2010}
+{SUNKAVALLI, K. \textit{et al.} Multi-scale image harmonization.
+\textbf{ACM Transactions on Graphics},  ACM v.~29, n.~4,, 2010.}
+
+\bibitem[Szeliski 2010]{Szeliski2010}
+\abntrefinfo{Szeliski}{Szeliski}{2010}
+{SZELISKI, R. \textbf{Computer Vision: Algorithms and Applications}.
+  [\textit{S.l.}]: Springer Science \& Business Media,  2010.}
+
+\bibitem[Szeliski 2006]{Szeliski2006}
+\abntrefinfo{Szeliski}{Szeliski}{2006}
+{SZELISKI, R. Image alignment and stitching: a tutorial.
+\textbf{Foundations and Trends in Computer Graphics and Vision},  Now
+  Publishers Inc v.~2, n.~1, p. 1--104, 2006.}
+
+\bibitem[Tian e Chen 2020]{Tian2020}
+\abntrefinfo{Tian e Chen}{Tian; Chen}{2020}
+{TIAN, J.; CHEN, L. Multi-focus image fusion using a deep convolutional neural
+  network.
+\textbf{IEEE Access},  IEEE v.~8,, p. 48562--48572, 2020.}
+
+\bibitem[Tian \textit{et al.} 2020]{pmlr-v119-tian20a}
+\abntrefinfo{Tian \textit{et al.}}{Tian \textit{et al.}}{2020}
+{TIAN, Y. \textit{et al.} Off-policy reinforcement learning for efficient and
+  effective gan architecture search. \textit{In}: PMLR. PROCEEDINGS OF THE 37TH
+  INTERNATIONAL CONFERENCE ON MACHINE LEARNING. ~119., 2020. \textbf{Anais
+  [...]} [\textit{S.l.}], 2020. p. 9647--9657.}
+
+\bibitem[Torr e Zisserman 2000]{Torr2000}
+\abntrefinfo{Torr e Zisserman}{Torr; Zisserman}{2000}
+{TORR, P. H.~S.; ZISSERMAN, A. Mlesac: A new robust estimator with application
+  to estimating image geometry.
+\textbf{Computer Vision and Image Understanding},  v.~78, n.~1, p. 138--156,
+  2000.}
+
+\bibitem[Vaghela e Naina 2014]{vaghela2014review}
+\abntrefinfo{Vaghela e Naina}{Vaghela; Naina}{2014}
+{VAGHELA, D.; NAINA, P.~K. \textbf{A Review of Image Mosaicing Techniques}, .
+  2014.}
+
+\bibitem[Wang \textit{et al.} 2004]{wang2004image}
+\abntrefinfo{Wang \textit{et al.}}{Wang \textit{et al.}}{2004}
+{WANG, Z. \textit{et al.} Image quality assessment: From error visibility to
+  structural similarity.
+\textbf{IEEE Transactions on Image Processing},  IEEE v.~13, n.~4, p. 600--612,
+  2004.}
+
+\bibitem[Wu, Chen e Liu 2022]{wu2022}
+\abntrefinfo{Wu, Chen e Liu}{Wu; Chen; Liu}{2022}
+{WU, Q.; CHEN, H.; LIU, X. Adaptação de modelos de fusão de imagens para
+  diferentes cenários.
+\textbf{IEEE Transactions on Geoscience and Remote Sensing},  IEEE v.~39, n.~3,
+  p. 789--802, 2022.}
+
+\bibitem[Xu \textit{et al.} 2023]{XU2023109347}
+\abntrefinfo{Xu \textit{et al.}}{Xu \textit{et al.}}{2023}
+{XU, M. \textit{et al.} A comprehensive survey of image augmentation techniques
+  for deep learning.
+\textbf{Pattern Recognition},  v.~137,, p. 109347, 2023.
+ISSN 0031-3203.
+Dispon{\'\i}vel em:
+  \url{https://www.sciencedirect.com/science/article/pii/S0031320323000481}.}
+
+\bibitem[Xue \textit{et al.} 2021]{xue2021}
+\abntrefinfo{Xue \textit{et al.}}{Xue \textit{et al.}}{2021}
+{XUE, W. \textit{et al.} Avaliação de desempenho de métodos de fusão de
+  imagens para detecção de objetos em ambientes urbanos.
+\textbf{IEEE Transactions on Image Processing},  IEEE v.~30,, p. 2585--2597,
+  2021.}
+
+\bibitem[Zaragoza \textit{et al.} 2013]{zaragoza2013projective}
+\abntrefinfo{Zaragoza \textit{et al.}}{Zaragoza \textit{et al.}}{2013}
+{ZARAGOZA, J. \textit{et al.} As-projective-as-possible image stitching with
+  moving {DLT}. \textit{In}: IEEE. IEEE CONFERENCE ON COMPUTER VISION AND
+  PATTERN RECOGNITION (CVPR). 2013. \textbf{Anais [...]} [\textit{S.l.}], 2013.
+  p. 2339--2346.}
+
+\bibitem[Zhang e Liu 2018]{zhang2018robust}
+\abntrefinfo{Zhang e Liu}{Zhang; Liu}{2018}
+{ZHANG, F.; LIU, F. Robust image stitching with multiple registrations.
+  \textit{In}: SPRINGER. EUROPEAN CONFERENCE ON COMPUTER VISION (ECCV). 2018.
+  \textbf{Anais [...]} [\textit{S.l.}], 2018. p. 53--67.}
+
+\bibitem[Zhang \textit{et al.} 2017]{zhang2017mixup}
+\abntrefinfo{Zhang \textit{et al.}}{Zhang \textit{et al.}}{2017}
+{ZHANG, H. \textit{et al.} mixup: Beyond empirical risk minimization.
+\textbf{arXiv preprint arXiv:1710.09412}, ,,, 2017.}
+
+\bibitem[Zhang, Li e Wang 2021]{zhang2021}
+\abntrefinfo{Zhang, Li e Wang}{Zhang; Li; Wang}{2021}
+{ZHANG, L.; LI, S.; WANG, Z. Fusão de imagens multi-sensor para detecção de
+  objetos em condições de visibilidade reduzida.
+\textbf{IEEE Transactions on Intelligent Transportation Systems},  IEEE v.~22,,
+  p. 3285--3297, 2021.}
+
+\bibitem[Zhang, Liu e Wang 2020]{zhang2020}
+\abntrefinfo{Zhang, Liu e Wang}{Zhang; Liu; Wang}{2020}
+{ZHANG, L.; LIU, W.; WANG, H. Desafios e técnicas na fusão de imagens para
+  detecção de objetos.
+\textbf{IEEE Transactions on Circuits and Systems for Video Technology},  IEEE
+  v.~29, n.~8, p. 789--802, 2020.}
+
+\bibitem[Zhao, Li e Wu 2019]{zhao2019object}
+\abntrefinfo{Zhao, Li e Wu}{Zhao; Li; Wu}{2019}
+{ZHAO, Z.; LI, H.; WU, T. Object detection with deep learning: A review.
+\textbf{IEEE Transactions on Neural Networks and Learning Systems},  IEEE
+  v.~30, n.~11, p. 3212--3232, 2019.}
+
+\bibitem[Zhou, Li e Chen 2022]{zhou2022medical}
+\abntrefinfo{Zhou, Li e Chen}{Zhou; Li; Chen}{2022}
+{ZHOU, Y.; LI, S.; CHEN, Y. Medical image fusion: A review.
+\textbf{IEEE Access},  IEEE v.~10,, p. 1583--1603, 2022.}
+
+\bibitem[Zhu \textit{et al.} 2020]{zhu2020}
+\abntrefinfo{Zhu \textit{et al.}}{Zhu \textit{et al.}}{2020}
+{ZHU, Q. \textit{et al.} A comparative study of image fusion methods for object
+  detection in forest environments.
+\textbf{IEEE Transactions on Geoscience and Remote Sensing},  IEEE v.~58,, p.
+  4700--4713, 2020.}
+
+\bibitem[Zitov{\'a} e Flusser 2003]{Zitova2003}
+\abntrefinfo{Zitov{\'a} e Flusser}{Zitov{\'a}; Flusser}{2003}
+{ZITOV{\'A}, B.; FLUSSER, J. Image registration methods: a survey.
+\textbf{Image and Vision Computing},  Elsevier v.~21, n.~11, p. 977--1000,
+  2003.}
+
+\end{thebibliography}

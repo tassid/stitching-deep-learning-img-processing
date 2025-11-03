@@ -1,0 +1,110 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 27 items.
+A level-1 auxiliary file: ./PreTexto/dedicatoria.aux
+Reallocating 'name_of_file' (item size: 1) to 30 items.
+A level-1 auxiliary file: ./PreTexto/agradecimentos.aux
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: ./PreTexto/epigrafe.aux
+Reallocating 'name_of_file' (item size: 1) to 22 items.
+A level-1 auxiliary file: ./PreTexto/resumo.aux
+Reallocating 'name_of_file' (item size: 1) to 24 items.
+A level-1 auxiliary file: ./PreTexto/abstract.aux
+Reallocating 'name_of_file' (item size: 1) to 31 items.
+A level-1 auxiliary file: ./capitulos/cap-introducao.aux
+Reallocating 'name_of_file' (item size: 1) to 35 items.
+A level-1 auxiliary file: ./capitulos/cap-secao-primaria.aux
+Reallocating 'name_of_file' (item size: 1) to 38 items.
+A level-1 auxiliary file: ./capitulos/cap-materiais-metodos.aux
+Reallocating 'name_of_file' (item size: 1) to 36 items.
+A level-1 auxiliary file: ./capitulos/cap-desenvolvimento.aux
+Reallocating 'name_of_file' (item size: 1) to 31 items.
+A level-1 auxiliary file: ./capitulos/cap-resultados.aux
+Reallocating 'name_of_file' (item size: 1) to 37 items.
+A level-1 auxiliary file: ./capitulos/cap-deteccao-objetos.aux
+Reallocating 'name_of_file' (item size: 1) to 31 items.
+A level-1 auxiliary file: ./capitulos/cap-conclusoes.aux
+Reallocating 'name_of_file' (item size: 1) to 16 items.
+Reallocating 'name_of_file' (item size: 1) to 5 items.
+Reallocating 'name_of_file' (item size: 1) to 22 items.
+A level-1 auxiliary file: ./PosTexto/anexoa.aux
+Reallocating 'name_of_file' (item size: 1) to 12 items.
+The style file: abntex2-alf.bst
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'wiz_functions' (item size: 4) to 6000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+write is an unknown function---line 1736 of file abntex2-alf.bst
+write is an unknown function---line 1744 of file abntex2-alf.bst
+write is an unknown function---line 1745 of file abntex2-alf.bst
+write is an unknown function---line 1746 of file abntex2-alf.bst
+Reallocating 'singl_function' (item size: 4) to 100 items.
+write is an unknown function---line 1762 of file abntex2-alf.bst
+write is an unknown function---line 1811 of file abntex2-alf.bst
+write is an unknown function---line 1856 of file abntex2-alf.bst
+write is an unknown function---line 1861 of file abntex2-alf.bst
+write is an unknown function---line 1862 of file abntex2-alf.bst
+Reallocating 'wiz_functions' (item size: 4) to 9000 items.
+write is an unknown function---line 1901 of file abntex2-alf.bst
+write is an unknown function---line 1909 of file abntex2-alf.bst
+write is an unknown function---line 1925 of file abntex2-alf.bst
+write is an unknown function---line 1935 of file abntex2-alf.bst
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'field_info' (item size: 4) to 11072 items.
+Database file #1: abntex2-options.bib
+Database file #2: main.bib
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'glb_str_end' (item size: 4) to 20 items.
+Reallocating 'glb_str_ptr' (item size: 4) to 20 items.
+Reallocating 'global_strs' (item size: 1) to 4000000 items.
++---------------------------------------------------------+
+| Estilo bibliográfico abntex2-alf.bst versão v-1.9.7           |
+| Em caso de dúvidas ou problemas com este estilo procure |
+| http://www.abntex.net.br/                               |
++---------------------------------------------------------+
+You've used 88 entries,
+            7047 wiz_defined-function locations,
+            1717 strings with 23111 characters,
+and the built_in function-call counts, 87082 in all, are:
+= -- 7436
+> -- 2939
+< -- 691
++ -- 1644
+- -- 874
+* -- 6562
+:= -- 10955
+add.period$ -- 309
+call.type$ -- 90
+change.case$ -- 1017
+chr.to.int$ -- 234
+cite$ -- 80
+duplicate$ -- 5165
+empty$ -- 5670
+format.name$ -- 4184
+if$ -- 20038
+int.to.chr$ -- 10
+int.to.str$ -- 3
+missing$ -- 1552
+newline$ -- 395
+num.names$ -- 400
+pop$ -- 1939
+preamble$ -- 1
+purify$ -- 372
+quote$ -- 0
+skip$ -- 5678
+stack$ -- 1
+substring$ -- 4182
+swap$ -- 2452
+text.length$ -- 147
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 12
+warning$ -- 0
+while$ -- 676
+width$ -- 0
+write$ -- 1374
+(There were 13 error messages)

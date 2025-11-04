@@ -1,0 +1,21 @@
+﻿metodo,label,tempo_segundos,psnr_db,ssim,ghosting,seam_energy,status,arquivo,erro
+classic-10_blend_poisson,Clássico • Blend Poisson,0.4223,,,,,sucesso,pano_classic-10_blend_poisson.jpg,
+classic-11_blend_multifocal,Clássico • Blend Multifocal,0.2743,,,,,sucesso,pano_classic-11_blend_multifocal.jpg,
+classic-12_blend_hybrid,Clássico • Blend Hybrid,0.3374,,,,,sucesso,pano_classic-12_blend_hybrid.jpg,
+classic-13_ecc_alignment,Clássico • Ecc Alignment,,,,,,erro,,OpenCV(4.12.0) D:\a\opencv-python\opencv-python\opencv\modules\video\src\ecc.cpp:589: error: (-7:Ite
+classic-1_stitcher_basico,Clássico • Stitcher Basico,,,,,,erro,,Stitching falhou com status 3
+classic-2_manual_sift_ransac_feather,Clássico • Manual Sift Ransac Feather,0.2418,,,,,sucesso,pano_classic-2_manual_sift_ransac_feather.jpg,
+classic-3_features_homography,Clássico • Features Homography,0.2467,,,,,sucesso,pano_classic-3_features_homography.jpg,
+classic-4_blend_exposure,Clássico • Blend Exposure,0.2588,,,,,sucesso,pano_classic-4_blend_exposure.jpg,
+classic-5_blend_wavelet,Clássico • Blend Wavelet,0.2486,,,,,sucesso,pano_classic-5_blend_wavelet.jpg,
+classic-6_seams_exposure_multiband,Clássico • Seams Exposure Multiband,3.1940,,,,,sucesso,pano_classic-6_seams_exposure_multiband.jpg,
+classic-7_detectors_harris_fast,Clássico • Detectors Harris Fast,0.3149,,,,,sucesso,pano_classic-7_detectors_harris_fast.jpg,
+classic-8_blend_laplacian,Clássico • Blend Laplacian,0.2575,,,,,sucesso,pano_classic-8_blend_laplacian.jpg,
+classic-9_exposure_comp_only,Clássico • Exposure Comp Only,0.2791,,,,,sucesso,pano_classic-9_exposure_comp_only.jpg,
+classic-opencv_stitcher,Clássico • OpenCV Stitcher,,,,,,erro,,"Falha ao ajustar parâmetros da câmera. Dicas: mantenha ordem/seq, 30-50% de overlap, iluminação seme"
+classic-orb_homography,Clássico • ORB Homography,0.0488,,,,,sucesso,pano_classic-orb_homography.jpg,
+deep-deep_homography,Deep • Deep Homography,0.2110,,,,,sucesso,pano_deep-deep_homography.jpg,
+deep-flow_stitch,Deep • Flow Stitch,0.1350,,,,,sucesso,pano_deep-flow_stitch.jpg,
+deep-loftr,Deep • Loftr,11.0111,,,,,sucesso,pano_deep-loftr.jpg,
+deep-sp_superglue,Deep • Sp Superglue,0.2226,,,,,sucesso,pano_deep-sp_superglue.jpg,
+deep-udis,Deep • Udis,0.2315,,,,,sucesso,pano_deep-udis.jpg,

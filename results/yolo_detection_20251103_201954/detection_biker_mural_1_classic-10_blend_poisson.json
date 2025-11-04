@@ -1,0 +1,37 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251027_180132\\biker_mural_1_classic-10_blend_poisson.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        589.9622192382812,
+        226.0395050048828,
+        761.5054321289062,
+        335.3728942871094
+      ],
+      [
+        589.5859375,
+        225.63059997558594,
+        761.8695068359375,
+        335.452392578125
+      ]
+    ],
+    "confidences": [
+      0.5120416283607483,
+      0.48620545864105225
+    ],
+    "classes": [
+      2,
+      7
+    ],
+    "class_names": [
+      "car",
+      "truck"
+    ],
+    "count_by_class": {
+      "car": 1,
+      "truck": 1
+    },
+    "total_detections": 2
+  }
+}

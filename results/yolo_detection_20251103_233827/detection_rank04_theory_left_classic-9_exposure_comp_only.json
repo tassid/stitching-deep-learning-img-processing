@@ -1,0 +1,37 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank04_theory_left_classic-9_exposure_comp_only.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        13.483278274536133,
+        61.791297912597656,
+        291.5069885253906,
+        372.32086181640625
+      ],
+      [
+        722.7288208007812,
+        140.0192413330078,
+        774.8388671875,
+        388.292724609375
+      ]
+    ],
+    "confidences": [
+      0.9667207598686218,
+      0.5131276845932007
+    ],
+    "classes": [
+      76,
+      43
+    ],
+    "class_names": [
+      "scissors",
+      "knife"
+    ],
+    "count_by_class": {
+      "scissors": 1,
+      "knife": 1
+    },
+    "total_detections": 2
+  }
+}

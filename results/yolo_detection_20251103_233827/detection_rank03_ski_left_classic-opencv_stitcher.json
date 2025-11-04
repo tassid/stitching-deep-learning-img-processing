@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank03_ski_left_classic-opencv_stitcher.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        284.0575866699219,
+        151.43251037597656,
+        380.1535949707031,
+        235.475341796875
+      ]
+    ],
+    "confidences": [
+      0.7770515084266663
+    ],
+    "classes": [
+      0
+    ],
+    "class_names": [
+      "person"
+    ],
+    "count_by_class": {
+      "person": 1
+    },
+    "total_detections": 1
+  }
+}

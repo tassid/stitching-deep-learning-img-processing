@@ -1,0 +1,37 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_theory_left_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        13.444954872131348,
+        61.78445816040039,
+        291.8150939941406,
+        372.4013671875
+      ],
+      [
+        722.6624755859375,
+        140.12881469726562,
+        774.9848022460938,
+        388.1708679199219
+      ]
+    ],
+    "confidences": [
+      0.9645609259605408,
+      0.5517957210540771
+    ],
+    "classes": [
+      76,
+      43
+    ],
+    "class_names": [
+      "scissors",
+      "knife"
+    ],
+    "count_by_class": {
+      "scissors": 1,
+      "knife": 1
+    },
+    "total_detections": 2
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank02_biker_mural_1_classic-1_stitcher_basico.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        235.25440979003906,
+        247.55953979492188,
+        379.1877136230469,
+        349.9994201660156
+      ],
+      [
+        570.9364013671875,
+        203.26744079589844,
+        739.9658203125,
+        312.2297058105469
+      ],
+      [
+        138.5821990966797,
+        194.63478088378906,
+        235.2330780029297,
+        267.9129333496094
+      ]
+    ],
+    "confidences": [
+      0.8066003918647766,
+      0.7520143389701843,
+      0.26567789912223816
+    ],
+    "classes": [
+      2,
+      2,
+      1
+    ],
+    "class_names": [
+      "car",
+      "car",
+      "bicycle"
+    ],
+    "count_by_class": {
+      "car": 2,
+      "bicycle": 1
+    },
+    "total_detections": 3
+  }
+}

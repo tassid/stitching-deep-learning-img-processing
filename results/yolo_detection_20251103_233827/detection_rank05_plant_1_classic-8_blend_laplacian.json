@@ -1,0 +1,47 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_plant_1_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        83.89217376708984,
+        104.61161804199219,
+        336.273193359375,
+        462.5693359375
+      ],
+      [
+        0.0,
+        360.3931884765625,
+        497.0084533691406,
+        599.794189453125
+      ],
+      [
+        154.1453857421875,
+        401.1664733886719,
+        293.68798828125,
+        482.242919921875
+      ]
+    ],
+    "confidences": [
+      0.729163408279419,
+      0.5099546313285828,
+      0.2935187816619873
+    ],
+    "classes": [
+      58,
+      60,
+      45
+    ],
+    "class_names": [
+      "potted plant",
+      "dining table",
+      "bowl"
+    ],
+    "count_by_class": {
+      "potted plant": 1,
+      "dining table": 1,
+      "bowl": 1
+    },
+    "total_detections": 3
+  }
+}

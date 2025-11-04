@@ -1,0 +1,37 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank04_ski_left_classic-9_exposure_comp_only.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        171.91981506347656,
+        138.0010223388672,
+        461.7419738769531,
+        369.55322265625
+      ],
+      [
+        426.05474853515625,
+        315.6462707519531,
+        449.2257080078125,
+        374.8751220703125
+      ]
+    ],
+    "confidences": [
+      0.893653154373169,
+      0.2920292019844055
+    ],
+    "classes": [
+      0,
+      31
+    ],
+    "class_names": [
+      "person",
+      "snowboard"
+    ],
+    "count_by_class": {
+      "person": 1,
+      "snowboard": 1
+    },
+    "total_detections": 2
+  }
+}

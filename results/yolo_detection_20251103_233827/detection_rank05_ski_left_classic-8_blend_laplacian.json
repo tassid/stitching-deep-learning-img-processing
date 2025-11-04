@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_ski_left_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        172.41307067871094,
+        140.0847625732422,
+        462.6007385253906,
+        366.8224792480469
+      ]
+    ],
+    "confidences": [
+      0.8717567324638367
+    ],
+    "classes": [
+      0
+    ],
+    "class_names": [
+      "person"
+    ],
+    "count_by_class": {
+      "person": 1
+    },
+    "total_detections": 1
+  }
+}

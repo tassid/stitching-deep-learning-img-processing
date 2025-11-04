@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_no_contractor_parking_1_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        14.39007568359375,
+        595.4346313476562,
+        959.891357421875,
+        815.9482421875
+      ]
+    ],
+    "confidences": [
+      0.3561878800392151
+    ],
+    "classes": [
+      6
+    ],
+    "class_names": [
+      "train"
+    ],
+    "count_by_class": {
+      "train": 1
+    },
+    "total_detections": 1
+  }
+}

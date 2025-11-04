@@ -1,0 +1,36 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_coke_190_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        761.5567626953125,
+        124.82726287841797,
+        860.5798950195312,
+        263.8099060058594
+      ],
+      [
+        343.84283447265625,
+        101.22954559326172,
+        417.9765319824219,
+        208.73455810546875
+      ]
+    ],
+    "confidences": [
+      0.35070642828941345,
+      0.26741576194763184
+    ],
+    "classes": [
+      39,
+      39
+    ],
+    "class_names": [
+      "bottle",
+      "bottle"
+    ],
+    "count_by_class": {
+      "bottle": 2
+    },
+    "total_detections": 2
+  }
+}

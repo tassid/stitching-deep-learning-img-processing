@@ -1,0 +1,36 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank04_graffiti_car_1_classic-9_exposure_comp_only.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        261.2742614746094,
+        459.8946533203125,
+        1012.5221557617188,
+        680.0509643554688
+      ],
+      [
+        86.22213745117188,
+        430.8206481933594,
+        175.7148895263672,
+        472.3173522949219
+      ]
+    ],
+    "confidences": [
+      0.8754557371139526,
+      0.5299361348152161
+    ],
+    "classes": [
+      2,
+      2
+    ],
+    "class_names": [
+      "car",
+      "car"
+    ],
+    "count_by_class": {
+      "car": 2
+    },
+    "total_detections": 2
+  }
+}

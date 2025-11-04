@@ -1,0 +1,21 @@
+﻿metodo,label,status,tempo_segundos,psnr_db,ssim,mse,ghosting,seam_energy,overlap_ratio,deltaE_mean,deltaL_mean,entropia,nitidez,arquivo,erro
+classic-10_blend_poisson,Clássico • Blend Poisson,sucesso,0.4524,,,,,,,,,,,pano_classic-10_blend_poisson.jpg,
+classic-11_blend_multifocal,Clássico • Blend Multifocal,sucesso,0.2891,,,,,,,,,,,pano_classic-11_blend_multifocal.jpg,
+classic-12_blend_hybrid,Clássico • Blend Hybrid,sucesso,0.3725,,,,,,,,,,,pano_classic-12_blend_hybrid.jpg,
+classic-13_ecc_alignment,Clássico • Ecc Alignment,erro,,,,,,,,,,,,,OpenCV(4.12.0) D:\a\opencv-python\opencv-python\opencv\modules\video\src\ecc.cpp:589: error: (-7:Ite
+classic-1_stitcher_basico,Clássico • Stitcher Basico,erro,,,,,,,,,,,,,Stitching falhou com status 3
+classic-2_manual_sift_ransac_feather,Clássico • Manual Sift Ransac Feather,sucesso,0.2797,,,,,,,,,,,pano_classic-2_manual_sift_ransac_feather.jpg,
+classic-3_features_homography,Clássico • Features Homography,sucesso,0.2731,,,,,,,,,,,pano_classic-3_features_homography.jpg,
+classic-4_blend_exposure,Clássico • Blend Exposure,sucesso,0.2617,,,,,,,,,,,pano_classic-4_blend_exposure.jpg,
+classic-5_blend_wavelet,Clássico • Blend Wavelet,sucesso,0.2633,,,,,,,,,,,pano_classic-5_blend_wavelet.jpg,
+classic-6_seams_exposure_multiband,Clássico • Seams Exposure Multiband,sucesso,5.6865,,,,,,,,,,,pano_classic-6_seams_exposure_multiband.jpg,
+classic-7_detectors_harris_fast,Clássico • Detectors Harris Fast,sucesso,0.7751,,,,,,,,,,,pano_classic-7_detectors_harris_fast.jpg,
+classic-8_blend_laplacian,Clássico • Blend Laplacian,sucesso,0.5249,,,,,,,,,,,pano_classic-8_blend_laplacian.jpg,
+classic-9_exposure_comp_only,Clássico • Exposure Comp Only,sucesso,0.3844,,,,,,,,,,,pano_classic-9_exposure_comp_only.jpg,
+classic-opencv_stitcher,Clássico • OpenCV Stitcher,erro,,,,,,,,,,,,,"Falha ao ajustar parâmetros da câmera. Dicas: mantenha ordem/seq, 30-50% de overlap, iluminação seme"
+classic-orb_homography,Clássico • ORB Homography,sucesso,0.0511,,,,,,,,,,,pano_classic-orb_homography.jpg,
+deep-deep_homography,Deep • Deep Homography,sucesso,0.2529,,,,,,,,,,,pano_deep-deep_homography.jpg,
+deep-flow_stitch,Deep • Flow Stitch,sucesso,0.2340,,,,,,,,,,,pano_deep-flow_stitch.jpg,
+deep-loftr,Deep • Loftr,sucesso,9.0731,,,,,,,,,,,pano_deep-loftr.jpg,
+deep-sp_superglue,Deep • Sp Superglue,sucesso,0.3338,,,,,,,,,,,pano_deep-sp_superglue.jpg,
+deep-udis,Deep • Udis,sucesso,0.3152,,,,,,,,,,,pano_deep-udis.jpg,

@@ -1,0 +1,46 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank04_P2_front_of_window_classic-9_exposure_comp_only.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        565.2408447265625,
+        161.3688201904297,
+        657.7666015625,
+        424.1641540527344
+      ],
+      [
+        187.1083984375,
+        157.9429168701172,
+        249.10775756835938,
+        388.6708679199219
+      ],
+      [
+        373.8199768066406,
+        112.38189697265625,
+        449.638916015625,
+        151.13816833496094
+      ]
+    ],
+    "confidences": [
+      0.9230396151542664,
+      0.6772144436836243,
+      0.4087935984134674
+    ],
+    "classes": [
+      0,
+      0,
+      74
+    ],
+    "class_names": [
+      "person",
+      "person",
+      "clock"
+    ],
+    "count_by_class": {
+      "person": 2,
+      "clock": 1
+    },
+    "total_detections": 3
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_building_dubai_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        187.00355529785156,
+        1339.9232177734375,
+        1180.66796875,
+        1600.396240234375
+      ]
+    ],
+    "confidences": [
+      0.5480945706367493
+    ],
+    "classes": [
+      6
+    ],
+    "class_names": [
+      "train"
+    ],
+    "count_by_class": {
+      "train": 1
+    },
+    "total_detections": 1
+  }
+}

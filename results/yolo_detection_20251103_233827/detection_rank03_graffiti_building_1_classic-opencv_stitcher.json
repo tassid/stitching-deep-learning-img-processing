@@ -1,0 +1,12 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank03_graffiti_building_1_classic-opencv_stitcher.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [],
+    "confidences": [],
+    "classes": [],
+    "class_names": [],
+    "count_by_class": {},
+    "total_detections": 0
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank02_cars_1_classic-1_stitcher_basico.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        34.624794006347656,
+        124.26837921142578,
+        616.1856689453125,
+        384.7291259765625
+      ],
+      [
+        36.91569900512695,
+        111.6507339477539,
+        208.01707458496094,
+        174.8129119873047
+      ],
+      [
+        2.8802695274353027,
+        103.26638793945312,
+        44.72261047363281,
+        169.578369140625
+      ]
+    ],
+    "confidences": [
+      0.903093695640564,
+      0.8783687949180603,
+      0.7632105350494385
+    ],
+    "classes": [
+      2,
+      2,
+      2
+    ],
+    "class_names": [
+      "car",
+      "car",
+      "car"
+    ],
+    "count_by_class": {
+      "car": 3
+    },
+    "total_detections": 3
+  }
+}

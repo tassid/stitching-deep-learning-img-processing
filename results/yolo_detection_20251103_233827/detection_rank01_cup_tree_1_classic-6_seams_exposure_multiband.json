@@ -1,0 +1,12 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank01_cup_tree_1_classic-6_seams_exposure_multiband.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [],
+    "confidences": [],
+    "classes": [],
+    "class_names": [],
+    "count_by_class": {},
+    "total_detections": 0
+  }
+}

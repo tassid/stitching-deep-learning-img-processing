@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank01_ski_left_classic-6_seams_exposure_multiband.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        172.24729919433594,
+        139.00698852539062,
+        463.2845764160156,
+        367.35003662109375
+      ]
+    ],
+    "confidences": [
+      0.8335190415382385
+    ],
+    "classes": [
+      0
+    ],
+    "class_names": [
+      "person"
+    ],
+    "count_by_class": {
+      "person": 1
+    },
+    "total_detections": 1
+  }
+}

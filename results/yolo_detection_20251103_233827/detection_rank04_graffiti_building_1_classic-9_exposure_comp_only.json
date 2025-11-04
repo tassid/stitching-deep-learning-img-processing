@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank04_graffiti_building_1_classic-9_exposure_comp_only.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        779.610107421875,
+        337.5002746582031,
+        796.0238037109375,
+        369.36431884765625
+      ]
+    ],
+    "confidences": [
+      0.37493041157722473
+    ],
+    "classes": [
+      0
+    ],
+    "class_names": [
+      "person"
+    ],
+    "count_by_class": {
+      "person": 1
+    },
+    "total_detections": 1
+  }
+}

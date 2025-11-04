@@ -1,0 +1,47 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank01_plant_1_classic-6_seams_exposure_multiband.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        88.36524963378906,
+        104.24908447265625,
+        334.2714538574219,
+        461.6315002441406
+      ],
+      [
+        81.27238464355469,
+        359.4844665527344,
+        496.8899230957031,
+        599.718994140625
+      ],
+      [
+        148.88845825195312,
+        276.07745361328125,
+        299.9510803222656,
+        460.70928955078125
+      ]
+    ],
+    "confidences": [
+      0.7210837006568909,
+      0.5881814956665039,
+      0.25600382685661316
+    ],
+    "classes": [
+      58,
+      60,
+      41
+    ],
+    "class_names": [
+      "potted plant",
+      "dining table",
+      "cup"
+    ],
+    "count_by_class": {
+      "potted plant": 1,
+      "dining table": 1,
+      "cup": 1
+    },
+    "total_detections": 3
+  }
+}

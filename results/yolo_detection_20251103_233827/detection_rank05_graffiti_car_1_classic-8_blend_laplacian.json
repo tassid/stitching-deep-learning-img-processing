@@ -1,0 +1,36 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank05_graffiti_car_1_classic-8_blend_laplacian.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        229.9978790283203,
+        458.5130310058594,
+        1012.5206909179688,
+        680.2396240234375
+      ],
+      [
+        86.11800384521484,
+        430.9413757324219,
+        175.6974334716797,
+        472.3184509277344
+      ]
+    ],
+    "confidences": [
+      0.8857229948043823,
+      0.5198459625244141
+    ],
+    "classes": [
+      2,
+      2
+    ],
+    "class_names": [
+      "car",
+      "car"
+    ],
+    "count_by_class": {
+      "car": 2
+    },
+    "total_detections": 2
+  }
+}

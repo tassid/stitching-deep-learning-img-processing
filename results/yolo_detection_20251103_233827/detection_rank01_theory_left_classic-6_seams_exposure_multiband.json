@@ -1,0 +1,37 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank01_theory_left_classic-6_seams_exposure_multiband.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        12.271644592285156,
+        61.993629455566406,
+        291.5528869628906,
+        371.2821960449219
+      ],
+      [
+        722.3638305664062,
+        139.19668579101562,
+        774.863525390625,
+        387.52642822265625
+      ]
+    ],
+    "confidences": [
+      0.9641851782798767,
+      0.39192333817481995
+    ],
+    "classes": [
+      76,
+      43
+    ],
+    "class_names": [
+      "scissors",
+      "knife"
+    ],
+    "count_by_class": {
+      "scissors": 1,
+      "knife": 1
+    },
+    "total_detections": 2
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank02_coke_190_classic-1_stitcher_basico.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        914.46630859375,
+        243.63645935058594,
+        1576.6517333984375,
+        403.89056396484375
+      ]
+    ],
+    "confidences": [
+      0.3766240179538727
+    ],
+    "classes": [
+      73
+    ],
+    "class_names": [
+      "book"
+    ],
+    "count_by_class": {
+      "book": 1
+    },
+    "total_detections": 1
+  }
+}

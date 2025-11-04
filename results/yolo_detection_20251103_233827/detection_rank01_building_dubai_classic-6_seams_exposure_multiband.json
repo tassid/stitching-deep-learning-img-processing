@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank01_building_dubai_classic-6_seams_exposure_multiband.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        194.99591064453125,
+        1338.7421875,
+        1182.2294921875,
+        1600.5303955078125
+      ]
+    ],
+    "confidences": [
+      0.44062888622283936
+    ],
+    "classes": [
+      6
+    ],
+    "class_names": [
+      "train"
+    ],
+    "count_by_class": {
+      "train": 1
+    },
+    "total_detections": 1
+  }
+}

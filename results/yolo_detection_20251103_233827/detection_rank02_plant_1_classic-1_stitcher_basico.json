@@ -1,0 +1,56 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank02_plant_1_classic-1_stitcher_basico.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        249.8913116455078,
+        101.46076202392578,
+        535.1407470703125,
+        462.063720703125
+      ],
+      [
+        261.81097412109375,
+        399.6694641113281,
+        522.3414306640625,
+        487.0045166015625
+      ],
+      [
+        257.12249755859375,
+        288.4335021972656,
+        528.0448608398438,
+        468.73406982421875
+      ],
+      [
+        30.4534969329834,
+        351.254638671875,
+        767.537109375,
+        602.2799072265625
+      ]
+    ],
+    "confidences": [
+      0.7046980857849121,
+      0.4875393509864807,
+      0.397770494222641,
+      0.29145488142967224
+    ],
+    "classes": [
+      58,
+      45,
+      45,
+      60
+    ],
+    "class_names": [
+      "potted plant",
+      "bowl",
+      "bowl",
+      "dining table"
+    ],
+    "count_by_class": {
+      "potted plant": 1,
+      "bowl": 2,
+      "dining table": 1
+    },
+    "total_detections": 4
+  }
+}

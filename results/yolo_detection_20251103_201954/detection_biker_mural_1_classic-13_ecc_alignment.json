@@ -1,0 +1,27 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251027_180132\\biker_mural_1_classic-13_ecc_alignment.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        6.376416206359863,
+        205.4145050048828,
+        392.944091796875,
+        338.4053039550781
+      ]
+    ],
+    "confidences": [
+      0.477897047996521
+    ],
+    "classes": [
+      2
+    ],
+    "class_names": [
+      "car"
+    ],
+    "count_by_class": {
+      "car": 1
+    },
+    "total_detections": 1
+  }
+}

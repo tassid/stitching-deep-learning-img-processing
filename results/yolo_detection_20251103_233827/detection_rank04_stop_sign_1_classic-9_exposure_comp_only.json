@@ -1,0 +1,46 @@
+{
+  "image_path": "C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\scan_20251103_232902\\top_5_methods\\rank04_stop_sign_1_classic-9_exposure_comp_only.jpg",
+  "model": "yolov11n",
+  "detections": {
+    "boxes": [
+      [
+        345.0216979980469,
+        240.83541870117188,
+        405.4515075683594,
+        305.9095153808594
+      ],
+      [
+        206.718505859375,
+        333.40606689453125,
+        255.70022583007812,
+        354.17431640625
+      ],
+      [
+        487.4858093261719,
+        313.0965576171875,
+        512.910888671875,
+        338.45721435546875
+      ]
+    ],
+    "confidences": [
+      0.8857680559158325,
+      0.5909749269485474,
+      0.38225969672203064
+    ],
+    "classes": [
+      11,
+      2,
+      11
+    ],
+    "class_names": [
+      "stop sign",
+      "car",
+      "stop sign"
+    ],
+    "count_by_class": {
+      "stop sign": 2,
+      "car": 1
+    },
+    "total_detections": 3
+  }
+}

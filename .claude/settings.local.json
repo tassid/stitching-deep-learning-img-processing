@@ -29,7 +29,9 @@
       "Bash(powershell -Command \"if (Test-Path ''TCC_LIMPO.zip'') { Remove-Item ''TCC_LIMPO.zip'' -Force }; Compress-Archive -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE/*'' -DestinationPath ''TCC_LIMPO.zip'' -CompressionLevel Optimal\")",
       "Read(//c//**)",
       "Bash(explorer \"C:\\Users\\TASSI\\Documents\\GitHub\\stitching-deep-learning-img-processing\\results\\visualizacoes_avancadas\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(powershel -Command \"Get-ChildItem -Path ''TCC_TASSIANE_2025_NOVOTEMPLATE'' -Directory | Select-Object Name\")",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,232 @@
+\chapter{Materiais e Métodos}
+
+Este capítulo descreve a metodologia adotada para realização dos experimentos comparativos entre diferentes técnicas de fusão de imagens panorâmicas e sua influência na detecção de objetos. São apresentados os conjuntos de dados selecionados, o ambiente computacional configurado, a arquitetura do sistema implementado, as métricas de avaliação empregadas e o protocolo experimental estabelecido para garantir a reprodutibilidade e validade científica dos resultados.
+
+\section{Visão Geral da Metodologia}
+
+A metodologia deste trabalho foi estruturada em cinco etapas principais: (1) seleção e preparação dos conjuntos de dados; (2) implementação de um sistema modular contendo técnicas clássicas e baseadas em aprendizado profundo para fusão de imagens; (3) integração de modelos estado-da-arte para detecção de objetos; (4) definição de métricas quantitativas para avaliação objetiva dos resultados; e (5) execução de experimentos sistemáticos comparando o desempenho das diferentes abordagens.
+
+O desenvolvimento seguiu uma metodologia iterativa e incremental, permitindo a implementação gradual de funcionalidades e a realização de testes preliminares em cada etapa. Esta abordagem mostrou-se adequada para um projeto de natureza experimental, onde diferentes técnicas precisam ser testadas e comparadas, possibilitando ajustes e refinamentos ao longo do processo.
+
+\section{Conjuntos de Dados}
+
+Para garantir a validade e abrangência dos experimentos, foi selecionado um conjunto de dados público amplamente utilizado pela comunidade científica de visão computacional para avaliação de técnicas de fusão de imagens.
+
+\subsection{Base de Dados de Múltiplos Registros}
+
+O conjunto de dados principal utilizado neste trabalho foi a base de Múltiplos Registros (\textit{Robust Image Stitching with Multiple Registrations}), proposta por \citeonline{zhang2018robust}. Esta base foi escolhida como referência principal dos experimentos devido às suas características particulares que a tornam ideal para avaliação sistemática de técnicas de fusão de imagens.
+
+A base contém 14 conjuntos de imagens para fusão, cada um apresentando desafios específicos relacionados a múltiplas possibilidades de registro entre as imagens. Os conjuntos são: \textit{biker\_mural}, \textit{cars}, \textit{coke\_190}, \textit{cup\_tree}, \textit{graffiti\_building}, \textit{graffiti\_car}, \textit{no\_contractor\_parking}, \textit{P2\_front\_of\_window}, \textit{plant}, \textit{rental\_office}, \textit{ski\_left}, \textit{stop\_sign}, \textit{theory\_left}, e \textit{traffic\_cones}.
+
+Uma característica distintiva desta base é que foi especificamente desenvolvida para testar a robustez de algoritmos de fusão em cenários onde existem múltiplas correspondências válidas entre as imagens de entrada. O aspecto mais importante que motivou sua escolha é a disponibilidade de imagens de referência (\textit{ground truth}) para todos os 14 conjuntos, permitindo comparações objetivas entre os resultados obtidos pelas diferentes técnicas implementadas através do cálculo de métricas quantitativas.
+
+\section{Ambiente Computacional}
+
+Os experimentos foram conduzidos em um ambiente computacional controlado para garantir a consistência e reprodutibilidade dos resultados.
+
+\subsection{Configuração de Hardware}
+
+Os testes foram executados em uma estação de trabalho com as seguintes especificações:
+
+\begin{itemize}
+    \item \textbf{Processador}: Intel Core i7-10700K (8 núcleos, 16 threads, 3.8 GHz base / 5.1 GHz boost)
+    \item \textbf{Memória RAM}: 32 GB DDR4 3200 MHz
+    \item \textbf{Placa Gráfica}: NVIDIA GeForce RTX 3080 (10 GB GDDR6X)
+    \item \textbf{Armazenamento}: SSD NVMe 1 TB
+    \item \textbf{Sistema Operacional}: Windows 11 Pro (64-bit)
+\end{itemize}
+
+A presença de uma placa gráfica dedicada com suporte a \gls{cuda} foi essencial para viabilizar a execução eficiente das técnicas baseadas em aprendizado profundo, que demandam processamento intensivo em GPU.
+
+\subsection{Ambiente de Software}
+
+O sistema foi implementado utilizando Python 3.10.x como linguagem de programação principal. As principais bibliotecas e frameworks utilizados foram:
+
+\begin{itemize}
+    \item \textbf{OpenCV 4.8.x}: Processamento de imagens e implementação de técnicas clássicas
+    \item \textbf{NumPy 1.24.x}: Operações matriciais e álgebra linear
+    \item \textbf{PyTorch 2.0.x}: Framework de aprendizado profundo
+    \item \textbf{torchvision 0.15.x}: Transformações de imagens e modelos pré-treinados
+    \item \textbf{scikit-image 0.20.x}: Métricas de qualidade de imagem (PSNR, SSIM)
+    \item \textbf{PyWavelets 1.4.x}: Transformadas Wavelet para fusão multi-escala
+    \item \textbf{Ultralytics 8.0.x}: Integração do YOLOv8 para detecção de objetos
+    \item \textbf{Matplotlib 3.7.x}: Visualização de resultados
+    \item \textbf{pandas 2.0.x}: Manipulação e análise de dados experimentais
+\end{itemize}
+
+Todas as bibliotecas foram instaladas através do gerenciador de pacotes \textit{pip}, e as versões específicas foram registradas em um arquivo \textit{requirements.txt} para facilitar a reprodução do ambiente.
+
+\section{Arquitetura do Sistema}
+
+O sistema desenvolvido foi estruturado em módulos independentes, cada um responsável por uma funcionalidade específica. Esta organização modular facilita a manutenção do código, promove a reutilização de componentes e permite que diferentes técnicas sejam experimentadas de forma sistemática. A arquitetura proposta compreende quatro módulos principais.
+
+\subsection{Módulo de \textit{Benchmarks}}
+
+O módulo de \textit{benchmarks} constitui o núcleo do sistema, contendo as implementações das técnicas de fusão de imagens. Este módulo foi subdividido em duas categorias principais:
+
+\subsection*{Técnicas Clássicas}
+
+As técnicas clássicas implementadas incluem:
+
+\begin{itemize}
+    \item \textbf{\textit{Stitching} Básico \gls{opencv}}: Método automatizado que serve como baseline de referência
+    \item \textbf{\gls{sift} + \gls{ransac}}: Implementação manual com controle fino sobre detecção de características, correspondência e estimação de homografia
+    \item \textbf{\gls{fast} + \gls{ransac}}: Alternativa mais rápida ao \gls{sift} para cenários com restrições temporais
+    \item \textbf{Mesclagem Laplaciana}: Fusão baseada em pirâmides Laplacianas para transições suaves
+    \item \textbf{Mesclagem \textit{Wavelet}}: Decomposição multi-escala usando transformadas \textit{Wavelet}
+    \item \textbf{Edição \textit{Poisson}}: Preservação de gradientes para fusão com diferenças de iluminação
+\end{itemize}
+
+\subsection*{Técnicas Baseadas em Aprendizado Profundo}
+
+As técnicas modernas implementadas incluem:
+
+\begin{itemize}
+    \item \textbf{\gls{superpoint} + \gls{superglue}}: Combinação estado-da-arte para detecção e correspondência de características usando Redes neurais de grafos
+    \item \textbf{\gls{loftr}}: Correspondência \textit{detector-free} baseada em \textit{transformers}
+    \item \textbf{Homografia via \gls{cnn}}: Estimação direta de transformação usando redes neurais convolucionais
+\end{itemize}
+
+Cada técnica foi implementada de forma independente, permitindo análises comparativas detalhadas de desempenhos e características. Para fins de reprodutibilidade, todos os algoritmos utilizados estão descritos no Apêndice~\ref{apendiceA}, que apresenta o nome do arquivo, técnica correspondente e a seção do texto onde cada um é discutido.
+
+
+\subsection*{Módulo de Datasets}
+
+O módulo de \textit{datasets} gerencia o carregamento e pré-processamento padronizado das imagens. As principais funcionalidades implementadas incluem:
+
+\begin{itemize}
+    \item Leitura de sequências de imagens com validação de integridade
+    \item Normalização de formato para espaço de cores RGB de 8 bits
+    \item Organização de metadados sobre ordem de captura
+    \item Cache de imagens pré-processadas para otimização de desempenho
+\end{itemize}
+
+A padronização do pré-processamento é essencial para garantir comparações justas entre diferentes técnicas e resultados reprodutíveis.
+
+\subsection*{Módulo de Métricas}
+
+O módulo de métricas implementa todas as medidas de avaliação para qualidade de fusão e eficácia de detecção:
+
+\subsection*{Métricas de Fusão de Imagens}
+
+\begin{itemize}
+    \item \textbf{\gls{psnr}}: Relação sinal-ruído para avaliar fidelidade de reconstrução
+    \item \textbf{\gls{ssim}}: Índice de similaridade estrutural baseado em percepção visual
+    \item \textbf{Entropia}: Quantidade de informação preservada na imagem fusionada
+    \item \textbf{\gls{ghostingscore}}: Quantificação de artefatos de desalinhamento
+    \item \textbf{\textit{Seam Energy}}: Qualidade das transições entre imagens adjacentes
+    \item \textbf{Tempo de Processamento}: Eficiência computacional em segundos
+\end{itemize}
+
+\subsection*{Métricas de Detecção de Objetos}
+
+\begin{itemize}
+    \item \textbf{\gls{iou}}: Sobreposição entre caixas delimitadoras previstas e verdadeiras
+    \item \textbf{Precision e Recall}: Proporção de detecções corretas e cobertura
+    \item \textbf{\textit{F1-Score}}: Média harmônica entre \textit{precision} e \textit{recall}
+    \item \textbf{\gls{map}}: Precisão média para avaliação multi-classe
+    \item \textbf{\gls{fps}}: Velocidade de processamento para aplicações em tempo real
+\end{itemize}
+
+A implementação destas métricas seguiu rigorosamente as definições estabelecidas na literatura, garantindo validade científica das avaliações.
+
+\subsection{Módulo de Utilitários}
+
+O módulo de utilitários complementa o sistema com funções auxiliares:
+
+\begin{itemize}
+    \item Visualização de resultados e sobreposição de detecções
+    \item Conversão entre formatos de dados e coordenadas
+    \item Registro automático de experimentos com \textit{timestamp}
+    \item Geração de relatórios comparativos em formato \gls{csv} e gráficos
+    \item Eliminação de detecções duplicadas baseada em \gls{iou}
+\end{itemize}
+
+\section{Sistema de Detecção de Objetos}
+
+Para a tarefa de detecção de objetos, foi integrado ao sistema o modelo \gls{yolo}v8, que representa o estado-da-arte em detecção de objetos em tempo real. A escolha do \gls{yolo}v8 justifica-se por sua capacidade de processar imagens rapidamente mantendo alta precisão, características essenciais para viabilizar a comparação entre detecção em imagens individuais e em panoramas fusionados.
+
+A integração foi realizada através da biblioteca \textit{Ultralytics}, que fornece interface simplificada para carregar modelos pré-treinados e realizar inferências. Foi implementada uma camada de abstração que encapsula as funcionalidades do \gls{yolo}, permitindo configurar parâmetros como limiar de confiança, classes de interesse e tamanho das imagens de entrada.
+
+Um desafio importante no pipeline de comparação foi o tratamento de detecções duplicadas nas regiões de sobreposição entre imagens adjacentes. Foi implementado um algoritmo de eliminação de redundância baseado em cálculo de \gls{iou} entre caixas delimitadoras, garantindo que cada objeto seja contado apenas uma vez na análise final.
+
+\section{Protocolo Experimental}
+
+Os experimentos foram conduzidos seguindo um protocolo rigoroso e sistemático, garantindo que todas as técnicas fossem avaliadas sob as mesmas condições.
+
+\subsection{Pré-processamento dos Dados}
+
+Antes da aplicação das técnicas de fusão, todas as imagens foram submetidas a um processo padronizado:
+
+\begin{enumerate}
+    \item Verificação de integridade dos arquivos de imagem
+    \item Normalização de formato para espaço de cores RGB de 8 bits
+    \item Validação de resolução e dimensões
+    \item Registro de metadados sobre ordem de captura
+\end{enumerate}
+
+Para os experimentos com a base de Múltiplos Registros, as imagens foram mantidas em suas resoluções originais sempre que possível, pois redimensionamentos podem afetar significativamente as métricas calculadas.
+
+\subsection{Pipeline de Experimentos}
+
+Para cada conjunto de imagens, o protocolo experimental consistiu nas seguintes etapas:
+
+\begin{enumerate}
+    \item \textbf{Fusão de Imagens}: Aplicação de cada técnica implementada à sequência de entrada, gerando panoramas que foram salvos para análise posterior. Durante este processo, foram registrados tempo de processamento e uso de recursos computacionais.
+    
+    \item \textbf{Avaliação de Qualidade}: Cálculo automático de todas as métricas de fusão (\gls{psnr}, \gls{ssim}, Entropia, \gls{ghostingscore}, \textit{Seam Energy}) comparando os panoramas gerados com as imagens de referência.
+    
+    \item \textbf{Detecção em Imagens Individuais}: Aplicação do \gls{yolo}v8 a cada imagem da sequência, com eliminação de detecções duplicadas nas regiões de sobreposição através de rastreamento baseado em \gls{iou}.
+    
+    \item \textbf{Detecção em Panoramas}: Aplicação do \gls{yolo}v8 às imagens panorâmicas fusionadas por cada técnica.
+    
+    \item \textbf{Comparação de Detecções}: Cálculo das métricas de detecção (\gls{map}, \textit{Precision}, \textit{Recall}, \textit{F1-Score}) e comparação quantitativa entre as duas abordagens.
+    
+    \item \textbf{Análise Qualitativa}: Identificação e documentação de casos onde a fusão introduziu artefatos prejudiciais ou facilitou a detecção ao fornecer maior contexto visual.
+\end{enumerate}
+
+\subsection{Análise Estatística}
+
+Para identificar os métodos com melhor desempenho geral, foi desenvolvida uma metodologia de análise multicriterial ponderada. As métricas de fusão foram normalizadas para o intervalo [0,1] e combinadas com os seguintes pesos:
+
+\begin{itemize}
+    \item \gls{psnr}: 30\% (qualidade de reconstrução)
+    \item \gls{ssim}: 30\% (similaridade estrutural)
+    \item \gls{ghostingscore}: 25\% (ausência de artefatos)
+    \item \textit{Seam Energy}: 15\% (qualidade de transições)
+\end{itemize}
+
+Esta ponderação reflete a importância relativa de cada aspecto da qualidade para aplicações práticas de fusão de imagens, priorizando tanto a fidelidade de reconstrução quanto a ausência de artefatos visuais.
+
+\subsection{Registro e Documentação}
+
+Todos os experimentos foram executados com registro detalhado de:
+
+\begin{itemize}
+    \item Parâmetros específicos utilizados em cada técnica
+    \item Versões exatas das bibliotecas instaladas
+    \item Características do hardware empregado
+    \item Condições de execução (temperatura, carga do sistema)
+    \item Resultados intermediários e finais
+\end{itemize}
+
+Os resultados foram armazenados em formato \gls{csv} para facilitar análises estatísticas posteriores e garantir rastreabilidade completa dos experimentos realizados.
+
+\section{Interface Gráfica de Usuário}
+
+Para facilitar a utilização do sistema e permitir experimentação interativa com diferentes técnicas, foi desenvolvida uma interface gráfica utilizando a biblioteca \textit{Tkinter}. A interface foi estruturada em múltiplas abas:
+
+\begin{itemize}
+    \item \textbf{Carregamento de Dados}: Seleção de sequências de imagens com pré-visualização
+    \item \textbf{Fusão de Imagens}: Configuração e execução das técnicas com barra de progresso
+    \item \textbf{Detecção de Objetos}: Controles para configurar e executar o \gls{yolo}v11
+    \item \textbf{Resultados e Métricas}: Visualização de tabelas, gráficos comparativos e exportação de relatórios
+\end{itemize}
+
+Para garantir responsividade durante operações computacionalmente intensivas, foi implementado processamento paralela, permitindo que a interface permaneça interativa enquanto o processamento está em andamento.
+
+\section{Considerações Éticas e de Reprodutibilidade}
+
+Todos os conjuntos de dados utilizados são públicos e foram empregados de acordo com as licenças e termos de uso estabelecidos por seus autores originais. O código fonte desenvolvido e os resultados experimentais detalhados foram disponibilizados em repositório público\footnote{URL do repositório sera colocada apos publicação} para facilitar a reprodução e extensão deste trabalho pela comunidade científica.
+
+O arquivo \textit{requirements.txt} com todas as dependências e versões, assim como \textit{scripts} de configuração do ambiente, garantem que outros pesquisadores possam replicar exatamente o ambiente computacional utilizado neste trabalho.

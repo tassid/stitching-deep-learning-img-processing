@@ -1,0 +1,64 @@
+% ----------------------------------------------------------
+% ANEXOS
+% ----------------------------------------------------------
+\begin{anexosenv}
+
+% ----------------------------------------------------------
+% ANEXO A
+% ----------------------------------------------------------
+\chapter{Relação dos Algoritmos Implementados}
+\label{anexoA}
+
+Este anexo apresenta a listagem completa dos algoritmos desenvolvidos e avaliados neste trabalho. 
+As técnicas foram divididas entre métodos clássicos, baseados em transformações geométricas e 
+estratégias de mesclagem tradicionais, e métodos baseados em aprendizado profundo, que utilizam 
+redes neurais convolucionais e modelos recentes de correspondência de características.
+
+\vspace{0.5cm}
+
+\begin{longtable}{|c|p{4cm}|p{7cm}|p{3cm}|}
+\caption{Relação dos algoritmos implementados e respectivas descrições.}
+\label{tab:algoritmos}\\
+\hline
+\textbf{Nº} & \textbf{Arquivo} & \textbf{Técnica / Algoritmo} & \textbf{Categoria} \\
+\hline
+\endfirsthead
+
+\caption[]{(continuação) Relação dos algoritmos implementados e respectivas descrições.}\\
+\hline
+\textbf{Nº} & \textbf{Arquivo} & \textbf{Técnica / Algoritmo} & \textbf{Categoria} \\
+\hline
+\endhead
+
+1  & \texttt{1\_stitcher\_basico.py} & Stitcher Básico (OpenCV Stitcher) & Clássico \\ \hline
+2  & \texttt{2\_manual\_sift\_ransac\_feather.py} & SIFT + RANSAC + Feather Blending & Clássico \\ \hline
+3  & \texttt{4\_blend\_exposure.py} & Exposure Blending & Clássico \\ \hline
+4  & \texttt{5\_blend\_wavelet.py} & Wavelet Fusion & Clássico \\ \hline
+5  & \texttt{6\_seams\_exposure\_multiband.py} & Seams Exposure Multiband & Clássico \\ \hline
+6  & \texttt{7\_detectors\_harris\_fast.py} & Detecção Harris + FAST + RANSAC & Clássico \\ \hline
+7  & \texttt{8\_blend\_laplacian.py} & Laplacian Pyramid Blending & Clássico \\ \hline
+8  & \texttt{9\_exposure\_comp\_only.py} & Exposure Compensation Only & Clássico \\ \hline
+9  & \texttt{10\_blend\_poisson.py} & Poisson Image Blending & Clássico \\ \hline
+10 & \texttt{11\_blend\_multifocal.py} & Multi-Focus Image Fusion & Clássico \\ \hline
+11 & \texttt{12\_blend\_hybrid.py} & Hybrid Image Fusion (Wavelet + Laplacian) & Clássico \\ \hline
+12 & \texttt{13\_ecc\_alignment.py} & ECC Alignment (Enhanced Correlation Coefficient) & Clássico \\ \hline
+13 & \texttt{deep\_homography.py} & Homografia via CNN & Deep Learning \\ \hline
+14 & \texttt{flow\_stitch.py} & Flow-Based Stitching (Optical Flow CNN) & Deep Learning \\ \hline
+15 & \texttt{harmonize\_cnn.py} & Image Harmonization CNN & Deep Learning \\ \hline
+16 & \texttt{harmonize\_gan.py} & Image Harmonization GAN & Deep Learning \\ \hline
+17 & \texttt{loftr.py} & Local Feature Transformer (LoFTR) & Deep Learning \\ \hline
+18 & \texttt{sp\_superglue.py} & SuperPoint + SuperGlue & Deep Learning \\ \hline
+19 & \texttt{udis.py} & UDIS — Unsupervised Deep Image Stitching & Deep Learning \\ \hline
+
+\end{longtable}
+\noindent\textbf{Fonte:} Elaborado pela autora (2025).
+
+\vspace{0.8cm}
+
+Observa-se que o conjunto de algoritmos engloba tanto abordagens clássicas, amplamente 
+utilizadas em \textit{stitching} tradicional (OpenCV, RANSAC, blending multibanda, etc.), 
+quanto abordagens modernas com aprendizado profundo, incluindo SuperPoint, SuperGlue, 
+LoFTR e UDIS. A avaliação de desempenho combinou métricas de qualidade e eficiência, 
+conforme detalhado nos Capítulos 4 e 5.
+
+\end{anexosenv}

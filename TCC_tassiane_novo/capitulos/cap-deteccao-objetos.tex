@@ -1,0 +1,192 @@
+%%%% CAPÍTULO 6 - DETECÇÃO DE OBJETOS EM IMAGENS PANORÂMICAS
+%%
+%% Este capítulo apresenta a aplicação de técnicas de detecção de objetos sobre os mosaicos
+%% panorâmicos construídos no capítulo anterior, avaliando o impacto da fusão de imagens
+%% na precisão e eficácia da detecção.
+
+\chapter{Detecção de Objetos em Imagens Panorâmicas}\label{cap:deteccao-objetos}
+
+Este capítulo descreve a metodologia e os resultados da aplicação de técnicas de detecção de objetos sobre as imagens panorâmicas geradas pelas diferentes técnicas de fusão avaliadas no Capítulo~\ref{cap:resultados}. O objetivo é investigar como a qualidade da fusão de imagens impacta a detecção de objetos, comparando resultados entre imagens originais e panoramas fusionados.
+
+\section{Motivação e Contexto}
+
+A fusão de imagens para construção de mosaicos panorâmicos é frequentemente utilizada como etapa de pré-processamento em sistemas de visão computacional que requerem uma visão ampla de uma cena. Em aplicações como vigilância, monitoramento ambiental e navegação autônoma, a capacidade de detectar objetos em panoramas é crucial para o funcionamento adequado do sistema.
+
+No entanto, o processo de fusão pode introduzir artefatos visuais como ghosting, distorções geométricas e variações de iluminação que potencialmente afetam a precisão dos detectores de objetos. Este capítulo investiga essa relação através de experimentos sistemáticos.
+
+\section{Metodologia de Detecção}
+
+\subsection{Modelos de Detecção Utilizados}
+
+Para avaliar o impacto da fusão de imagens na detecção de objetos, foram selecionados modelos do estado da arte da família YOLO (\textit{You Only Look Once}), conhecidos por sua eficiência e precisão em detecção em tempo real.
+
+\textbf{Modelos implementados:}
+\begin{itemize}
+    \item \textbf{YOLOv5}: Versão amplamente utilizada com bom equilíbrio entre velocidade e precisão
+    \item \textbf{YOLOv8}: Versão mais recente com arquitetura otimizada e melhor desempenho
+    \item \textbf{YOLO-NAS}: Arquitetura obtida por busca neural com desempenho superior em cenários desafiadores
+\end{itemize}
+
+Todos os modelos foram utilizados com pesos pré-treinados no dataset COCO, que contém 80 classes de objetos comuns.
+
+\subsection{Protocolo Experimental}
+
+O protocolo experimental foi estruturado da seguinte forma:
+
+\begin{enumerate}
+    \item \textbf{Detecção nas Imagens Originais}
+    \begin{itemize}
+        \item Aplicação dos modelos YOLO em cada imagem individual do conjunto
+        \item Registro de todas as detecções (classes, coordenadas, confiança)
+        \item Cálculo de métricas por imagem
+    \end{itemize}
+
+    \item \textbf{Construção dos Panoramas}
+    \begin{itemize}
+        \item Utilização dos 5 melhores métodos identificados no Capítulo~\ref{cap:resultados}
+        \item Geração de panoramas para cada conjunto de imagens
+        \item Verificação da qualidade da fusão
+    \end{itemize}
+
+    \item \textbf{Detecção nos Panoramas}
+    \begin{itemize}
+        \item Aplicação dos mesmos modelos YOLO nos panoramas gerados
+        \item Registro de todas as detecções
+        \item Cálculo das mesmas métricas
+    \end{itemize}
+
+    \item \textbf{Análise Comparativa}
+    \begin{itemize}
+        \item Comparação de precisão, recall e mAP entre originais e panoramas
+        \item Identificação de objetos perdidos ou detectados incorretamente
+        \item Correlação entre qualidade de fusão (PSNR, SSIM, ghosting) e desempenho de detecção
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Métricas de Avaliação}
+
+Para avaliar o desempenho da detecção de objetos, foram utilizadas as seguintes métricas padrão:
+
+\begin{itemize}
+    \item \textbf{Precision (Precisão)}: Proporção de detecções corretas entre todas as detecções realizadas
+    \item \textbf{Recall (Revocação)}: Proporção de objetos reais que foram detectados
+    \item \textbf{F1-Score}: Média harmônica entre precisão e recall
+    \item \textbf{mAP (mean Average Precision)}: Precisão média considerando diferentes limiares de IoU
+    \item \textbf{IoU (Intersection over Union)}: Métrica de sobreposição entre detecção e ground truth
+\end{itemize}
+
+\section{Resultados e Análise}
+
+\subsection{Desempenho por Modelo de Detecção}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Esta seção apresentará tabelas e gráficos comparando:}
+\begin{itemize}
+    \item \textcolor{blue}{Precision, Recall e mAP para cada modelo YOLO}
+    \item \textcolor{blue}{Comparação entre detecção em imagens originais vs panoramas}
+    \item \textcolor{blue}{Tempo de processamento de detecção}
+\end{itemize}
+
+% Exemplo de tabela futura:
+% \begin{table}[htb]
+% \centering
+% \caption{Desempenho de detecção: Imagens Originais vs Panoramas}
+% \label{tab:deteccao-comparacao}
+% \begin{tabular}{lccc|ccc}
+% \hline
+% \textbf{Modelo} & \multicolumn{3}{c|}{\textbf{Originais}} & \multicolumn{3}{c}{\textbf{Panoramas}} \\
+%                 & Precision & Recall & mAP & Precision & Recall & mAP \\ \hline
+% YOLOv5         & --    & --     & --  & --        & --     & --  \\
+% YOLOv8         & --    & --     & --  & --        & --     & --  \\
+% YOLO-NAS       & --    & --     & --  & --        & --     & --  \\ \hline
+% \end{tabular}
+% \fonte{Autoria própria (2025).}
+% \end{table}
+
+\subsection{Impacto da Qualidade de Fusão na Detecção}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Esta seção analisará a correlação entre:}
+\begin{itemize}
+    \item \textcolor{blue}{PSNR/SSIM do panorama vs precisão de detecção}
+    \item \textcolor{blue}{Ghosting Score vs taxa de falsos positivos}
+    \item \textcolor{blue}{Seam Energy vs detecções perdidas em regiões de transição}
+\end{itemize}
+
+\subsection{Análise de Casos Específicos}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Apresentação de casos ilustrativos:}
+\begin{itemize}
+    \item \textcolor{blue}{Caso onde fusão melhorou detecção (objeto parcialmente visível em imagens individuais)}
+    \item \textcolor{blue}{Caso onde fusão prejudicou detecção (ghosting gerou falsos positivos)}
+    \item \textcolor{blue}{Caso neutro (detecção equivalente)}
+\end{itemize}
+
+% Exemplo de figura futura:
+% \begin{figure}[htb]
+% \centering
+% \includegraphics[width=0.9\textwidth]{figuras/deteccao/comparacao_caso1.jpg}
+% \caption{Comparação de detecção: (a) Imagens originais; (b) Panorama fusionado com OpenCV Stitcher}
+% \label{fig:deteccao-caso1}
+% \end{figure}
+
+\subsection{Análise por Classe de Objeto}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Investigação do desempenho por tipo de objeto:}
+\begin{itemize}
+    \item \textcolor{blue}{Objetos grandes vs pequenos}
+    \item \textcolor{blue}{Objetos próximos a regiões de junção (seams)}
+    \item \textcolor{blue}{Objetos em movimento (se presentes no dataset)}
+\end{itemize}
+
+\section{Discussão}
+
+\subsection{Trade-offs Entre Fusão e Detecção}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Discussão sobre:}
+\begin{itemize}
+    \item \textcolor{blue}{Quando vale a pena fazer fusão antes de detectar?}
+    \item \textcolor{blue}{Quais métodos de fusão são mais adequados para preservar detectabilidade?}
+    \item \textcolor{blue}{Custo computacional: fusão + detecção vs múltiplas detecções}
+\end{itemize}
+
+\subsection{Limitações e Desafios Identificados}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Identificação de:}
+\begin{itemize}
+    \item \textcolor{blue}{Limitações dos modelos YOLO em panoramas de alta resolução}
+    \item \textcolor{blue}{Desafios específicos de detecção em regiões com artefatos de fusão}
+    \item \textcolor{blue}{Casos onde ground truth é difícil de estabelecer}
+\end{itemize}
+
+\subsection{Recomendações Práticas}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Diretrizes para aplicações práticas:}
+\begin{itemize}
+    \item \textcolor{blue}{Escolha de método de fusão baseada na aplicação de detecção}
+    \item \textcolor{blue}{Pré-processamento adicional para melhorar detecção em panoramas}
+    \item \textcolor{blue}{Estratégias híbridas (detecção antes + depois da fusão)}
+\end{itemize}
+
+\section{Síntese do Capítulo}
+
+\textcolor{red}{[SEÇÃO A IMPLEMENTAR]}
+
+\textcolor{blue}{Resumo dos principais achados:}
+\begin{itemize}
+    \item \textcolor{blue}{Resumo quantitativo: variação média em mAP}
+    \item \textcolor{blue}{Identificação do melhor método de fusão para detecção}
+    \item \textcolor{blue}{Conclusões sobre viabilidade de fusão + detecção}
+\end{itemize}
